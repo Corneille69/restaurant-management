@@ -526,6 +526,28 @@ def get_web_portal():
         .mgr-tab-btn.active { background: linear-gradient(135deg, #10b981, #059669); color: white; border-color: #10b981; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
         .adm-tab-btn.active { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-color: #f59e0b; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35); }
 
+        @keyframes recordingPulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.25); opacity: 1; }
+        }
+        .recording-pulse-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+            animation: recordingPulse 0.8s infinite alternate;
+        }
+        .badge-unread {
+            background: #ef4444;
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 7px;
+        }
+
         /* FACTURE OFFICIELLE CORPORATE & MODÈLE MONOCHROME DE RÉFÉRENCE (FIDÈLE À L'IMAGE & SANS CODE EN DUR) */
         .corporate-invoice-paper {
             background-color: #ffffff;
@@ -673,12 +695,12 @@ def get_web_portal():
         </div>
         <div id="userNav" class="user-nav hidden" style="display: flex; align-items: center; gap: 0.85rem;">
             <button id="btnHeaderConfig" class="btn btn-primary" onclick="switchAdminTab('config')" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: black; font-weight: 800; font-size: 0.82rem; padding: 0.45rem 1rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); display: none;">⚙️ CONFIGURATION DU RESTAURANT &amp; DGI</button>
-            <a href="http://localhost:8070/web?db=restaurant_odoo#action=mail.action_discuss" target="_blank" id="btnHeaderDiscuss" title="Messagerie &amp; Appels (SMS &amp; Vidéo)" style="position: relative; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 6px; border-radius: 8px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.12); cursor: pointer; transition: all 0.2s ease;">
+            <a href="javascript:void(0)" onclick="openDirectCommunicationChat()" id="btnHeaderDiscuss" title="Messagerie &amp; Appels (SMS, Vocaux &amp; Vidéo)" style="position: relative; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 6px; border-radius: 8px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.12); cursor: pointer; transition: all 0.2s ease;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path d="M20 2H8c-1.1 0-2 .9-2 2v1h10c1.66 0 3 1.34 3 3v8h1c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#94a3b8"/>
                     <path d="M15 6H4c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h2v3l3.5-3H15c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" fill="#f8fafc"/>
                 </svg>
-                <span id="headerChatBadge" style="position: absolute; top: -4px; right: -5px; background: #10b981; color: white; border-radius: 9999px; font-size: 0.68rem; font-weight: 800; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.5);">1</span>
+                <span id="headerChatBadge" style="position: absolute; top: -4px; right: -5px; background: #10b981; color: white; border-radius: 9999px; font-size: 0.68rem; font-weight: 800; min-width: 18px; height: 18px; display: none; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.5);">0</span>
             </a>
             <span id="navUserName" style="font-weight: 600;"></span>
             <span id="navUserBadge" class="role-badge"></span>
@@ -835,6 +857,21 @@ def get_web_portal():
                             <div class="sidebar-item-content">
                                 <span class="sidebar-item-title">Configuration Restaurant</span>
                                 <span class="sidebar-item-sub">Identité, IFU, Logo &amp; DGI</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Groupe 4 : Communication Directe -->
+                    <div class="sidebar-group-label" style="margin-top: 0.6rem;">COMMUNICATION DIRECTE</div>
+                    <div class="sidebar-menu-list">
+                        <button class="sidebar-nav-item" id="admTabBtnChat" onclick="switchAdminTab('chat')">
+                            <span class="sidebar-icon">📱</span>
+                            <div class="sidebar-item-content">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span class="sidebar-item-title">SMS &amp; Appel</span>
+                                    <span id="admChatBadge" class="badge-unread hidden" style="background: #ef4444; color: white; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; padding: 2px 7px; margin-left: 6px;">0</span>
+                                </div>
+                                <span class="sidebar-item-sub">Messages, Vocaux &amp; Appels</span>
                             </div>
                         </button>
                     </div>
@@ -1565,6 +1602,113 @@ def get_web_portal():
                 </div>
             </div>
 
+            <!-- SECTION 6 : COMMUNICATION ADMIN <-> GÉRANTS (SMS, VOCAUX & APPELS) -->
+            <div id="admSectionChat" class="hidden">
+                <div style="background: linear-gradient(135deg, rgba(19, 27, 46, 0.95), rgba(15, 23, 42, 0.95)); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                    
+                    <!-- En-tête de section -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                        <div>
+                            <h2 style="font-size: 1.4rem; font-weight: 800; color: #fbbf24; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem;">
+                                📱 <span>SMS, Vocaux &amp; Appels avec les Gérants</span>
+                            </h2>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+                                Échangez directement par SMS instantané, notes vocales et appels audio/vidéo avec chacun de vos gérants.
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 0.6rem; align-items: center;">
+                            <button class="btn btn-secondary" onclick="loadCommunicationContacts()" style="font-size: 0.85rem;">
+                                🔄 Actualiser les Gérants
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Interface 2 Colonnes : Contacts Gérants à gauche, Thread SMS, Vocaux & Vidéo à droite -->
+                    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; min-height: 580px;">
+                        
+                        <!-- Colonne Gauche : Liste des Gérants -->
+                        <div style="background: rgba(11, 15, 25, 0.6); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column;">
+                            <div style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+                                Gérants du Restaurant (<span id="admChatManagersCount">0</span>)
+                            </div>
+                            <div id="admChatContactsList" style="display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; flex: 1;">
+                                <div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.85rem;">Chargement des gérants...</div>
+                            </div>
+                        </div>
+
+                        <!-- Colonne Droite : Fil de discussion et Commandes Vocales / Vidéo -->
+                        <div style="background: rgba(11, 15, 25, 0.6); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;">
+                            
+                            <!-- Header de l'interlocuteur sélectionné -->
+                            <div id="admChatHeader" style="background: rgba(19, 27, 46, 0.8); border-bottom: 1px solid var(--border); padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div id="admChatActiveAvatar" style="width: 40px; height: 40px; border-radius: 50%; background: #1e293b; border: 1.5px solid #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; color: #f59e0b;">
+                                        🧑‍💼
+                                    </div>
+                                    <div>
+                                        <div id="admChatActiveName" style="font-weight: 700; font-size: 1rem; color: var(--text-main);">Sélectionnez un gérant</div>
+                                        <div id="admChatActiveStatus" style="font-size: 0.75rem; color: var(--text-muted);">En attente de sélection</div>
+                                    </div>
+                                </div>
+                                <div id="admChatActionButtons" style="display: flex; gap: 0.6rem;">
+                                    <button class="btn btn-primary" onclick="initiateWebRTCCall('video')" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 700; font-size: 0.85rem; padding: 0.5rem 1rem;">
+                                        🎥 Appel Vidéo
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="initiateWebRTCCall('audio')" style="font-weight: 700; font-size: 0.85rem; padding: 0.5rem 1rem;">
+                                        📞 Appel Audio
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Zone des bulles de messages (textes, vocaux, etc.) -->
+                            <div id="admChatMessagesContainer" style="flex: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; max-height: 400px; min-height: 340px; background: rgba(8, 12, 20, 0.4);">
+                                <div style="margin: auto; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+                                    Sélectionnez un gérant dans la liste pour commencer à échanger par SMS, envoyer une note vocale ou démarrer un appel.
+                                </div>
+                            </div>
+
+                            <!-- Raccourcis de messages rapides (Chips) -->
+                            <div style="padding: 0.5rem 1.25rem; background: rgba(19, 27, 46, 0.5); border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 0.5rem; overflow-x: auto;">
+                                <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('adm', 'Bonjour, tout se passe bien en caisse ?')">💬 Bonjour, tout va bien ?</button>
+                                <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('adm', 'Pouvez-vous clôturer la session de caisse ?')">🧾 Clôture caisse</button>
+                                <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('adm', 'Rejoignez-moi en appel vidéo s\'il vous plaît.')">🎥 Appel vidéo demandé</button>
+                                <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('adm', 'Facture validée avec succès.')">✅ Facture validée</button>
+                            </div>
+
+                            <!-- Barre de saisie standard (Texte + Bouton Vocal) -->
+                            <div id="admChatNormalBar" style="padding: 0.85rem 1.25rem; background: rgba(19, 27, 46, 0.8); border-top: 1px solid var(--border); display: flex; gap: 0.75rem; align-items: center;">
+                                <input type="text" id="admChatInput" placeholder="Taper votre message SMS instantané..." class="form-control" style="flex: 1; padding: 0.65rem 1rem; font-size: 0.9rem;" onkeydown="handleChatInputKey(event, 'adm')" />
+                                <button type="button" class="btn btn-secondary" onclick="startVoiceRecording('adm')" title="Enregistrer une note vocale pour ce gérant" style="display: flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1rem; font-weight: 700; border-radius: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; white-space: nowrap;">
+                                    🎙️ Vocal
+                                </button>
+                                <button class="btn btn-primary" onclick="sendChatMessage('adm')" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: black; font-weight: 800; padding: 0.65rem 1.4rem; white-space: nowrap;">
+                                    Envoyer 📤
+                                </button>
+                            </div>
+
+                            <!-- Barre d'enregistrement vocal en cours (Admin) -->
+                            <div id="admChatVoiceBar" class="hidden" style="padding: 0.85rem 1.25rem; background: rgba(30, 20, 25, 0.95); border-top: 2px solid #ef4444; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <span class="recording-pulse-dot"></span>
+                                    <span style="font-weight: 700; color: #f87171; font-size: 0.9rem;">Enregistrement vocal en cours...</span>
+                                    <span id="admVoiceTimer" style="background: rgba(239, 68, 68, 0.25); color: #fca5a5; padding: 2px 8px; border-radius: 6px; font-family: monospace; font-size: 0.95rem; font-weight: 800;">0:00</span>
+                                </div>
+                                <div style="display: flex; gap: 0.6rem; align-items: center;">
+                                    <button type="button" class="btn btn-secondary" onclick="cancelVoiceRecording('adm')" style="font-size: 0.85rem; padding: 0.45rem 0.9rem; color: #cbd5e1;">
+                                        ❌ Annuler
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="stopAndSendVoiceRecording('adm')" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-weight: 800; font-size: 0.85rem; padding: 0.45rem 1.2rem; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);">
+                                        🚀 Envoyer le vocal
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
             </main>
     </div>
 </div>
@@ -1606,7 +1750,10 @@ def get_web_portal():
                 <button class="mgr-tab-btn" id="tabBtnStats" onclick="switchManagerTab('stats')">
                     📊 Statistiques du Service
                 </button>
-
+                <button class="mgr-tab-btn" id="tabBtnChat" onclick="switchManagerTab('chat')">
+                    📱 SMS &amp; Appel
+                    <span id="mgrChatBadge" class="badge-unread hidden" style="background: #ef4444; color: white; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; padding: 2px 7px; margin-left: 6px;">0</span>
+                </button>
             </div>
 
             <!-- SECTION 1 : POINT DE VENTE (POS) INTÉGRÉ DU GÉRANT (ACTIF PAR DÉFAUT À LA CONNEXION) -->
@@ -1819,6 +1966,99 @@ def get_web_portal():
                         <div class="label">Plats Actifs sur la Carte</div>
                         <div id="mgrStatMenuCount" class="value">-</div>
                     </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6 : COMMUNICATION GÉRANT <-> ADMIN (SMS, VOCAUX & APPELS) -->
+            <div id="mgrSectionChat" class="hidden">
+                <div style="background: linear-gradient(135deg, rgba(19, 27, 46, 0.95), rgba(15, 23, 42, 0.95)); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                    
+                    <!-- En-tête de section -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                        <div>
+                            <h2 style="font-size: 1.4rem; font-weight: 800; color: #34d399; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem;">
+                                📱 <span>Liaison Directe Administrateur (SMS, Vocaux &amp; Appels)</span>
+                            </h2>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+                                Échangez en direct avec l'Administrateur du restaurant par SMS, notes vocales enregistrées ou appels audio/vidéo.
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 0.6rem; align-items: center;">
+                            <button class="btn btn-primary" onclick="initiateWebRTCCall('video')" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 700; font-size: 0.85rem; padding: 0.5rem 1.1rem;">
+                                🎥 Appel Vidéo Direct Admin
+                            </button>
+                            <button class="btn btn-secondary" onclick="initiateWebRTCCall('audio')" style="font-weight: 700; font-size: 0.85rem; padding: 0.5rem 1rem;">
+                                📞 Appel Audio
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fiche statut de l'Administrateur -->
+                    <div style="background: rgba(11, 15, 25, 0.6); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.85rem;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: #1e293b; border: 2px solid #fbbf24; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                👑
+                            </div>
+                            <div>
+                                <div style="font-weight: 800; font-size: 1.05rem; color: #fbbf24;" id="mgrChatAdminName">Administrateur Général</div>
+                                <div style="font-size: 0.78rem; color: #34d399; display: flex; align-items: center; gap: 0.35rem;">
+                                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #34d399;"></span>
+                                    Canal sécurisé ouvert &amp; direct
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">
+                            Notifications instantanées activées ⚡
+                        </div>
+                    </div>
+
+                    <!-- Zone des bulles de messages -->
+                    <div style="background: rgba(11, 15, 25, 0.6); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
+                        
+                        <div id="mgrChatMessagesContainer" style="flex: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; max-height: 420px; min-height: 340px; background: rgba(8, 12, 20, 0.4);">
+                            <div style="margin: auto; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+                                Chargement des échanges avec l'Administrateur...
+                            </div>
+                        </div>
+
+                        <!-- Raccourcis de messages rapides (Chips) -->
+                        <div style="padding: 0.5rem 1.25rem; background: rgba(19, 27, 46, 0.5); border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 0.5rem; overflow-x: auto;">
+                            <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('mgr', 'Bonjour Monsieur l\'Administrateur, le service est ouvert.')">👋 Service ouvert</button>
+                            <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('mgr', 'J\'ai une question concernant une facture client.')">🧾 Question facture</button>
+                            <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('mgr', 'Pouvez-vous vous connecter en appel vidéo pour une vérification ?')">🎥 Appel vidéo svp</button>
+                            <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('mgr', 'Toutes les tables sont bien gérées, aucune anomalie.')">✅ Tout est en ordre</button>
+                        </div>
+
+                        <!-- Barre de saisie standard (Texte + Bouton Vocal) -->
+                        <div id="mgrChatNormalBar" style="padding: 0.85rem 1.25rem; background: rgba(19, 27, 46, 0.8); border-top: 1px solid var(--border); display: flex; gap: 0.75rem; align-items: center;">
+                            <input type="text" id="mgrChatInput" placeholder="Écrire un message SMS instantané à l'Administrateur..." class="form-control" style="flex: 1; padding: 0.65rem 1rem; font-size: 0.9rem;" onkeydown="handleChatInputKey(event, 'mgr')" />
+                            <button type="button" class="btn btn-secondary" onclick="startVoiceRecording('mgr')" title="Enregistrer une note vocale pour l'Administrateur" style="display: flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1rem; font-weight: 700; border-radius: 8px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; white-space: nowrap;">
+                                🎙️ Vocal
+                            </button>
+                            <button class="btn btn-primary" onclick="sendChatMessage('mgr')" style="background: linear-gradient(135deg, #10b981, #059669); color: white; font-weight: 800; padding: 0.65rem 1.4rem; white-space: nowrap;">
+                                Envoyer 📤
+                            </button>
+                        </div>
+
+                        <!-- Barre d'enregistrement vocal en cours (Gérant) -->
+                        <div id="mgrChatVoiceBar" class="hidden" style="padding: 0.85rem 1.25rem; background: rgba(30, 20, 25, 0.95); border-top: 2px solid #ef4444; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <span class="recording-pulse-dot"></span>
+                                <span style="font-weight: 700; color: #f87171; font-size: 0.9rem;">Enregistrement vocal en cours...</span>
+                                <span id="mgrVoiceTimer" style="background: rgba(239, 68, 68, 0.25); color: #fca5a5; padding: 2px 8px; border-radius: 6px; font-family: monospace; font-size: 0.95rem; font-weight: 800;">0:00</span>
+                            </div>
+                            <div style="display: flex; gap: 0.6rem; align-items: center;">
+                                <button type="button" class="btn btn-secondary" onclick="cancelVoiceRecording('mgr')" style="font-size: 0.85rem; padding: 0.45rem 0.9rem; color: #cbd5e1;">
+                                    ❌ Annuler
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="stopAndSendVoiceRecording('mgr')" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-weight: 800; font-size: 0.85rem; padding: 0.45rem 1.2rem; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);">
+                                    🚀 Envoyer le vocal
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
 
@@ -2421,13 +2661,16 @@ def get_web_portal():
         }
 
         function switchManagerTab(tab) {
-            const tabs = ['pos', 'invoices', 'orders', 'tables', 'stats'];
+            const tabs = ['pos', 'invoices', 'orders', 'tables', 'stats', 'chat'];
             tabs.forEach(t => {
                 const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
                 const sec = document.getElementById('mgrSection' + t.charAt(0).toUpperCase() + t.slice(1));
                 if (btn) btn.classList.toggle('active', t === tab);
                 if (sec) sec.classList.toggle('hidden', t !== tab);
             });
+            if (tab === 'chat') {
+                initCommunicationChat('mgr');
+            }
         }
 
         function reprintOrderReceipt(orderId) {
@@ -3216,7 +3459,7 @@ def get_web_portal():
 
 
         function switchAdminTab(tab) {
-            const tabs = ['overview', 'globalInvoices', 'invoices', 'managers', 'menu', 'config'];
+            const tabs = ['overview', 'globalInvoices', 'invoices', 'managers', 'menu', 'config', 'chat'];
             tabs.forEach(t => {
                 const btn = document.getElementById('admTabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
                 const sec = document.getElementById('admSection' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -3238,6 +3481,8 @@ def get_web_portal():
                 loadAdminDishesData();
             } else if (tab === 'config') {
                 loadRestaurantConfig();
+            } else if (tab === 'chat') {
+                initCommunicationChat('adm');
             }
         }
 
@@ -5127,6 +5372,8 @@ def get_web_portal():
             bubble.style.flexDirection = 'column';
             bubble.style.maxWidth = '78%';
 
+            const isAudio = msg.message_type === 'audio';
+
             if (msg.is_mine) {
                 bubble.style.alignSelf = 'flex-end';
                 const bgStyle = (currentUser && currentUser.role === 'admin')
@@ -5134,9 +5381,22 @@ def get_web_portal():
                     : 'linear-gradient(135deg, #10b981, #059669)';
                 const txtColor = (currentUser && currentUser.role === 'admin') ? '#000000' : '#ffffff';
                 
+                let bodyHtml = '';
+                if (isAudio) {
+                    bodyHtml = `
+                        <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.8rem; font-weight: 800; margin-bottom: 0.35rem;">
+                            <span>🎙️</span>
+                            <span>Note Vocale</span>
+                        </div>
+                        <audio controls preload="metadata" src="${msg.content}" style="max-width: 250px; height: 38px; border-radius: 8px; outline: none;"></audio>
+                    `;
+                } else {
+                    bodyHtml = escapeHtml(msg.content);
+                }
+
                 bubble.innerHTML = `
-                    <div style="background: ${bgStyle}; color: ${txtColor}; padding: 0.65rem 1rem; border-radius: 14px 14px 2px 14px; font-size: 0.9rem; font-weight: 500; word-break: break-word; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
-                        ${escapeHtml(msg.content)}
+                    <div style="background: ${bgStyle}; color: ${txtColor}; padding: ${isAudio ? '0.65rem 0.85rem' : '0.65rem 1rem'}; border-radius: 14px 14px 2px 14px; font-size: 0.9rem; font-weight: 500; word-break: break-word; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+                        ${bodyHtml}
                     </div>
                     <div style="font-size: 0.68rem; color: #94a3b8; align-self: flex-end; margin-top: 3px; display: flex; align-items: center; gap: 4px;">
                         <span>${msg.created_at || ''}</span>
@@ -5145,12 +5405,26 @@ def get_web_portal():
                 `;
             } else {
                 bubble.style.alignSelf = 'flex-start';
+
+                let bodyHtml = '';
+                if (isAudio) {
+                    bodyHtml = `
+                        <div style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.8rem; font-weight: 800; margin-bottom: 0.35rem; color: #38bdf8;">
+                            <span>🎙️</span>
+                            <span>Note Vocale</span>
+                        </div>
+                        <audio controls preload="metadata" src="${msg.content}" style="max-width: 250px; height: 38px; border-radius: 8px; outline: none;"></audio>
+                    `;
+                } else {
+                    bodyHtml = escapeHtml(msg.content);
+                }
+
                 bubble.innerHTML = `
                     <div style="font-size: 0.72rem; font-weight: 700; color: #fbbf24; margin-bottom: 2px; margin-left: 4px;">
                         ${escapeHtml(msg.sender_name)}
                     </div>
-                    <div style="background: #1e293b; color: #f8fafc; border: 1px solid #334155; padding: 0.65rem 1rem; border-radius: 14px 14px 14px 2px; font-size: 0.9rem; word-break: break-word; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
-                        ${escapeHtml(msg.content)}
+                    <div style="background: #1e293b; color: #f8fafc; border: 1px solid #334155; padding: ${isAudio ? '0.65rem 0.85rem' : '0.65rem 1rem'}; border-radius: 14px 14px 14px 2px; font-size: 0.9rem; word-break: break-word; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+                        ${bodyHtml}
                     </div>
                     <div style="font-size: 0.68rem; color: #64748b; margin-top: 3px; margin-left: 4px;">
                         <span>${msg.created_at || ''}</span>
@@ -5221,6 +5495,192 @@ def get_web_portal():
             }
         }
 
+        // --- ENREGISTREMENT ET ENVOI DE NOTES VOCALES (ADMIN <-> GÉRANT) ---
+        let voiceMediaRecorder = null;
+        let voiceAudioChunks = [];
+        let voiceTimerInterval = null;
+        let voiceSeconds = 0;
+        let voiceStream = null;
+
+        function showVoiceRecordingUI(mode, isRecording) {
+            const normalBar = document.getElementById(mode + 'ChatNormalBar');
+            const voiceBar = document.getElementById(mode + 'ChatVoiceBar');
+            if (normalBar) normalBar.classList.toggle('hidden', isRecording);
+            if (voiceBar) voiceBar.classList.toggle('hidden', !isRecording);
+            if (isRecording) {
+                const timerEl = document.getElementById(mode + 'VoiceTimer');
+                if (timerEl) timerEl.innerText = '0:00';
+            }
+        }
+
+        async function startVoiceRecording(mode) {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert("L'enregistrement vocal requiert l'accès microphone (HTTPS ou localhost).");
+                    return;
+                }
+
+                voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                let mimeType = '';
+                if (window.MediaRecorder) {
+                    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                        mimeType = 'audio/webm;codecs=opus';
+                    } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                        mimeType = 'audio/webm';
+                    } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+                        mimeType = 'audio/ogg;codecs=opus';
+                    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        mimeType = 'audio/mp4';
+                    }
+                }
+
+                voiceMediaRecorder = mimeType ? new MediaRecorder(voiceStream, { mimeType }) : new MediaRecorder(voiceStream);
+                voiceAudioChunks = [];
+                voiceSeconds = 0;
+
+                voiceMediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) {
+                        voiceAudioChunks.push(e.data);
+                    }
+                };
+
+                voiceMediaRecorder.start(250);
+
+                showVoiceRecordingUI(mode, true);
+
+                if (voiceTimerInterval) clearInterval(voiceTimerInterval);
+                voiceTimerInterval = setInterval(() => {
+                    voiceSeconds++;
+                    const m = Math.floor(voiceSeconds / 60);
+                    const s = voiceSeconds % 60;
+                    const timerEl = document.getElementById(mode + 'VoiceTimer');
+                    if (timerEl) timerEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                }, 1000);
+
+            } catch (err) {
+                console.error("Erreur accès micro:", err);
+                alert("Impossible d'accéder au microphone : " + (err.message || "Veuillez autoriser l'accès micro dans votre navigateur."));
+            }
+        }
+
+        function cancelVoiceRecording(mode) {
+            if (voiceTimerInterval) {
+                clearInterval(voiceTimerInterval);
+                voiceTimerInterval = null;
+            }
+            if (voiceMediaRecorder && voiceMediaRecorder.state !== 'inactive') {
+                try {
+                    voiceMediaRecorder.stop();
+                } catch (e) {}
+            }
+            if (voiceStream) {
+                try {
+                    voiceStream.getTracks().forEach(t => t.stop());
+                } catch (e) {}
+                voiceStream = null;
+            }
+            voiceAudioChunks = [];
+            voiceMediaRecorder = null;
+            showVoiceRecordingUI(mode, false);
+        }
+
+        async function stopAndSendVoiceRecording(mode) {
+            if (!voiceMediaRecorder || voiceMediaRecorder.state === 'inactive') {
+                cancelVoiceRecording(mode);
+                return;
+            }
+
+            if (voiceTimerInterval) {
+                clearInterval(voiceTimerInterval);
+                voiceTimerInterval = null;
+            }
+
+            let targetId = commActiveContact ? commActiveContact.id : null;
+            if (!targetId && mode === 'mgr') {
+                const adminContact = commContacts.find(c => c.role === 'admin') || commContacts[0];
+                if (adminContact) targetId = adminContact.id;
+            }
+
+            if (!targetId) {
+                alert("Veuillez sélectionner un destinataire avant d'envoyer la note vocale.");
+                cancelVoiceRecording(mode);
+                return;
+            }
+
+            voiceMediaRecorder.onstop = async () => {
+                const mime = voiceMediaRecorder ? (voiceMediaRecorder.mimeType || 'audio/webm') : 'audio/webm';
+                const blob = new Blob(voiceAudioChunks, { type: mime });
+                if (voiceStream) {
+                    try {
+                        voiceStream.getTracks().forEach(t => t.stop());
+                    } catch (e) {}
+                    voiceStream = null;
+                }
+                voiceMediaRecorder = null;
+                voiceAudioChunks = [];
+                showVoiceRecordingUI(mode, false);
+
+                if (blob.size < 100) {
+                    alert("Enregistrement vocal trop court.");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const base64Audio = reader.result;
+                    await sendAudioMessage(targetId, base64Audio, mode);
+                };
+                reader.readAsDataURL(blob);
+            };
+
+            voiceMediaRecorder.stop();
+        }
+
+        async function sendAudioMessage(targetId, base64Audio, mode) {
+            try {
+                const res = await fetch('/api/v1/communication/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        receiver_id: targetId,
+                        content: base64Audio,
+                        message_type: 'audio'
+                    })
+                });
+
+                if (res.ok) {
+                    const newMsg = await res.json();
+                    if (newMsg.id > commLastMessageId) commLastMessageId = newMsg.id;
+                    const containerId = mode === 'adm' ? 'admChatMessagesContainer' : 'mgrChatMessagesContainer';
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        const placeholder = container.querySelector('div[style*="margin: auto"]');
+                        if (placeholder) placeholder.remove();
+                        appendMessageBubble(container, newMsg);
+                        container.scrollTop = container.scrollHeight;
+                    }
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    alert("Erreur d'envoi du vocal : " + (errData.detail || "Échec"));
+                }
+            } catch (err) {
+                console.error("Erreur envoi note vocale:", err);
+                alert("Erreur réseau lors de l'envoi du vocal : " + err.message);
+            }
+        }
+
+        function openDirectCommunicationChat() {
+            if (currentUser && currentUser.role === 'admin') {
+                switchAdminTab('chat');
+            } else {
+                switchManagerTab('chat');
+            }
+        }
+
         function handleChatInputKey(event, mode) {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -5263,10 +5723,20 @@ def get_web_portal():
                     const data = await resUnread.json();
                     const count = data.unread_count || 0;
                     
+                    const admBadge = document.getElementById('admChatBadge');
+                    if (admBadge) {
+                        admBadge.innerText = count;
+                        admBadge.classList.toggle('hidden', count === 0);
+                    }
+                    const mgrBadge = document.getElementById('mgrChatBadge');
+                    if (mgrBadge) {
+                        mgrBadge.innerText = count;
+                        mgrBadge.classList.toggle('hidden', count === 0);
+                    }
                     const hdrBadge = document.getElementById('headerChatBadge');
                     if (hdrBadge) {
-                        hdrBadge.innerText = count > 0 ? count : '1';
-                        // Toujours visible avec indicateur de présence
+                        hdrBadge.innerText = count;
+                        hdrBadge.style.display = count > 0 ? 'flex' : 'none';
                     }
                 }
 
@@ -5281,7 +5751,22 @@ def get_web_portal():
                     }
                 }
 
+                // C. Si l'onglet Chat est actuellement visible, charger les nouveaux messages
+                const admSec = document.getElementById('admSectionChat');
+                const mgrSec = document.getElementById('mgrSectionChat');
+                const isChatVisible = (admSec && !admSec.classList.contains('hidden')) || (mgrSec && !mgrSec.classList.contains('hidden'));
 
+                if (isChatVisible) {
+                    let targetId = commActiveContact ? commActiveContact.id : null;
+                    if (!targetId && currentUser && currentUser.role !== 'admin') {
+                        const adminContact = commContacts.find(c => c.role === 'admin') || commContacts[0];
+                        if (adminContact) targetId = adminContact.id;
+                    }
+                    if (targetId) {
+                        await loadChatMessages(targetId, false);
+                    }
+                }
+            } catch (err) {
                 // Silencieux
             }
         }
