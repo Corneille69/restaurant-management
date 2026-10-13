@@ -1,0 +1,53 @@
+services:
+
+  restaurant-db:
+    image: postgres:16
+    container_name: restaurant-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: restaurant_db
+      POSTGRES_USER: restaurant_user
+      POSTGRES_PASSWORD: restaurant_password
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - restaurant-db-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U restaurant_user -d restaurant_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  restaurant-backend:
+    build:
+      context: ./backend
+
+    container_name: restaurant-backend
+    restart: unless-stopped
+
+    depends_on:
+      restaurant-db:
+        condition: service_healthy
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      DATABASE_URL: postgresql+psycopg://restaurant_user:restaurant_password@restaurant-db:5432/restaurant_db
+      ODOO_URL: http://host.docker.internal:8070
+      ODOO_DB: restaurant_odoo
+      ODOO_USER: admin
+      ODOO_PASSWORD: admin
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    volumes:
+      - ./backend:/app
+
+volumes:
+  restaurant-db-data:

@@ -1,0 +1,109 @@
+FACTURE
+FACTURE NORMALISÉE DGI (E-MCF)
+Numéro de facture :
+GM/2026/0016
+Date de facturation :
+10/12/2026
+Échéance :
+10/13/2026
+Référence :
+DGI-FNE-GM-2026-F5F8F542
+SCAN DGI e-MCF
+Vendeur
+Le gout du matin
+secteur 5, koudougou,Ghana
+Tél : 
+56095425
+IFU : 
+000123456789A
+ 
+- 
+RCCM : 
+BF-OUA-01-2024-B12-00456
+Client
+Ministère de l'Économie et des Finances
+boulevar tensoba , SIAO , Koudougou
+Tél : 
++229 97 11 22 33
+NIF / IFU Client : 
+0202677889900
+DESIGNATION
+QTE
+PRIX UNIT
+MONTANT
+Riz au soumbala
+70
+800 FCFA
+56 000 FCFA
+Poulet roti
+40
+7 000 FCFA
+280 000 FCFA
+crudite & salade
+70
+600 FCFA
+42 000 FCFA
+Fruit & dessert
+100
+300 FCFA
+30 000 FCFA
+Jus de teedo & Bissape
+77
+400 FCFA
+30 800 FCFA
+Boisson alcoliser
+100
+800 FCFA
+80 000 FCFA
+Boisson non alcoliser et gazeuse
+100
+600 FCFA
+60 000 FCFA
+CONDITIONS ET MODALITÉS DE PAIEMENT
+Paiement à réception de facture
+Mode de règlement : 
+Espèces
+HOMOLOGATION DGI / E-MCF
+Réf. FNE : 
+DGI-FNE-GM-2026-F5F8F542
+Sceau Fiscal : 
+f5f8f542965fa5abaaa98d9ebc35aab5848fa3dae8eddce3f8e98ec62012c1f7
+NIM : 
+RESTO-DGI-MCF-01
+ - Daté du : 
+2026-10-12 16:21:38
+MONTANT HT
+578 800 FCFA
+TVA
+18
+%
+104 184 FCFA
+AIB
+1
+%
+- 5 788 FCFA
+TOTAL TTC
+682 984 FCFA
+NET À PAYER
+677 196 FCFA
+Le gout du matin
+secteur 5, koudougou,Ghana
+N° IFU : 
+000123456789A
+N° RCCM : 
+BF-OUA-01-2024-B12-00456
+Coordonnées
+Gérant : 
+OUEDRAOGO Jean-baptist
+Téléphone : 
+56095425
+Email : 
+ocorneille152@gmail.com
+Site : 
+www.lemodaje.com
+Détails bancaires & DGI
+Régime : 
+RNI
+NIM e-MCF : 
+RESTO-DGI-MCF-01
+Facture normalisée certifiée conforme DGI

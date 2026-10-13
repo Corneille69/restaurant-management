@@ -1,0 +1,1633 @@
+import xml.etree.ElementTree as ET
+
+# 1. Read dumped architectures from container
+import subprocess
+wiz_xml = subprocess.run(['docker', 'exec', 'odoo-odoo-1', 'cat', '/tmp/wiz_arch.xml'], capture_output=True, text=True, encoding='utf-8').stdout
+doc_xml = subprocess.run(['docker', 'exec', 'odoo-odoo-1', 'cat', '/tmp/doc_arch.xml'], capture_output=True, text=True, encoding='utf-8').stdout
+
+# Header actions and paperformat
+header_xml = """<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========================================================================= -->
+    <!-- 0. FORMAT PAPIER A4 PLEINE PAGE POUR FACTURES RESTAURANT (1 SEULE PAGE GARANTIE) -->
+    <!-- ========================================================================= -->
+    <record id="paperformat_restaurant_single_page" model="report.paperformat">
+        <field name="name">Format Facture Restaurant Pleine Page A4 (1 Page)</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">2</field>
+        <field name="margin_bottom">2</field>
+        <field name="margin_left">4</field>
+        <field name="margin_right">4</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <!-- ========================================================================= -->
+    <!-- 1. ACTIONS D'IMPRESSION PDF DES FACTURES RESTAURANT -->
+    <!-- ========================================================================= -->
+
+    <!-- ACTION DE RAPPORT PDF POUR LA FACTURE GLOBALE / JOURNALIÈRE DGI -->
+    <record id="action_report_restaurant_daily_invoice" model="ir.actions.report">
+        <field name="paperformat_id" ref="restaurant_core.paperformat_restaurant_single_page"/>
+        <field name="name">Facture Officielle Restaurant &amp; DGI (PDF)</field>
+        <field name="model">restaurant.daily.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">restaurant_core.report_daily_invoice_template</field>
+        <field name="report_file">restaurant_core.report_daily_invoice_template</field>
+        <field name="print_report_name">'Facture_%s' % (object.name or object.id)</field>
+        <field name="binding_model_id" ref="model_restaurant_daily_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- ACTION DE RAPPORT PDF POUR LES COMMANDES / REÇUS POS -->
+    <record id="action_report_restaurant_pos_order_invoice" model="ir.actions.report">
+        <field name="paperformat_id" ref="restaurant_core.paperformat_restaurant_single_page"/>
+        <field name="name">Facture Client Restaurant (PDF)</field>
+        <field name="model">pos.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">restaurant_core.report_pos_order_invoice_template</field>
+        <field name="report_file">restaurant_core.report_pos_order_invoice_template</field>
+        <field name="print_report_name">'Facture_%s' % (object.pos_reference or object.name)</field>
+        <field name="binding_model_id" ref="point_of_sale.model_pos_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- ACTION DE RAPPORT PDF POUR LES FACTURES CLIENTS COMPTABILITÉ (account.move) -->
+    <record id="action_report_restaurant_account_move_invoice" model="ir.actions.report">
+        <field name="paperformat_id" ref="restaurant_core.paperformat_restaurant_single_page"/>
+        <field name="name">Facture Officielle Restaurant &amp; DGI (PDF)</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">restaurant_core.report_account_move_invoice_template</field>
+        <field name="report_file">restaurant_core.report_account_move_invoice_template</field>
+        <field name="print_report_name">'Facture_%s' % (object.name or object.id)</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- ACTIONS DE RAPPORTS PDF POUR LES GRANDS MARCHÉS -->
+    <record id="action_report_marche_client_receipt" model="ir.actions.report">
+        <field name="paperformat_id" ref="restaurant_core.paperformat_restaurant_single_page"/>
+        <field name="name">Reçu Client Grand Marché (PDF)</field>
+        <field name="model">restaurant.grand.marche</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">restaurant_core.report_marche_client_receipt_template</field>
+        <field name="report_file">restaurant_core.report_marche_client_receipt_template</field>
+        <field name="print_report_name">'Recu_Client_%s' % (object.name or object.id)</field>
+        <field name="binding_model_id" ref="restaurant_core.model_restaurant_grand_marche"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_marche_dgi_invoice" model="ir.actions.report">
+        <field name="paperformat_id" ref="restaurant_core.paperformat_restaurant_single_page"/>
+        <field name="name">Facture Normalisée DGI Grand Marché (PDF)</field>
+        <field name="model">restaurant.grand.marche</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">restaurant_core.report_marche_dgi_template</field>
+        <field name="report_file">restaurant_core.report_marche_dgi_template</field>
+        <field name="print_report_name">'Facture_DGI_%s' % (object.dgi_reference or object.name)</field>
+        <field name="binding_model_id" ref="restaurant_core.model_restaurant_grand_marche"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_restaurant_grand_marche" model="ir.actions.report">
+        <field name="paperformat_id" ref="restaurant_core.paperformat_restaurant_single_page"/>
+        <field name="name">Facture Grand Marché (PDF)</field>
+        <field name="model">restaurant.grand.marche</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">restaurant_core.report_grand_marche_template</field>
+        <field name="report_file">restaurant_core.report_grand_marche_template</field>
+        <field name="print_report_name">'Facture_Marche_%s' % (object.name or object.id)</field>
+        <field name="binding_model_id" ref="restaurant_core.model_restaurant_grand_marche"/>
+        <field name="binding_type">report</field>
+    </record>
+"""
+
+# Template 1: report_daily_invoice_template
+daily_tmpl = """    <!-- ========================================================================= -->
+    <!-- 2. TEMPLATE RAPPORT FACTURE GLOBALE / JOURNALIÈRE DGI -->
+    <!-- ========================================================================= -->
+    <template id="report_daily_invoice_template">
+        <t t-call="web.html_container">
+            <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+                <meta charset="utf-8"/>
+            </head>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="config" t-value="env['restaurant.configuration'].sudo().search([], limit=1)"/>
+                <t t-set="resto_name" t-value="(config.name if (config and config.name) else False) or o.company_name or (o.company_id.name if hasattr(o, 'company_id') else env.company.name) or 'RESTAURANT'"/>
+                <t t-set="resto_sub" t-value="(config.subtitle if (config and config.subtitle) else False) or (o.company_subtitle if hasattr(o, 'company_subtitle') else '')"/>
+                <t t-set="resto_ifu" t-value="(config.ifu if (config and config.ifu) else False) or o.company_ifu or (o.company_id.vat if hasattr(o, 'company_id') else env.company.vat) or '-'"/>
+                <t t-set="resto_rccm" t-value="(config.rccm if (config and config.rccm) else False) or o.company_rccm or '-'"/>
+                <t t-set="resto_regime" t-value="(config.tax_regime if (config and config.tax_regime) else False) or o.company_tax_regime or '-'"/>
+                <t t-set="resto_division" t-value="(config.fiscal_division if (config and config.fiscal_division) else False) or o.company_fiscal_division or '-'"/>
+                <t t-set="resto_phone" t-value="(config.phone if (config and config.phone) else False) or o.company_phone or (o.company_id.phone if hasattr(o, 'company_id') else env.company.phone) or '-'"/>
+                <t t-set="resto_address" t-value="(config.address if (config and config.address) else False) or o.company_address or (o.company_id.street if hasattr(o, 'company_id') else env.company.street) or '-'"/>
+                <t t-set="resto_email" t-value="(config.email if (config and config.email) else False) or o.company_email or (o.company_id.email if hasattr(o, 'company_id') else env.company.email) or '-'"/>
+                <t t-set="resto_website" t-value="(config.website if (config and config.website) else False) or (o.company_website if hasattr(o, 'company_website') else (o.company_id.website if hasattr(o, 'company_id') else env.company.website)) or '-'"/>
+                <t t-set="resto_nim" t-value="(config.nim if (config and config.nim) else False) or (o.company_nim if hasattr(o, 'company_nim') else 'RESTO-DGI-MCF-01')"/>
+                <t t-set="resto_legal" t-value="(config.legal_mention if (config and config.legal_mention) else False) or (o.company_legal_mention if hasattr(o, 'company_legal_mention') else 'Facture normalisée certifiée conforme aux exigences de la Direction Générale des Impôts (DGI / e-MCF).')"/>
+                <t t-set="logo_src" t-value="image_data_uri(config.logo) if (config and config.logo) else (image_data_uri(env.company.logo) if env.company.logo else False)"/>
+                <t t-set="line_count" t-value="len(o.order_ids) if o.order_ids else 1"/>
+                <t t-set="dyn_font" t-value="'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '11.5px' if line_count &gt; 4 else '12.5px'"/>
+                <t t-set="dyn_pad" t-value="'2.5px 5px' if line_count &gt; 25 else '3.5px 6px' if line_count &gt; 18 else '6px 8px' if line_count &gt; 10 else '24px 14px' if line_count &gt; 4 else '32px 16px'"/>
+                <t t-set="dyn_line_height" t-value="'1.3' if line_count &gt; 25 else '1.35' if line_count &gt; 18 else '1.4' if line_count &gt; 10 else '1.6' if line_count &gt; 4 else '1.7'"/>
+                <t t-set="sec_gap" t-value="'4px' if line_count &gt; 25 else '6px' if line_count &gt; 18 else '8px' if line_count &gt; 10 else '26px' if line_count &gt; 4 else '34px'"/>
+                <t t-set="tot_font" t-value="'8.5px' if line_count &gt; 25 else '9px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '11.5px' if line_count &gt; 4 else '12.5px'"/>
+                <t t-set="tot_pad" t-value="'3px 5px' if line_count &gt; 25 else '3.5px 6px' if line_count &gt; 18 else '5px 7px' if line_count &gt; 10 else '14px 12px' if line_count &gt; 4 else '18px 14px'"/>
+                <t t-set="tot_ttc_font" t-value="'10px' if line_count &gt; 25 else '10.5px' if line_count &gt; 18 else '11px' if line_count &gt; 10 else '14px' if line_count &gt; 4 else '15px'"/>
+
+                <div class="article page single-page-invoice" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000000; background: #ffffff; padding: 8mm 12mm 6mm 12mm; position: relative; min-height: 250mm; box-sizing: border-box; font-size: 10.5px; line-height: 1.45; page-break-inside: avoid; page-break-after: avoid;">
+                    
+                    <!-- 1. EN-TÊTE : TITRE 'FACTURE' À GAUCHE & MÉTADONNÉES + QR CODE DGI À DROITE -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap};">
+                        <div style="display: table-cell; width: 45%; vertical-align: top;">
+                            <h1 style="font-size: 26px; font-weight: 900; color: #000000; margin: 0 0 2px 0; letter-spacing: 1.5px; text-transform: uppercase; line-height: 1;">
+                                FACTURE
+                            </h1>
+                            <div style="font-size: 9.5px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;">
+                                FACTURE NORMALISÉE JOURNALIÈRE DGI (e-MCF)
+                            </div>
+                        </div>
+                        <div style="display: table-cell; width: 55%; vertical-align: top; text-align: right;">
+                            <div style="display: inline-table; text-align: left;">
+                                <div style="display: table-row;">
+                                    <div style="display: table-cell; vertical-align: middle; padding-right: 15px;">
+                                        <table style="font-size: 11px; color: #000000; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Numéro de facture :</td>
+                                                <td style="font-weight: 700; padding: 2px 0;" t-esc="o.name"/>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Date de facturation :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;"><span t-field="o.date"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Échéance :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;">Clôture journalière</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Référence :</td>
+                                                <td style="font-weight: 700; padding: 2px 0; font-family: monospace;" t-esc="o.dgi_reference or o.name"/>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- QR CODE OFFICIEL DGI INTÉGRÉ DANS L'EN-TÊTE -->
+                                    <div style="display: table-cell; vertical-align: middle; text-align: center; border-left: 1.5px solid #000000; padding-left: 12px;">
+                                        <img t-att-src="o.get_dgi_qr_code_base64()" style="width: 65px; height: 65px; display: block; margin: 0 auto;" alt="QR DGI"/>
+                                        <div style="font-size: 8px; font-weight: 800; color: #166534; margin-top: 2px; letter-spacing: 0.5px;">
+                                            SCAN DGI e-MCF
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. SECTION VENDEUR ET CLIENT -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap};">
+                        <!-- COLONNE VENDEUR -->
+                        <div style="display: table-cell; width: 50%; vertical-align: top; padding-right: 20px;">
+                            <div style="font-size: 13.5px; font-weight: 900; color: #000000; margin-bottom: 6px;">
+                                Vendeur
+                            </div>
+                            <div style="font-size: 11px; color: #111827; line-height: 1.45;">
+                                <div style="font-weight: 800; font-size: 11.5px; color: #000000;" t-esc="resto_name"/>
+                                <div style="font-style: italic; color: #4b5563;" t-if="resto_address" t-esc="resto_address"/>
+                                <div t-if="resto_phone">Tél : <span t-esc="resto_phone"/></div>
+                                <div style="margin-top: 4px; font-size: 10.5px; color: #374151;">
+                                    <span t-if="resto_ifu">IFU : <strong t-esc="resto_ifu"/></span>
+                                    <span t-if="resto_ifu and resto_rccm"> - </span>
+                                    <span t-if="resto_rccm">RCCM : <strong t-esc="resto_rccm"/></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLONNE CLIENT -->
+                        <div style="display: table-cell; width: 50%; vertical-align: top; padding-left: 20px;">
+                            <div style="font-size: 13.5px; font-weight: 900; color: #000000; margin-bottom: 6px;">
+                                Client
+                            </div>
+                            <div style="font-size: 11px; color: #111827; line-height: 1.45;">
+                                <div style="font-weight: 800; font-size: 11.5px; color: #000000;">Clients Journaliers du Restaurant</div>
+                                <div style="font-style: italic; color: #4b5563;">Consommation sur place &amp; À emporter</div>
+                                <div>Règlement comptant journalier</div>
+                                <div style="margin-top: 4px; font-size: 10.5px; color: #374151;">
+                                    <span>Ventes Journalières Certifiées DGI</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. TABLEAU DES VENTES JOURNALIÈRES -->
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000000; margin-bottom: 0;">
+                        <thead>
+                            <tr style="background-color: #000000; color: #ffffff;">
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; width: 48%;">
+                                    DESIGNATION
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; width: 10%;">
+                                    QTE
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; width: 20%;">
+                                    PRIX UNIT
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; width: 22%;">
+                                    MONTANT
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="line_count" t-value="len(o.order_ids) if o.order_ids else 1"/>
+                            <t t-if="o.order_ids">
+                                <t t-foreach="o.order_ids" t-as="order">
+                                    <tr>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; vertical-align: middle;">
+                                            <span style="font-weight: 700; color: #000000;" t-esc="order.pos_reference or order.name"/>
+                                            <small t-if="order.user_id" style="display: block; font-weight: 400; color: #4b5563;">Gérant : <t t-esc="order.user_id.name"/></small>
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: center; font-weight: 700; vertical-align: middle;" t-esc="len(order.lines) or 1"/>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 700; vertical-align: middle;" t-esc="'{0:,.0f}'.format(order.amount_total).replace(',', ' ') + ' FCFA'"/>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 800; vertical-align: middle;" t-esc="'{0:,.0f}'.format(order.amount_total).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                </t>
+                            </t>
+                            <t t-else="">
+                                <tr>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; vertical-align: middle;">
+                                        <span style="font-weight: 700; color: #000000;">Ventes Globales Restauration &amp; Boissons (Groupe B - Norme DGI)</span>
+                                    </td>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: center; font-weight: 700; vertical-align: middle;" t-esc="o.total_orders or 1"/>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 700; vertical-align: middle;" t-esc="'{0:,.0f}'.format(o.total_ttc).replace(',', ' ') + ' FCFA'"/>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 800; vertical-align: middle;" t-esc="'{0:,.0f}'.format(o.total_ttc).replace(',', ' ') + ' FCFA'"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- 4. BLOC DES TOTAUX ET CONDITIONS -->
+                    <div style="width: 100%; margin-top: 0; margin-bottom: 10px; page-break-inside: avoid;">
+                        <div style="display: table; width: 100%; border-collapse: collapse;">
+                            <!-- COLONNE GAUCHE (48%) : CONDITIONS DE PAIEMENT + HOMOLOGATION DGI -->
+                            <div style="display: table-cell; width: 48%; vertical-align: top; padding-right: 15px; padding-top: 4px;">
+                                <div style="font-weight: 900; font-size: 11px; color: #000000; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.3px;">
+                                    Conditions et modalités de paiement
+                                </div>
+                                <div style="font-size: 10px; color: #1f2937; margin-bottom: 8px; line-height: 1.4;">
+                                    <div>Règlement comptant journalier clôturé.</div>
+                                    <div>Modes : Espèces, Mobile Money, Carte bancaire</div>
+                                </div>
+
+                                <!-- CADRE HOMOLOGATION DGI OFFICIEL -->
+                                <div style="border: 1.5px solid #166534; background: #f0fdf4; border-radius: 4px; padding: 6px 8px; font-size: 9px; color: #14532d; line-height: 1.4;">
+                                    <div style="font-weight: 900; text-transform: uppercase; margin-bottom: 3px; color: #166534; font-size: 9.5px; letter-spacing: 0.5px;">
+                                        HOMOLOGATION DGI / e-MCF
+                                    </div>
+                                    <div>Réf. FNE : <strong t-esc="o.dgi_reference or o.name"/></div>
+                                    <div>Sceau Fiscal : <span style="font-family: monospace; font-size: 8px; word-break: break-all;" t-esc="o.dgi_security_code or 'VERIFIED_DGI_SIGNATURE'"/></div>
+                                    <div style="margin-top: 2px;">NIM : <strong t-esc="resto_nim"/> - Daté du : <span t-esc="o.dgi_certified_at or o.date"/></div>
+                                </div>
+                            </div>
+
+                            <!-- COLONNE DROITE (52%) : TABLEAU DES TOTAUX ACCROCHÉ AUX ARTICLES -->
+                            <div style="display: table-cell; width: 52%; vertical-align: top;">
+                                <table style="width: 100%; border-collapse: collapse; border-top: none; font-size: 11px;">
+                                    <tr>
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; border-top: none; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000; text-transform: uppercase;">
+                                            MONTANT HT
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; border-top: none; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'{0:,.0f}'.format(o.total_ht).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000;">
+                                            TVA
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: center; font-weight: 700; color: #000000; width: 45px;">
+                                            18%
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'{0:,.0f}'.format(o.total_tva).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <!-- TOTAL TTC EN FOND NOIR ET ÉCRITURE BLANCHE IDENTIQUE À L'IMAGE -->
+                                    <tr style="background-color: #000000; color: #ffffff;">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_ttc_font}; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase;">
+                                            TOTAL TTC
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_ttc_font}; text-align: right; font-weight: 900;" t-esc="'{0:,.0f}'.format(o.total_ttc).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. PIED DE PAGE EN FLUX NORMAL (AUCUN CHEVAUCHEMENT POSSIBLE) -->
+                    <div t-attf-style="border-top: 1.5px solid #000000; padding-top: 14px; margin-top: #{'10px' if line_count &gt; 25 else '16px' if line_count &gt; 18 else '26px' if line_count &gt; 10 else '55px'}; font-size: #{'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '10px'}; color: #374151; line-height: 1.45;">
+                        <div style="display: table; width: 100%;">
+                            <!-- COLONNE 1 : MON ENTREPRISE -->
+                            <div style="display: table-cell; width: 34%; vertical-align: top; padding-right: 10px;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;" t-esc="resto_name"/>
+                                <div t-esc="resto_address"/>
+                                <div>N° IFU : <strong t-esc="resto_ifu"/></div>
+                                <div>N° RCCM : <strong t-esc="resto_rccm"/></div>
+                            </div>
+
+                            <!-- COLONNE 2 : COORDONNÉES -->
+                            <div style="display: table-cell; width: 33%; vertical-align: top; padding-right: 10px;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;">Coordonnées</div>
+                                <div t-if="o.active_manager_name">Gérant : <span t-esc="o.active_manager_name"/></div>
+                                <div t-elif="o.create_uid">Gérant : <span t-esc="o.create_uid.name"/></div>
+                                <div t-else="">Gérant : <span t-esc="resto_name"/></div>
+                                <div>Téléphone : <span t-esc="resto_phone"/></div>
+                                <div>Email : <span t-esc="resto_email"/></div>
+                                <div t-if="resto_website">Site : <span t-esc="resto_website"/></div>
+                            </div>
+
+                            <!-- COLONNE 3 : DÉTAILS BANCAIRES & DGI -->
+                            <div style="display: table-cell; width: 33%; vertical-align: top;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;">Détails bancaires &amp; DGI</div>
+                                <div>Régime : <strong t-esc="resto_regime"/></div>
+                                <div>NIM e-MCF : <strong t-esc="resto_nim"/></div>
+                                <div style="color: #166534; font-weight: 700;">
+                                    Facture normalisée certifiée conforme DGI
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+"""
+
+# Template 2: report_pos_order_invoice_template
+pos_tmpl = """    <!-- ========================================================================= -->
+    <!-- 3. TEMPLATE RAPPORT FACTURE CLIENT POS (pos.order) -->
+    <!-- ========================================================================= -->
+    <template id="report_pos_order_invoice_template">
+        <t t-call="web.html_container">
+            <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+                <meta charset="utf-8"/>
+            </head>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="config" t-value="env['restaurant.configuration'].sudo().search([], limit=1)"/>
+                <t t-set="resto_name" t-value="(config.name if (config and config.name) else False) or (o.company_id.name if hasattr(o, 'company_id') else env.company.name) or 'RESTAURANT'"/>
+                <t t-set="resto_sub" t-value="(config.subtitle if (config and config.subtitle) else False) or ''"/>
+                <t t-set="resto_ifu" t-value="(config.ifu if (config and config.ifu) else False) or (o.company_id.vat if hasattr(o, 'company_id') else env.company.vat) or '-'"/>
+                <t t-set="resto_rccm" t-value="(config.rccm if (config and config.rccm) else False) or '-'"/>
+                <t t-set="resto_regime" t-value="(config.tax_regime if (config and config.tax_regime) else False) or '-'"/>
+                <t t-set="resto_nim" t-value="(config.nim if (config and config.nim) else False) or 'RESTO-DGI-MCF-01'"/>
+                <t t-set="resto_phone" t-value="(config.phone if (config and config.phone) else False) or (o.company_id.phone if hasattr(o, 'company_id') else env.company.phone) or '-'"/>
+                <t t-set="resto_address" t-value="(config.address if (config and config.address) else False) or (o.company_id.street if hasattr(o, 'company_id') else env.company.street) or '-'"/>
+                <t t-set="resto_email" t-value="(config.email if (config and config.email) else False) or (o.company_id.email if hasattr(o, 'company_id') else env.company.email) or '-'"/>
+                <t t-set="resto_website" t-value="(config.website if (config and config.website) else False) or (o.company_id.website if hasattr(o, 'company_id') else env.company.website) or '-'"/>
+                <t t-set="line_count" t-value="len(o.lines) if o.lines else 1"/>
+                <t t-set="dyn_font" t-value="'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '11.5px' if line_count &gt; 4 else '12.5px'"/>
+                <t t-set="dyn_pad" t-value="'2.5px 5px' if line_count &gt; 25 else '3.5px 6px' if line_count &gt; 18 else '6px 8px' if line_count &gt; 10 else '24px 14px' if line_count &gt; 4 else '32px 16px'"/>
+                <t t-set="dyn_line_height" t-value="'1.3' if line_count &gt; 25 else '1.35' if line_count &gt; 18 else '1.4' if line_count &gt; 10 else '1.6' if line_count &gt; 4 else '1.7'"/>
+                <t t-set="sec_gap" t-value="'4px' if line_count &gt; 25 else '6px' if line_count &gt; 18 else '8px' if line_count &gt; 10 else '26px' if line_count &gt; 4 else '34px'"/>
+                <t t-set="tot_font" t-value="'8.5px' if line_count &gt; 25 else '9px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '11.5px' if line_count &gt; 4 else '12.5px'"/>
+                <t t-set="tot_pad" t-value="'3px 5px' if line_count &gt; 25 else '3.5px 6px' if line_count &gt; 18 else '5px 7px' if line_count &gt; 10 else '14px 12px' if line_count &gt; 4 else '18px 14px'"/>
+                <t t-set="tot_ttc_font" t-value="'10px' if line_count &gt; 25 else '10.5px' if line_count &gt; 18 else '11px' if line_count &gt; 10 else '14px' if line_count &gt; 4 else '15px'"/>
+
+                <div class="article page single-page-invoice" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000000; background: #ffffff; padding: 8mm 12mm 6mm 12mm; position: relative; min-height: 250mm; box-sizing: border-box; font-size: 10.5px; line-height: 1.45; page-break-inside: avoid; page-break-after: avoid;">
+                    
+                    <!-- 1. EN-TÊTE : TITRE 'FACTURE' À GAUCHE & MÉTADONNÉES + QR CODE DGI À DROITE -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap};">
+                        <div style="display: table-cell; width: 45%; vertical-align: top;">
+                            <h1 style="font-size: 26px; font-weight: 900; color: #000000; margin: 0 0 2px 0; letter-spacing: 1.5px; text-transform: uppercase; line-height: 1;">
+                                FACTURE
+                            </h1>
+                            <div style="font-size: 9.5px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;">
+                                FACTURE RESTAURANT &amp; DGI (e-MCF)
+                            </div>
+                        </div>
+                        <div style="display: table-cell; width: 55%; vertical-align: top; text-align: right;">
+                            <div style="display: inline-table; text-align: left;">
+                                <div style="display: table-row;">
+                                    <div style="display: table-cell; vertical-align: middle; padding-right: 15px;">
+                                        <table style="font-size: 11px; color: #000000; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Numéro de facture :</td>
+                                                <td style="font-weight: 700; padding: 2px 0;" t-esc="o.pos_reference or o.name"/>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Date de facturation :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;"><span t-field="o.date_order"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Échéance :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;">À réception (Comptant)</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Référence :</td>
+                                                <td style="font-weight: 700; padding: 2px 0; font-family: monospace;" t-esc="o.name"/>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- QR CODE OFFICIEL DGI INTÉGRÉ DANS L'EN-TÊTE -->
+                                    <div style="display: table-cell; vertical-align: middle; text-align: center; border-left: 1.5px solid #000000; padding-left: 12px;">
+                                        <img t-att-src="o.get_dgi_qr_code_base64()" style="width: 65px; height: 65px; display: block; margin: 0 auto;" alt="QR DGI"/>
+                                        <div style="font-size: 8px; font-weight: 800; color: #166534; margin-top: 2px; letter-spacing: 0.5px;">
+                                            SCAN DGI e-MCF
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. SECTION VENDEUR ET CLIENT -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap};">
+                        <!-- COLONNE VENDEUR -->
+                        <div style="display: table-cell; width: 50%; vertical-align: top; padding-right: 20px;">
+                            <div style="font-size: 13.5px; font-weight: 900; color: #000000; margin-bottom: 6px;">
+                                Vendeur
+                            </div>
+                            <div style="font-size: 11px; color: #111827; line-height: 1.45;">
+                                <div style="font-weight: 800; font-size: 11.5px; color: #000000;" t-esc="resto_name"/>
+                                <div style="font-style: italic; color: #4b5563;" t-if="resto_address" t-esc="resto_address"/>
+                                <div t-if="resto_phone">Tél : <span t-esc="resto_phone"/></div>
+                                <div style="margin-top: 4px; font-size: 10.5px; color: #374151;">
+                                    <span t-if="resto_ifu">IFU : <strong t-esc="resto_ifu"/></span>
+                                    <span t-if="resto_ifu and resto_rccm"> - </span>
+                                    <span t-if="resto_rccm">RCCM : <strong t-esc="resto_rccm"/></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLONNE CLIENT -->
+                        <div style="display: table-cell; width: 50%; vertical-align: top; padding-left: 20px;">
+                            <div style="font-size: 13.5px; font-weight: 900; color: #000000; margin-bottom: 6px;">
+                                Client
+                            </div>
+                            <div style="font-size: 11px; color: #111827; line-height: 1.45;">
+                                <div style="font-weight: 800; font-size: 11.5px; color: #000000;" t-esc="o.partner_id.name if o.partner_id else 'Client de passage'"/>
+                                <div style="font-style: italic; color: #4b5563;" t-if="o.partner_id and o.partner_id.contact_address" t-esc="o.partner_id.contact_address"/>
+                                <div t-if="o.partner_id and o.partner_id.phone">Tél : <span t-esc="o.partner_id.phone"/></div>
+                                <div style="margin-top: 4px; font-size: 10.5px; color: #374151;">
+                                    <span t-if="o.partner_id and o.partner_id.vat">NIF / IFU Client : <strong t-esc="o.partner_id.vat"/></span>
+                                    <span t-else="">Client Particulier / Comptant</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. TABLEAU DES ARTICLES -->
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000000; margin-bottom: 0;">
+                        <thead>
+                            <tr style="background-color: #000000; color: #ffffff;">
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; width: 48%;">
+                                    DESIGNATION
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; width: 10%;">
+                                    QTE
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; width: 20%;">
+                                    PRIX UNIT
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; width: 22%;">
+                                    MONTANT
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="line_count" t-value="len(o.lines) if o.lines else 1"/>
+                            <t t-foreach="o.lines" t-as="l">
+                                <tr>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; vertical-align: middle;">
+                                        <span style="font-weight: 700; color: #000000;" t-esc="l.product_id.display_name or l.full_product_name"/>
+                                    </td>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: center; font-weight: 700; vertical-align: middle;" t-esc="'%g' % l.qty if l.qty else '0'"/>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 700; vertical-align: middle;" t-esc="'{0:,.0f}'.format(l.price_unit).replace(',', ' ') + ' FCFA'"/>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 800; vertical-align: middle;" t-esc="'{0:,.0f}'.format(l.price_subtotal_incl).replace(',', ' ') + ' FCFA'"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- 4. BLOC DES TOTAUX ET CONDITIONS -->
+                    <div style="width: 100%; margin-top: 0; margin-bottom: 10px; page-break-inside: avoid;">
+                        <div style="display: table; width: 100%; border-collapse: collapse;">
+                            <!-- COLONNE GAUCHE (48%) : CONDITIONS DE PAIEMENT + HOMOLOGATION DGI -->
+                            <div style="display: table-cell; width: 48%; vertical-align: top; padding-right: 15px; padding-top: 4px;">
+                                <div style="font-weight: 900; font-size: 11px; color: #000000; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.3px;">
+                                    Conditions et modalités de paiement
+                                </div>
+                                <div style="font-size: 10px; color: #1f2937; margin-bottom: 8px; line-height: 1.4;">
+                                    <div>Mode de règlement : <strong t-esc="o.payment_method_name or 'Espèces (Cash)'"/></div>
+                                    <div t-if="o.tendered_amount">Montant versé : <span t-esc="'{0:,.0f}'.format(o.tendered_amount).replace(',', ' ') + ' FCFA'"/> | Monnaie rendue : <span t-esc="'{0:,.0f}'.format(o.change_amount).replace(',', ' ') + ' FCFA'"/></div>
+                                </div>
+
+                                <!-- CADRE HOMOLOGATION DGI OFFICIEL -->
+                                <div style="border: 1.5px solid #166534; background: #f0fdf4; border-radius: 4px; padding: 6px 8px; font-size: 9px; color: #14532d; line-height: 1.4;">
+                                    <div style="font-weight: 900; text-transform: uppercase; margin-bottom: 3px; color: #166534; font-size: 9.5px; letter-spacing: 0.5px;">
+                                        HOMOLOGATION DGI / e-MCF
+                                    </div>
+                                    <div>Réf. FNE : <strong t-esc="o.pos_reference or o.name"/></div>
+                                    <div>Machine (NIM) : <strong t-esc="resto_nim"/> - Daté du : <span t-field="o.date_order"/></div>
+                                </div>
+                            </div>
+
+                            <!-- COLONNE DROITE (52%) : TABLEAU DES TOTAUX ACCROCHÉ AUX ARTICLES -->
+                            <div style="display: table-cell; width: 52%; vertical-align: top;">
+                                <table style="width: 100%; border-collapse: collapse; border-top: none; font-size: 11px;">
+                                    <tr>
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; border-top: none; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000; text-transform: uppercase;">
+                                            MONTANT HT
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; border-top: none; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'{0:,.0f}'.format(o.amount_total - (o.amount_tax or 0)).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000;">
+                                            TVA
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: center; font-weight: 700; color: #000000; width: 45px;">
+                                            18%
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'{0:,.0f}'.format(o.amount_tax or 0).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <!-- TOTAL TTC EN FOND NOIR ET ÉCRITURE BLANCHE IDENTIQUE À L'IMAGE -->
+                                    <tr style="background-color: #000000; color: #ffffff;">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_ttc_font}; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase;">
+                                            TOTAL TTC
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_ttc_font}; text-align: right; font-weight: 900;" t-esc="'{0:,.0f}'.format(o.amount_total).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. PIED DE PAGE EN FLUX NORMAL (AUCUN CHEVAUCHEMENT POSSIBLE) -->
+                    <div t-attf-style="border-top: 1.5px solid #000000; padding-top: 14px; margin-top: #{'10px' if line_count &gt; 25 else '16px' if line_count &gt; 18 else '26px' if line_count &gt; 10 else '55px'}; font-size: #{'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '10px'}; color: #374151; line-height: 1.45;">
+                        <div style="display: table; width: 100%;">
+                            <!-- COLONNE 1 : MON ENTREPRISE -->
+                            <div style="display: table-cell; width: 34%; vertical-align: top; padding-right: 10px;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;" t-esc="resto_name"/>
+                                <div t-esc="resto_address"/>
+                                <div>N° IFU : <strong t-esc="resto_ifu"/></div>
+                                <div>N° RCCM : <strong t-esc="resto_rccm"/></div>
+                            </div>
+
+                            <!-- COLONNE 2 : COORDONNÉES -->
+                            <div style="display: table-cell; width: 33%; vertical-align: top; padding-right: 10px;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;">Coordonnées</div>
+                                <div>Gérant : <span t-esc="o.user_id.name if o.user_id else resto_name"/></div>
+                                <div>Téléphone : <span t-esc="resto_phone"/></div>
+                                <div>Email : <span t-esc="resto_email"/></div>
+                            </div>
+
+                            <!-- COLONNE 3 : DÉTAILS BANCAIRES & DGI -->
+                            <div style="display: table-cell; width: 33%; vertical-align: top;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;">Détails &amp; DGI</div>
+                                <div>Régime : <strong t-esc="resto_regime"/></div>
+                                <div>NIM e-MCF : <strong t-esc="resto_nim"/></div>
+                                <div style="color: #166534; font-weight: 700;">
+                                    Facture certifiée conforme DGI
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+"""
+
+# Template 3: report_account_move_invoice_template
+move_tmpl = """    <!-- ========================================================================= -->
+    <!-- 4. TEMPLATE RAPPORT FACTURE CLIENT COMPTABLE (account.move) -->
+    <!-- ========================================================================= -->
+    <template id="report_account_move_invoice_template">
+        <t t-call="web.html_container">
+            <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+                <meta charset="utf-8"/>
+            </head>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="config" t-value="env['restaurant.configuration'].sudo().search([], limit=1)"/>
+                <t t-set="resto_name" t-value="(config.name if (config and config.name) else False) or (o.company_id.name if hasattr(o, 'company_id') else env.company.name) or 'RESTAURANT'"/>
+                <t t-set="resto_sub" t-value="(config.subtitle if (config and config.subtitle) else False) or ''"/>
+                <t t-set="resto_ifu" t-value="(config.ifu if (config and config.ifu) else False) or (o.company_id.vat if hasattr(o, 'company_id') else env.company.vat) or '-'"/>
+                <t t-set="resto_rccm" t-value="(config.rccm if (config and config.rccm) else False) or '-'"/>
+                <t t-set="resto_regime" t-value="(config.tax_regime if (config and config.tax_regime) else False) or '-'"/>
+                <t t-set="resto_nim" t-value="(config.nim if (config and config.nim) else False) or 'RESTO-DGI-MCF-01'"/>
+                <t t-set="resto_phone" t-value="(config.phone if (config and config.phone) else False) or (o.company_id.phone if hasattr(o, 'company_id') else env.company.phone) or '-'"/>
+                <t t-set="resto_address" t-value="(config.address if (config and config.address) else False) or (o.company_id.street if hasattr(o, 'company_id') else env.company.street) or '-'"/>
+                <t t-set="resto_email" t-value="(config.email if (config and config.email) else False) or (o.company_id.email if hasattr(o, 'company_id') else env.company.email) or '-'"/>
+                <t t-set="resto_website" t-value="(config.website if (config and config.website) else False) or (o.company_id.website if hasattr(o, 'company_id') else env.company.website) or '-'"/>
+                <t t-set="line_count" t-value="len(o.invoice_line_ids) if o.invoice_line_ids else 1"/>
+                <t t-set="dyn_font" t-value="'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '11.5px' if line_count &gt; 4 else '12.5px'"/>
+                <t t-set="dyn_pad" t-value="'2.5px 5px' if line_count &gt; 25 else '3.5px 6px' if line_count &gt; 18 else '6px 8px' if line_count &gt; 10 else '24px 14px' if line_count &gt; 4 else '32px 16px'"/>
+                <t t-set="dyn_line_height" t-value="'1.3' if line_count &gt; 25 else '1.35' if line_count &gt; 18 else '1.4' if line_count &gt; 10 else '1.6' if line_count &gt; 4 else '1.7'"/>
+                <t t-set="sec_gap" t-value="'4px' if line_count &gt; 25 else '6px' if line_count &gt; 18 else '8px' if line_count &gt; 10 else '26px' if line_count &gt; 4 else '34px'"/>
+                <t t-set="tot_font" t-value="'8.5px' if line_count &gt; 25 else '9px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '11.5px' if line_count &gt; 4 else '12.5px'"/>
+                <t t-set="tot_pad" t-value="'3px 5px' if line_count &gt; 25 else '3.5px 6px' if line_count &gt; 18 else '5px 7px' if line_count &gt; 10 else '14px 12px' if line_count &gt; 4 else '18px 14px'"/>
+                <t t-set="tot_ttc_font" t-value="'10px' if line_count &gt; 25 else '10.5px' if line_count &gt; 18 else '11px' if line_count &gt; 10 else '14px' if line_count &gt; 4 else '15px'"/>
+
+                <div class="article page single-page-invoice" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000000; background: #ffffff; padding: 8mm 12mm 6mm 12mm; position: relative; min-height: 250mm; box-sizing: border-box; font-size: 10.5px; line-height: 1.45; page-break-inside: avoid; page-break-after: avoid;">
+                    
+                    <!-- 1. EN-TÊTE : TITRE 'FACTURE' À GAUCHE & MÉTADONNÉES + QR CODE DGI À DROITE -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap};">
+                        <div style="display: table-cell; width: 45%; vertical-align: top;">
+                            <h1 style="font-size: 26px; font-weight: 900; color: #000000; margin: 0 0 2px 0; letter-spacing: 1.5px; text-transform: uppercase; line-height: 1;">
+                                FACTURE
+                            </h1>
+                            <div style="font-size: 9.5px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;">
+                                FACTURE CLIENT &amp; DGI (e-MCF)
+                            </div>
+                        </div>
+                        <div style="display: table-cell; width: 55%; vertical-align: top; text-align: right;">
+                            <div style="display: inline-table; text-align: left;">
+                                <div style="display: table-row;">
+                                    <div style="display: table-cell; vertical-align: middle; padding-right: 15px;">
+                                        <table style="font-size: 11px; color: #000000; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Numéro de facture :</td>
+                                                <td style="font-weight: 700; padding: 2px 0;" t-esc="o.name"/>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Date de facturation :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;"><span t-field="o.invoice_date"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Échéance :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;">
+                                                    <span t-if="o.invoice_date_due" t-field="o.invoice_date_due"/>
+                                                    <span t-else="">À réception</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Référence :</td>
+                                                <td style="font-weight: 700; padding: 2px 0; font-family: monospace;" t-esc="o.name"/>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- QR CODE OFFICIEL DGI INTÉGRÉ DANS L'EN-TÊTE -->
+                                    <div style="display: table-cell; vertical-align: middle; text-align: center; border-left: 1.5px solid #000000; padding-left: 12px;">
+                                        <img t-att-src="o.get_dgi_qr_code_base64()" style="width: 65px; height: 65px; display: block; margin: 0 auto;" alt="QR DGI"/>
+                                        <div style="font-size: 8px; font-weight: 800; color: #166534; margin-top: 2px; letter-spacing: 0.5px;">
+                                            SCAN DGI e-MCF
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. SECTION VENDEUR ET CLIENT -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap};">
+                        <!-- COLONNE VENDEUR -->
+                        <div style="display: table-cell; width: 50%; vertical-align: top; padding-right: 20px;">
+                            <div style="font-size: 13.5px; font-weight: 900; color: #000000; margin-bottom: 6px;">
+                                Vendeur
+                            </div>
+                            <div style="font-size: 11px; color: #111827; line-height: 1.45;">
+                                <div style="font-weight: 800; font-size: 11.5px; color: #000000;" t-esc="resto_name"/>
+                                <div style="font-style: italic; color: #4b5563;" t-if="resto_address" t-esc="resto_address"/>
+                                <div t-if="resto_phone">Tél : <span t-esc="resto_phone"/></div>
+                                <div style="margin-top: 4px; font-size: 10.5px; color: #374151;">
+                                    <span t-if="resto_ifu">IFU : <strong t-esc="resto_ifu"/></span>
+                                    <span t-if="resto_ifu and resto_rccm"> - </span>
+                                    <span t-if="resto_rccm">RCCM : <strong t-esc="resto_rccm"/></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLONNE CLIENT -->
+                        <div style="display: table-cell; width: 50%; vertical-align: top; padding-left: 20px;">
+                            <div style="font-size: 13.5px; font-weight: 900; color: #000000; margin-bottom: 6px;">
+                                Client
+                            </div>
+                            <div style="font-size: 11px; color: #111827; line-height: 1.45;">
+                                <div style="font-weight: 800; font-size: 11.5px; color: #000000;" t-esc="o.partner_id.name or 'Client'"/>
+                                <div style="font-style: italic; color: #4b5563;" t-if="o.partner_id.contact_address" t-esc="o.partner_id.contact_address"/>
+                                <div t-if="o.partner_id.phone">Tél : <span t-esc="o.partner_id.phone"/></div>
+                                <div style="margin-top: 4px; font-size: 10.5px; color: #374151;">
+                                    <span t-if="o.partner_id.vat">NIF / IFU Client : <strong t-esc="o.partner_id.vat"/></span>
+                                    <span t-else="">Client Particulier / Entreprise</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. TABLEAU DES ARTICLES -->
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000000; margin-bottom: 0;">
+                        <thead>
+                            <tr style="background-color: #000000; color: #ffffff;">
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; width: 48%;">
+                                    DESIGNATION
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; width: 10%;">
+                                    QTE
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; width: 20%;">
+                                    PRIX UNIT
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; width: 22%;">
+                                    MONTANT
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="lines" t-value="o.invoice_line_ids.filtered(lambda l: not l.display_type)"/>
+                            <t t-foreach="lines" t-as="l">
+                                <tr>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; vertical-align: middle;">
+                                        <span style="font-weight: 700; color: #000000;" t-esc="l.name"/>
+                                    </td>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: center; font-weight: 700; vertical-align: middle;" t-esc="'%g' % l.quantity if l.quantity else '0'"/>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 700; vertical-align: middle;" t-esc="'{0:,.0f}'.format(l.price_unit).replace(',', ' ') + ' FCFA'"/>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 800; vertical-align: middle;" t-esc="'{0:,.0f}'.format(l.price_subtotal).replace(',', ' ') + ' FCFA'"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- 4. BLOC DES TOTAUX ET CONDITIONS -->
+                    <div style="width: 100%; margin-top: 0; margin-bottom: 10px; page-break-inside: avoid;">
+                        <div style="display: table; width: 100%; border-collapse: collapse;">
+                            <!-- COLONNE GAUCHE (48%) : CONDITIONS DE PAIEMENT + HOMOLOGATION DGI -->
+                            <div style="display: table-cell; width: 48%; vertical-align: top; padding-right: 15px; padding-top: 4px;">
+                                <div style="font-weight: 900; font-size: 11px; color: #000000; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.3px;">
+                                    Conditions et modalités de paiement
+                                </div>
+                                <div style="font-size: 10px; color: #1f2937; margin-bottom: 8px; line-height: 1.4;">
+                                    <span t-if="o.invoice_payment_term_id" t-esc="o.invoice_payment_term_id.name"/>
+                                    <span t-else="">Le paiement est dû à réception de facture.</span>
+                                </div>
+
+                                <!-- CADRE HOMOLOGATION DGI OFFICIEL -->
+                                <div style="border: 1.5px solid #166534; background: #f0fdf4; border-radius: 4px; padding: 6px 8px; font-size: 9px; color: #14532d; line-height: 1.4;">
+                                    <div style="font-weight: 900; text-transform: uppercase; margin-bottom: 3px; color: #166534; font-size: 9.5px; letter-spacing: 0.5px;">
+                                        HOMOLOGATION DGI / e-MCF
+                                    </div>
+                                    <div>Réf. FNE : <strong t-esc="o.name"/></div>
+                                    <div>Machine (NIM) : <strong t-esc="resto_nim"/> - Daté du : <span t-field="o.invoice_date"/></div>
+                                </div>
+                            </div>
+
+                            <!-- COLONNE DROITE (52%) : TABLEAU DES TOTAUX ACCROCHÉ AUX ARTICLES -->
+                            <div style="display: table-cell; width: 52%; vertical-align: top;">
+                                <table style="width: 100%; border-collapse: collapse; border-top: none; font-size: 11px;">
+                                    <tr>
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; border-top: none; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000; text-transform: uppercase;">
+                                            MONTANT HT
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; border-top: none; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'{0:,.0f}'.format(o.amount_untaxed).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000;">
+                                            TVA
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: center; font-weight: 700; color: #000000; width: 45px;">
+                                            18%
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'{0:,.0f}'.format(o.amount_tax).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <!-- TOTAL TTC EN FOND NOIR ET ÉCRITURE BLANCHE IDENTIQUE À L'IMAGE -->
+                                    <tr style="background-color: #000000; color: #ffffff;">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_ttc_font}; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase;">
+                                            TOTAL TTC
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_ttc_font}; text-align: right; font-weight: 900;" t-esc="'{0:,.0f}'.format(o.amount_total).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. PIED DE PAGE EN FLUX NORMAL (AUCUN CHEVAUCHEMENT POSSIBLE) -->
+                    <div t-attf-style="border-top: 1.5px solid #000000; padding-top: 14px; margin-top: #{'10px' if line_count &gt; 25 else '16px' if line_count &gt; 18 else '26px' if line_count &gt; 10 else '55px'}; font-size: #{'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '10px'}; color: #374151; line-height: 1.45;">
+                        <div style="display: table; width: 100%;">
+                            <!-- COLONNE 1 : MON ENTREPRISE -->
+                            <div style="display: table-cell; width: 34%; vertical-align: top; padding-right: 10px;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;" t-esc="resto_name"/>
+                                <div t-esc="resto_address"/>
+                                <div>N° IFU : <strong t-esc="resto_ifu"/></div>
+                                <div>N° RCCM : <strong t-esc="resto_rccm"/></div>
+                            </div>
+
+                            <!-- COLONNE 2 : COORDONNÉES -->
+                            <div style="display: table-cell; width: 33%; vertical-align: top; padding-right: 10px;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;">Coordonnées</div>
+                                <div>Téléphone : <span t-esc="resto_phone"/></div>
+                                <div>Email : <span t-esc="resto_email"/></div>
+                                <div t-if="resto_website">Site : <span t-esc="resto_website"/></div>
+                            </div>
+
+                            <!-- COLONNE 3 : DÉTAILS BANCAIRES & DGI -->
+                            <div style="display: table-cell; width: 33%; vertical-align: top;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;">Détails bancaires &amp; DGI</div>
+                                <div>Régime : <strong t-esc="resto_regime"/></div>
+                                <div>NIM e-MCF : <strong t-esc="resto_nim"/></div>
+                                <div style="color: #166534; font-weight: 700;">
+                                    Facture certifiée conforme DGI
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+"""
+
+# Template 4: report_marche_client_receipt_template
+receipt_tmpl = """    <!-- ========================================================================= -->
+    <!-- TEMPLATE 1 : REÇU CLIENT GRAND MARCHÉ (GÉRANT) -->
+    <!-- ========================================================================= -->
+    <template id="report_marche_client_receipt_template">
+        <t t-call="web.html_container">
+            <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+                <meta charset="utf-8"/>
+            </head>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="config" t-value="env['restaurant.configuration'].sudo().search([], limit=1)"/>
+                <t t-set="resto_name" t-value="(config.name if (config and config.name) else False) or (o.company_id.name if hasattr(o, 'company_id') else env.company.name) or 'RESTAURANT'"/>
+                <t t-set="resto_sub" t-value="(config.subtitle if (config and config.subtitle) else False) or ''"/>
+                <t t-set="resto_phone" t-value="(config.phone if (config and config.phone) else False) or (o.company_id.phone if hasattr(o, 'company_id') else env.company.phone) or '-'"/>
+                <t t-set="resto_address" t-value="(config.address if (config and config.address) else False) or (o.company_id.street if hasattr(o, 'company_id') else env.company.street) or '-'"/>
+                <t t-set="resto_email" t-value="(config.email if (config and config.email) else False) or (o.company_id.email if hasattr(o, 'company_id') else env.company.email) or ''"/>
+                <t t-set="resto_website" t-value="(config.website if (config and config.website) else False) or (o.company_id.website if hasattr(o, 'company_id') else env.company.website) or ''"/>
+                <t t-set="resto_rccm" t-value="(config.rccm if (config and config.rccm) else False) or ''"/>
+                <t t-set="resto_ifu" t-value="(config.ifu if (config and config.ifu) else False) or ''"/>
+                <t t-set="resto_legal" t-value="(config.legal_mention if (config and config.legal_mention) else False) or 'Facture normalisée certifiée conforme aux exigences de la DGI'"/>
+                <t t-set="logo_src" t-value="image_data_uri(config.logo) if (config and config.logo) else (image_data_uri(env.company.logo) if env.company.logo else False)"/>
+                <t t-set="line_count" t-value="len(o.line_ids) if o.line_ids else 1"/>
+                <t t-set="dyn_font" t-value="'8.5px' if line_count &gt; 25 else '9.5px' if line_count &gt; 18 else '10px' if line_count &gt; 10 else '11px' if line_count &gt; 4 else '11.5px'"/>
+                <t t-set="dyn_pad" t-value="'3px 6px' if line_count &gt; 25 else '4.5px 7px' if line_count &gt; 18 else '6px 8px' if line_count &gt; 10 else '8px 10px' if line_count &gt; 4 else '10px 12px'"/>
+                <t t-set="dyn_line_height" t-value="'1.35' if line_count &gt; 25 else '1.4' if line_count &gt; 18 else '1.45' if line_count &gt; 10 else '1.5' if line_count &gt; 4 else '1.55'"/>
+                <t t-set="sec_gap" t-value="'5px' if line_count &gt; 25 else '7px' if line_count &gt; 18 else '9px' if line_count &gt; 10 else '12px' if line_count &gt; 4 else '16px'"/>
+                <t t-set="tot_font" t-value="'9px' if line_count &gt; 25 else '9.5px' if line_count &gt; 18 else '10px' if line_count &gt; 10 else '10.5px' if line_count &gt; 4 else '11px'"/>
+                <t t-set="tot_pad" t-value="'3px 6px' if line_count &gt; 25 else '4px 6px' if line_count &gt; 18 else '5px 7px' if line_count &gt; 10 else '6px 8px' if line_count &gt; 4 else '7px 9px'"/>
+
+                <div class="article page single-page-invoice" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b; background: #ffffff; padding: 5mm 10mm 4mm 10mm; position: relative; min-height: 250mm; box-sizing: border-box; font-size: 10px; line-height: 1.45; page-break-inside: avoid; page-break-after: avoid;">
+                    
+                    <!-- EN-TÊTE ÉTABLISSEMENT -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap}; border-bottom: 2.5px solid #064e3b; padding-bottom: 8px;">
+                        <div style="display: table-cell; width: 62%; vertical-align: middle;">
+                            <div style="display: table; width: 100%;">
+                                <div style="display: table-cell; width: 65px; vertical-align: middle;">
+                                    <img t-if="logo_src" t-att-src="logo_src" style="max-width: 60px; max-height: 60px; object-fit: contain;" alt="Logo"/>
+                                    <div t-else="" style="width: 55px; height: 55px; background: #064e3b; color: #ffffff; border-radius: 6px; font-size: 16px; line-height: 55px; text-align: center; font-weight: 800;">RESTO</div>
+                                </div>
+                                <div style="display: table-cell; vertical-align: middle; padding-left: 10px;">
+                                    <h2 style="font-size: 18px; font-weight: 900; color: #064e3b; margin: 0 0 2px 0; text-transform: uppercase;">
+                                        <span t-esc="resto_name"/>
+                                    </h2>
+                                    <p t-if="resto_sub" style="font-size: 10.5px; color: #64748b; margin: 0 0 2px 0; font-weight: 600;">
+                                        <span t-esc="resto_sub"/>
+                                    </p>
+                                    <div style="font-size: 10px; color: #475569; line-height: 1.35;">
+                                        <span><strong t-esc="resto_address"/></span>
+                                        <span t-if="resto_phone"> - Tél : <strong t-esc="resto_phone"/></span>
+                                        <div t-if="resto_rccm or resto_ifu" style="margin-top: 1px; font-size: 9px; color: #64748b;">
+                                            <span t-if="resto_ifu">IFU : <strong t-esc="resto_ifu"/></span>
+                                            <span t-if="resto_ifu and resto_rccm"> - </span>
+                                            <span t-if="resto_rccm">RCCM : <strong t-esc="resto_rccm"/></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: table-cell; width: 38%; vertical-align: middle; text-align: right;">
+                            <div style="background: #ecfdf5; border: 1.5px solid #059669; border-radius: 6px; padding: 6px 10px; display: inline-block; text-align: right;">
+                                <div style="font-size: 13px; font-weight: 900; color: #065f46; letter-spacing: 0.5px;">REÇU CLIENT</div>
+                                <div style="font-size: 11px; font-weight: 800; color: #0f172a; margin-top: 1px;">
+                                    <span t-field="o.name"/>
+                                </div>
+                                <div style="font-size: 9.5px; color: #047857; margin-top: 2px;">
+                                    Date : <strong><span t-field="o.date_invoice"/></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CLIENT ET CONTEXTE COMMANDE -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap}; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px;">
+                        <div style="display: table-cell; width: 55%; vertical-align: top; padding-right: 10px;">
+                            <div style="font-size: 11px; font-weight: 900; color: #064e3b; text-transform: uppercase; margin-bottom: 3px;">
+                                Client Destinataire
+                            </div>
+                            <div style="font-size: 12px; font-weight: 800; color: #0f172a;">
+                                <span t-field="o.partner_name"/>
+                            </div>
+                            <div style="font-size: 9.5px; color: #64748b; margin-top: 2px;">
+                                <span t-if="o.partner_address" t-field="o.partner_address"/>
+                                <span t-if="o.partner_phone"> - Tél : <strong t-field="o.partner_phone"/></span>
+                            </div>
+                            <div t-if="o.partner_ifu" style="font-size: 9px; color: #065f46; margin-top: 2px;">
+                                IFU / NIF : <strong t-field="o.partner_ifu"/>
+                            </div>
+                        </div>
+                        <div style="display: table-cell; width: 45%; vertical-align: top; text-align: right;">
+                            <div style="font-size: 10.5px; font-weight: 800; color: #334155;">Détails Prestation</div>
+                            <div t-if="o.subject" style="font-size: 10px; color: #0f172a; font-weight: 600; margin-top: 2px;">
+                                <span t-field="o.subject"/>
+                            </div>
+                            <div style="font-size: 9px; color: #64748b; margin-top: 3px;">
+                                Mode de règlement : <strong t-field="o.payment_method"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ARTICLES ET SERVICES COMMANDÉS -->
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
+                        <thead>
+                            <tr style="background: #064e3b; color: #ffffff;">
+                                <th t-attf-style="padding: #{dyn_pad}; font-size: #{dyn_font}; text-align: left; font-weight: 800; width: 48%; border-radius: 4px 0 0 0;">
+                                    DESIGNATION
+                                </th>
+                                <th t-attf-style="padding: #{dyn_pad}; font-size: #{dyn_font}; text-align: center; font-weight: 800; width: 12%;">
+                                    QTE
+                                </th>
+                                <th t-attf-style="padding: #{dyn_pad}; font-size: #{dyn_font}; text-align: right; font-weight: 800; width: 20%;">
+                                    PRIX UNIT
+                                </th>
+                                <th t-attf-style="padding: #{dyn_pad}; font-size: #{dyn_font}; text-align: right; font-weight: 800; width: 20%; border-radius: 0 4px 0 0;">
+                                    TOTAL
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="line_count" t-value="len(o.line_ids) if o.line_ids else 1"/>
+                            <t t-foreach="o.line_ids" t-as="l">
+                                <tr t-attf-style="border-bottom: 1px solid #e2e8f0; background-color: #{'#fcfdfd' if l_index % 2 == 0 else '#ffffff'};">
+                                    <td t-attf-style="padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; vertical-align: middle;">
+                                        <div style="font-weight: 700; color: #0f172a;"><span t-field="l.name"/></div>
+                                        <div t-if="l.notes" style="font-size: 8.5px; color: #64748b; font-style: italic;">
+                                            <span t-field="l.notes"/>
+                                        </div>
+                                    </td>
+                                    <td t-attf-style="padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: center; font-weight: 600; color: #334155; vertical-align: middle;">
+                                        <span t-field="l.quantity"/>
+                                    </td>
+                                    <td t-attf-style="padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 600; color: #334155; vertical-align: middle;" t-esc="'{0:,.0f}'.format(l.price_unit).replace(',', ' ') + ' FCFA'"/>
+                                    <td t-attf-style="padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 800; color: #064e3b; vertical-align: middle;" t-esc="'{0:,.0f}'.format(l.price_subtotal).replace(',', ' ') + ' FCFA'"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- TOTAUX COMMERCIAUX DU REÇU -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap}; margin-top: 6px;">
+                        <div style="display: table-cell; width: 52%; vertical-align: top; padding-right: 12px;">
+                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 5px; padding: 6px 10px; font-size: 9.5px;">
+                                <div style="font-weight: 800; color: #0f172a; margin-bottom: 2px; text-transform: uppercase;">
+                                    Conditions de la Prestation :
+                                </div>
+                                <div style="color: #475569; margin-bottom: 3px;"><span t-field="o.payment_terms"/></div>
+                                <div t-if="o.notes" style="font-style: italic; color: #64748b; font-size: 9px;"><span t-field="o.notes"/></div>
+                            </div>
+                        </div>
+                        <div style="display: table-cell; width: 48%; vertical-align: top;">
+                            <table t-attf-style="width: 100%; border-collapse: collapse; font-size: #{tot_font};">
+                                <tr style="background: #064e3b; color: #ffffff; border-top: 2px solid #064e3b;">
+                                    <td t-attf-style="padding: #{tot_pad}; font-weight: 900; font-size: 11px; letter-spacing: 0.5px;">TOTAL DE LA COMMANDE :</td>
+                                    <td t-attf-style="padding: #{tot_pad}; text-align: right; font-weight: 900; font-size: 12.5px; color: #ffd700;" t-esc="'{0:,.0f}'.format(o.amount_untaxed).replace(',', ' ') + ' FCFA'"/>
+                                </tr>
+                                <tr t-if="o.amount_deposit &gt; 0" style="border-bottom: 1px solid #e2e8f0; background: #f0fdf4;">
+                                    <td t-attf-style="padding: #{tot_pad}; font-weight: 700; color: #166534;">Moins Acompte Reçu :</td>
+                                    <td t-attf-style="padding: #{tot_pad}; text-align: right; font-weight: 800; color: #166534;" t-esc="'- ' + '{0:,.0f}'.format(o.amount_deposit).replace(',', ' ') + ' FCFA'"/>
+                                </tr>
+                                <tr t-if="o.amount_deposit &gt; 0" style="border-bottom: 2px solid #b91c1c;">
+                                    <td t-attf-style="padding: #{tot_pad}; font-weight: 900; color: #b91c1c; font-size: 11px;">SOLDE RESTANT À RÉGLER :</td>
+                                    <td t-attf-style="padding: #{tot_pad}; text-align: right; font-weight: 900; color: #b91c1c; font-size: 12px;" t-esc="'{0:,.0f}'.format(max(0, o.amount_untaxed - o.amount_deposit)).replace(',', ' ') + ' FCFA'"/>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PIED DE PAGE EN FLUX NORMAL -->
+                    <div t-attf-style="border-top: 1.5px solid #064e3b; padding-top: 14px; margin-top: #{'10px' if line_count &gt; 25 else '16px' if line_count &gt; 18 else '26px' if line_count &gt; 10 else '55px'}; text-align: center; font-size: #{'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '10px'}; color: #475569; line-height: 1.45;">
+                        <div t-if="resto_legal" style="font-weight: 600; color: #1e293b; margin-bottom: 2px;">
+                            <span t-esc="resto_legal"/>
+                        </div>
+                        <div>
+                            <span><strong><t t-esc="resto_name"/></strong></span>
+                            <span t-if="resto_address"> - <t t-esc="resto_address"/></span>
+                            <span t-if="resto_phone"> - Tél : <t t-esc="resto_phone"/></span>
+                            <span t-if="resto_email"> - <t t-esc="resto_email"/></span>
+                            <span t-if="resto_website"> - <t t-esc="resto_website"/></span>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+"""
+
+# Template 5: report_marche_dgi_template
+# With adjusted spacing: line_count <= 4: dyn_pad 15px 16px, line_count <= 10: dyn_pad 10.5px 14px, sec_gap 16px, tot_pad 8px 10px, margin-top 20px
+marche_dgi_tmpl = """    <!-- ========================================================================= -->
+    <!-- TEMPLATE 2 : FACTURE NORMALISÉE OFFICIELLE DGI (ADMIN) -->
+    <!-- ========================================================================= -->
+    <template id="report_marche_dgi_template">
+        <t t-call="web.html_container">
+            <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+                <meta charset="utf-8"/>
+            </head>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="config" t-value="env['restaurant.configuration'].sudo().search([], limit=1)"/>
+                <t t-set="resto_name" t-value="(config.name if (config and config.name) else False) or (o.company_id.name if hasattr(o, 'company_id') else env.company.name) or 'RESTAURANT'"/>
+                <t t-set="resto_sub" t-value="(config.subtitle if (config and config.subtitle) else False) or ''"/>
+                <t t-set="resto_ifu" t-value="(config.ifu if (config and config.ifu) else False) or (o.company_id.vat if hasattr(o, 'company_id') else env.company.vat) or '-'"/>
+                <t t-set="resto_rccm" t-value="(config.rccm if (config and config.rccm) else False) or '-'"/>
+                <t t-set="resto_nim" t-value="(config.nim if (config and config.nim) else False) or 'RESTO-DGI-MCF-01'"/>
+                <t t-set="resto_regime" t-value="(config.tax_regime if (config and config.tax_regime) else False) or 'Régime Réel Normal'"/>
+                <t t-set="resto_phone" t-value="(config.phone if (config and config.phone) else False) or (o.company_id.phone if hasattr(o, 'company_id') else env.company.phone) or '-'"/>
+                <t t-set="resto_address" t-value="(config.address if (config and config.address) else False) or (o.company_id.street if hasattr(o, 'company_id') else env.company.street) or '-'"/>
+                <t t-set="resto_email" t-value="(config.email if (config and config.email) else False) or (o.company_id.email if hasattr(o, 'company_id') else env.company.email) or '-'"/>
+                <t t-set="resto_website" t-value="(config.website if (config and config.website) else False) or 'www.restaurant.com'"/>
+                <t t-set="line_count" t-value="len(o.line_ids) if o.line_ids else 1"/>
+                <t t-set="dyn_font" t-value="'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '11.5px' if line_count &gt; 4 else '12.5px'"/>
+                <t t-set="dyn_pad" t-value="'2.5px 5px' if line_count &gt; 25 else '3.5px 6px' if line_count &gt; 18 else '6px 8px' if line_count &gt; 10 else '24px 14px' if line_count &gt; 4 else '32px 16px'"/>
+                <t t-set="dyn_line_height" t-value="'1.3' if line_count &gt; 25 else '1.35' if line_count &gt; 18 else '1.4' if line_count &gt; 10 else '1.6' if line_count &gt; 4 else '1.7'"/>
+                <t t-set="sec_gap" t-value="'4px' if line_count &gt; 25 else '6px' if line_count &gt; 18 else '8px' if line_count &gt; 10 else '26px' if line_count &gt; 4 else '34px'"/>
+                <t t-set="tot_font" t-value="'8.5px' if line_count &gt; 25 else '9px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '11.5px' if line_count &gt; 4 else '12.5px'"/>
+                <t t-set="tot_pad" t-value="'3px 5px' if line_count &gt; 25 else '3.5px 6px' if line_count &gt; 18 else '5px 7px' if line_count &gt; 10 else '14px 12px' if line_count &gt; 4 else '18px 14px'"/>
+                <t t-set="tot_ttc_font" t-value="'10px' if line_count &gt; 25 else '10.5px' if line_count &gt; 18 else '11px' if line_count &gt; 10 else '14px' if line_count &gt; 4 else '15px'"/>
+                <t t-set="ref_dgi" t-value="o.dgi_reference or ('DGI-FNE-GM-' + (o.date_invoice.strftime('%Y%m%d') if o.date_invoice else '2026') + '-0001')"/>
+
+                <div class="article page single-page-invoice" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000000; background: #ffffff; padding: 8mm 12mm 6mm 12mm; position: relative; min-height: 250mm; box-sizing: border-box; font-size: 10.5px; line-height: 1.45; page-break-inside: avoid; page-break-after: avoid;">
+                    
+                    <!-- 1. EN-TÊTE : TITRE 'FACTURE' À GAUCHE & MÉTADONNÉES + QR CODE DGI À DROITE -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap};">
+                        <div style="display: table-cell; width: 45%; vertical-align: top;">
+                            <h1 style="font-size: 26px; font-weight: 900; color: #000000; margin: 0 0 2px 0; letter-spacing: 1.5px; text-transform: uppercase; line-height: 1;">
+                                FACTURE
+                            </h1>
+                            <div style="font-size: 9.5px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;">
+                                FACTURE NORMALISÉE DGI (e-MCF)
+                            </div>
+                        </div>
+                        <div style="display: table-cell; width: 55%; vertical-align: top; text-align: right;">
+                            <div style="display: inline-table; text-align: left;">
+                                <div style="display: table-row;">
+                                    <div style="display: table-cell; vertical-align: middle; padding-right: 15px;">
+                                        <table style="font-size: 11px; color: #000000; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Numéro de facture :</td>
+                                                <td style="font-weight: 700; padding: 2px 0;" t-esc="o.name"/>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Date de facturation :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;"><span t-field="o.date_invoice"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Échéance :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;">
+                                                    <span t-if="o.date_due" t-field="o.date_due"/>
+                                                    <span t-else="">À réception</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Référence :</td>
+                                                <td style="font-weight: 700; padding: 2px 0; font-family: monospace;" t-esc="ref_dgi"/>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- QR CODE OFFICIEL DGI INTÉGRÉ DANS L'EN-TÊTE -->
+                                    <div style="display: table-cell; vertical-align: middle; text-align: center; border-left: 1.5px solid #000000; padding-left: 12px;">
+                                        <img t-att-src="o.get_dgi_qr_code_base64()" style="width: 65px; height: 65px; display: block; margin: 0 auto;" alt="QR DGI"/>
+                                        <div style="font-size: 8px; font-weight: 800; color: #166534; margin-top: 2px; letter-spacing: 0.5px;">
+                                            SCAN DGI e-MCF
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. SECTION VENDEUR ET CLIENT -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap};">
+                        <!-- COLONNE VENDEUR -->
+                        <div style="display: table-cell; width: 50%; vertical-align: top; padding-right: 20px;">
+                            <div style="font-size: 13.5px; font-weight: 900; color: #000000; margin-bottom: 6px;">
+                                Vendeur
+                            </div>
+                            <div style="font-size: 11px; color: #111827; line-height: 1.45;">
+                                <div style="font-weight: 800; font-size: 11.5px; color: #000000;" t-esc="resto_name"/>
+                                <div style="font-style: italic; color: #4b5563;" t-if="resto_address" t-esc="resto_address"/>
+                                <div t-if="resto_phone">Tél : <span t-esc="resto_phone"/></div>
+                                <div style="margin-top: 4px; font-size: 10.5px; color: #374151;">
+                                    <span t-if="resto_ifu">IFU : <strong t-esc="resto_ifu"/></span>
+                                    <span t-if="resto_ifu and resto_rccm"> - </span>
+                                    <span t-if="resto_rccm">RCCM : <strong t-esc="resto_rccm"/></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLONNE CLIENT -->
+                        <div style="display: table-cell; width: 50%; vertical-align: top; padding-left: 20px;">
+                            <div style="font-size: 13.5px; font-weight: 900; color: #000000; margin-bottom: 6px;">
+                                Client
+                            </div>
+                            <div style="font-size: 11px; color: #111827; line-height: 1.45;">
+                                <div style="font-weight: 800; font-size: 11.5px; color: #000000;" t-esc="o.partner_name"/>
+                                <div style="font-style: italic; color: #4b5563;" t-if="o.partner_address" t-esc="o.partner_address"/>
+                                <div t-if="o.partner_phone">Tél : <span t-esc="o.partner_phone"/></div>
+                                <div style="margin-top: 4px; font-size: 10.5px; color: #374151;">
+                                    <span t-if="o.partner_ifu">NIF / IFU Client : <strong t-esc="o.partner_ifu"/></span>
+                                    <span t-else="">Client Particulier / Entreprise</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. TABLEAU DES ARTICLES (DESIGNATION | QTE | PRIX UNIT | MONTANT) -->
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000000; margin-bottom: 0;">
+                        <thead>
+                            <tr style="background-color: #000000; color: #ffffff;">
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; width: 48%;">
+                                    DESIGNATION
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; width: 10%;">
+                                    QTE
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; width: 20%;">
+                                    PRIX UNIT
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; width: 22%;">
+                                    MONTANT
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="line_count" t-value="len(o.line_ids) if o.line_ids else 1"/>
+                            <t t-foreach="o.line_ids" t-as="l">
+                                <tr>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; vertical-align: middle;">
+                                        <span style="font-weight: 700; color: #000000;" t-esc="l.name"/>
+                                        <span t-if="l.notes" style="font-size: 9.5px; color: #4b5563; font-style: italic; display: block;">
+                                            <span t-esc="l.notes"/>
+                                        </span>
+                                    </td>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: center; font-weight: 700; vertical-align: middle;" t-esc="'%g' % l.quantity if l.quantity else '0'"/>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 700; vertical-align: middle;" t-esc="'{0:,.0f}'.format(l.price_unit).replace(',', ' ') + ' FCFA'"/>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 800; vertical-align: middle;" t-esc="'{0:,.0f}'.format(l.price_subtotal).replace(',', ' ') + ' FCFA'"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- 4. BLOC DES TOTAUX ET CONDITIONS (DEUX COLONNES CÔTE À CÔTE SOUS LA TABLE DES ARTICLES) -->
+                    <div style="width: 100%; margin-top: 0; margin-bottom: 10px; page-break-inside: avoid;">
+                        <div style="display: table; width: 100%; border-collapse: collapse;">
+                            <!-- COLONNE GAUCHE (48%) : CONDITIONS DE PAIEMENT + HOMOLOGATION DGI -->
+                            <div style="display: table-cell; width: 48%; vertical-align: top; padding-right: 15px; padding-top: 4px;">
+                                <div style="font-weight: 900; font-size: 11.5px; color: #000000; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px;">
+                                    Conditions et modalités de paiement
+                                </div>
+                                <div style="font-size: 10.5px; color: #1f2937; margin-bottom: 10px; line-height: 1.45;">
+                                    <span t-if="o.payment_terms" t-esc="o.payment_terms"/>
+                                    <span t-else="">Paiement à réception de facture</span>
+                                    <div t-if="o.payment_method" style="margin-top: 2px;">
+                                        Mode de règlement : 
+                                        <strong t-if="o.payment_method == 'transfer'">Virement bancaire</strong>
+                                        <strong t-elif="o.payment_method == 'check'">Chèque</strong>
+                                        <strong t-elif="o.payment_method == 'cash'">Espèces</strong>
+                                        <strong t-elif="o.payment_method == 'mobile'">Mobile Money</strong>
+                                        <strong t-else="">Selon convention</strong>
+                                    </div>
+                                </div>
+
+                                <!-- CADRE HOMOLOGATION DGI OFFICIEL -->
+                                <div style="border: 1.5px solid #166534; background: #f0fdf4; border-radius: 4px; padding: 8px 10px; font-size: 9.5px; color: #14532d; line-height: 1.45;">
+                                    <div style="font-weight: 900; text-transform: uppercase; margin-bottom: 3px; color: #166534; font-size: 10px; letter-spacing: 0.5px;">
+                                        HOMOLOGATION DGI / e-MCF
+                                    </div>
+                                    <div>Réf. FNE : <strong t-esc="ref_dgi"/></div>
+                                    <div>Sceau Fiscal : <span style="font-family: monospace; font-size: 8px; word-break: break-all;" t-esc="o.dgi_security_code or 'VERIFIED_DGI_SIGNATURE'"/></div>
+                                    <div style="margin-top: 2px;">NIM : <strong t-esc="resto_nim"/> - Daté du : <span t-esc="o.dgi_certified_at or o.date_invoice"/></div>
+                                </div>
+                            </div>
+
+                            <!-- COLONNE DROITE (52%) : TABLEAU DES TOTAUX ACCROCHÉ AUX ARTICLES -->
+                            <div style="display: table-cell; width: 52%; vertical-align: top;">
+                                <table style="width: 100%; border-collapse: collapse; border-top: none; font-size: 11px;">
+                                    <tr>
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; border-top: none; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000; text-transform: uppercase;">
+                                            MONTANT HT
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; border-top: none; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'{0:,.0f}'.format(o.amount_untaxed).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000;">
+                                            TVA
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: center; font-weight: 700; color: #000000; width: 45px;">
+                                            <span t-esc="o.tax_rate"/>%
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'{0:,.0f}'.format(o.amount_tax).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr t-if="o.is_certified_dgi and o.amount_aib &gt; 0">
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000;">
+                                            AIB
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: center; font-weight: 700; color: #000000; width: 45px;">
+                                            <span t-esc="o.aib_rate"/>%
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'- ' + '{0:,.0f}'.format(o.amount_aib).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr t-if="o.amount_deposit &gt; 0">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000;">
+                                            ACOMPTE VERSÉ
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'- ' + '{0:,.0f}'.format(o.amount_deposit).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <!-- TOTAL TTC EN FOND NOIR ET ÉCRITURE BLANCHE IDENTIQUE À L'IMAGE -->
+                                    <tr style="background-color: #000000; color: #ffffff;">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_ttc_font}; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase;">
+                                            TOTAL TTC
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_ttc_font}; text-align: right; font-weight: 900;" t-esc="'{0:,.0f}'.format(o.amount_total).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr t-if="o.is_certified_dgi and o.amount_aib &gt; 0" style="background-color: #1e293b; color: #ffffff;">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 900; text-transform: uppercase;">
+                                            NET À PAYER
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 900;" t-esc="'{0:,.0f}'.format(o.dgi_net_payable).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr t-if="o.amount_deposit &gt; 0 and o.amount_residual &gt; 0">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 900; color: #b91c1c;">
+                                            SOLDE RESTANT
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 900; color: #b91c1c;" t-esc="'{0:,.0f}'.format(o.amount_residual).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. PIED DE PAGE EN FLUX NORMAL (AUCUN CHEVAUCHEMENT POSSIBLE) -->
+                    <div t-attf-style="border-top: 1.5px solid #000000; padding-top: 14px; margin-top: #{'10px' if line_count &gt; 25 else '16px' if line_count &gt; 18 else '26px' if line_count &gt; 10 else '55px'}; font-size: #{'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '10px'}; color: #374151; line-height: 1.45;">
+                        <div style="display: table; width: 100%;">
+                            <!-- COLONNE 1 : MON ENTREPRISE -->
+                            <div style="display: table-cell; width: 34%; vertical-align: top; padding-right: 10px;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;" t-esc="resto_name"/>
+                                <div t-esc="resto_address"/>
+                                <div>N° IFU : <strong t-esc="resto_ifu"/></div>
+                                <div>N° RCCM : <strong t-esc="resto_rccm"/></div>
+                            </div>
+
+                            <!-- COLONNE 2 : COORDONNÉES -->
+                            <div style="display: table-cell; width: 33%; vertical-align: top; padding-right: 10px;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;">Coordonnées</div>
+                                <div t-if="o.manager_id">Gérant : <span t-esc="o.manager_id.name"/></div>
+                                <div>Téléphone : <span t-esc="resto_phone"/></div>
+                                <div>Email : <span t-esc="resto_email"/></div>
+                                <div t-if="resto_website">Site : <span t-esc="resto_website"/></div>
+                            </div>
+
+                            <!-- COLONNE 3 : DÉTAILS BANCAIRES & DGI -->
+                            <div style="display: table-cell; width: 33%; vertical-align: top;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;">Détails bancaires &amp; DGI</div>
+                                <div>Régime : <strong t-esc="resto_regime"/></div>
+                                <div>NIM e-MCF : <strong t-esc="resto_nim"/></div>
+                                <div style="color: #166534; font-weight: 700;">
+                                    Facture normalisée certifiée conforme DGI
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+"""
+
+# Template 6: report_grand_marche_template
+grand_marche_tmpl = """    <!-- ========================================================================= -->
+    <!-- TEMPLATE 3 : FACTURE GRAND MARCHÉ SUR MESURE (A4) -->
+    <!-- ========================================================================= -->
+    <template id="report_grand_marche_template">
+        <t t-call="web.html_container">
+            <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+                <meta charset="utf-8"/>
+            </head>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="config" t-value="env['restaurant.configuration'].sudo().search([], limit=1)"/>
+                <t t-set="resto_name" t-value="(config.name if (config and config.name) else False) or (o.company_id.name if hasattr(o, 'company_id') else env.company.name) or 'RESTAURANT'"/>
+                <t t-set="resto_sub" t-value="(config.subtitle if (config and config.subtitle) else False) or ''"/>
+                <t t-set="resto_ifu" t-value="(config.ifu if (config and config.ifu) else False) or (o.company_id.vat if hasattr(o, 'company_id') else env.company.vat) or '-'"/>
+                <t t-set="resto_rccm" t-value="(config.rccm if (config and config.rccm) else False) or '-'"/>
+                <t t-set="resto_nim" t-value="(config.nim if (config and config.nim) else False) or 'RESTO-DGI-MCF-01'"/>
+                <t t-set="resto_regime" t-value="(config.tax_regime if (config and config.tax_regime) else False) or '-'"/>
+                <t t-set="resto_phone" t-value="(config.phone if (config and config.phone) else False) or (o.company_id.phone if hasattr(o, 'company_id') else env.company.phone) or '-'"/>
+                <t t-set="resto_address" t-value="(config.address if (config and config.address) else False) or (o.company_id.street if hasattr(o, 'company_id') else env.company.street) or '-'"/>
+                <t t-set="resto_email" t-value="(config.email if (config and config.email) else False) or (o.company_id.email if hasattr(o, 'company_id') else env.company.email) or '-'"/>
+                <t t-set="resto_website" t-value="(config.website if (config and config.website) else False) or 'www.restaurant.com'"/>
+                <t t-set="line_count" t-value="len(o.line_ids) if o.line_ids else 1"/>
+                <t t-set="dyn_font" t-value="'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '11.5px' if line_count &gt; 4 else '12.5px'"/>
+                <t t-set="dyn_pad" t-value="'2.5px 5px' if line_count &gt; 25 else '3.5px 6px' if line_count &gt; 18 else '6px 8px' if line_count &gt; 10 else '24px 14px' if line_count &gt; 4 else '32px 16px'"/>
+                <t t-set="dyn_line_height" t-value="'1.3' if line_count &gt; 25 else '1.35' if line_count &gt; 18 else '1.4' if line_count &gt; 10 else '1.6' if line_count &gt; 4 else '1.7'"/>
+                <t t-set="sec_gap" t-value="'4px' if line_count &gt; 25 else '6px' if line_count &gt; 18 else '8px' if line_count &gt; 10 else '26px' if line_count &gt; 4 else '34px'"/>
+                <t t-set="tot_font" t-value="'8.5px' if line_count &gt; 25 else '9px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '11.5px' if line_count &gt; 4 else '12.5px'"/>
+                <t t-set="tot_pad" t-value="'3px 5px' if line_count &gt; 25 else '3.5px 6px' if line_count &gt; 18 else '5px 7px' if line_count &gt; 10 else '14px 12px' if line_count &gt; 4 else '18px 14px'"/>
+                <t t-set="tot_ttc_font" t-value="'10px' if line_count &gt; 25 else '10.5px' if line_count &gt; 18 else '11px' if line_count &gt; 10 else '14px' if line_count &gt; 4 else '15px'"/>
+
+                <div class="article page single-page-invoice" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000000; background: #ffffff; padding: 8mm 12mm 6mm 12mm; position: relative; min-height: 250mm; box-sizing: border-box; font-size: 10.5px; line-height: 1.45; page-break-inside: avoid; page-break-after: avoid;">
+                    
+                    <!-- 1. EN-TÊTE : TITRE 'FACTURE' À GAUCHE & MÉTADONNÉES + QR CODE DGI À DROITE -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap};">
+                        <div style="display: table-cell; width: 45%; vertical-align: top;">
+                            <h1 style="font-size: 26px; font-weight: 900; color: #000000; margin: 0 0 2px 0; letter-spacing: 1.5px; text-transform: uppercase; line-height: 1;">
+                                FACTURE
+                            </h1>
+                            <t t-if="o.is_certified_dgi">
+                                <div style="font-size: 9.5px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;">
+                                    FACTURE CERTIFIÉE DGI (e-MCF)
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div style="font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;">
+                                    FACTURE GRAND MARCHÉ
+                                </div>
+                            </t>
+                        </div>
+                        <div style="display: table-cell; width: 55%; vertical-align: top; text-align: right;">
+                            <div style="display: inline-table; text-align: left;">
+                                <div style="display: table-row;">
+                                    <div style="display: table-cell; vertical-align: middle; padding-right: 15px;">
+                                        <table style="font-size: 11px; color: #000000; border-collapse: collapse;">
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Numéro de facture :</td>
+                                                <td style="font-weight: 700; padding: 2px 0;" t-esc="o.name"/>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Date de facturation :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;"><span t-field="o.date_invoice"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Échéance :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;">
+                                                    <span t-if="o.date_due" t-field="o.date_due"/>
+                                                    <span t-else="">À réception</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Référence :</td>
+                                                <td style="font-weight: 700; padding: 2px 0; font-family: monospace;" t-esc="o.dgi_reference or o.subject or o.name"/>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- QR CODE DGI QUAND CERTIFIÉE -->
+                                    <t t-if="o.is_certified_dgi">
+                                        <div style="display: table-cell; vertical-align: middle; text-align: center; border-left: 1.5px solid #000000; padding-left: 12px;">
+                                            <img t-att-src="o.get_dgi_qr_code_base64()" style="width: 65px; height: 65px; display: block; margin: 0 auto;" alt="QR DGI"/>
+                                            <div style="font-size: 8px; font-weight: 800; color: #166534; margin-top: 2px; letter-spacing: 0.5px;">
+                                                SCAN DGI e-MCF
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. SECTION VENDEUR ET CLIENT -->
+                    <div t-attf-style="display: table; width: 100%; margin-bottom: #{sec_gap};">
+                        <!-- COLONNE VENDEUR -->
+                        <div style="display: table-cell; width: 50%; vertical-align: top; padding-right: 20px;">
+                            <div style="font-size: 13.5px; font-weight: 900; color: #000000; margin-bottom: 6px;">
+                                Vendeur
+                            </div>
+                            <div style="font-size: 11px; color: #111827; line-height: 1.45;">
+                                <div style="font-weight: 800; font-size: 11.5px; color: #000000;" t-esc="resto_name"/>
+                                <div style="font-style: italic; color: #4b5563;" t-if="resto_address" t-esc="resto_address"/>
+                                <div t-if="resto_phone">Tél : <span t-esc="resto_phone"/></div>
+                                <div style="margin-top: 4px; font-size: 10.5px; color: #374151;">
+                                    <span t-if="resto_ifu">IFU : <strong t-esc="resto_ifu"/></span>
+                                    <span t-if="resto_ifu and resto_rccm"> - </span>
+                                    <span t-if="resto_rccm">RCCM : <strong t-esc="resto_rccm"/></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COLONNE CLIENT -->
+                        <div style="display: table-cell; width: 50%; vertical-align: top; padding-left: 20px;">
+                            <div style="font-size: 13.5px; font-weight: 900; color: #000000; margin-bottom: 6px;">
+                                Client
+                            </div>
+                            <div style="font-size: 11px; color: #111827; line-height: 1.45;">
+                                <div style="font-weight: 800; font-size: 11.5px; color: #000000;" t-esc="o.partner_name"/>
+                                <div style="font-style: italic; color: #4b5563;" t-if="o.partner_address" t-esc="o.partner_address"/>
+                                <div t-if="o.partner_phone">Tél : <span t-esc="o.partner_phone"/></div>
+                                <div style="margin-top: 4px; font-size: 10.5px; color: #374151;">
+                                    <span t-if="o.partner_ifu">NIF / IFU Client : <strong t-esc="o.partner_ifu"/></span>
+                                    <span t-else="">Client Particulier / Entreprise</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. TABLEAU DES ARTICLES (DESIGNATION | QTE | PRIX UNIT | MONTANT) -->
+                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000000; margin-bottom: 0;">
+                        <thead>
+                            <tr style="background-color: #000000; color: #ffffff;">
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; width: 48%;">
+                                    DESIGNATION
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; width: 10%;">
+                                    QTE
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; width: 20%;">
+                                    PRIX UNIT
+                                </th>
+                                <th t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; font-weight: 900; text-align: right; text-transform: uppercase; letter-spacing: 0.5px; width: 22%;">
+                                    MONTANT
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="line_count" t-value="len(o.line_ids) if o.line_ids else 1"/>
+                            <t t-foreach="o.line_ids" t-as="l">
+                                <tr>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; vertical-align: middle;">
+                                        <span style="font-weight: 700; color: #000000;" t-esc="l.name"/>
+                                        <span t-if="l.notes" style="font-size: 9.5px; color: #4b5563; font-style: italic; display: block;">
+                                            <span t-esc="l.notes"/>
+                                        </span>
+                                    </td>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: center; font-weight: 700; vertical-align: middle;" t-esc="'%g' % l.quantity if l.quantity else '0'"/>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 700; vertical-align: middle;" t-esc="'{0:,.0f}'.format(l.price_unit).replace(',', ' ') + ' FCFA'"/>
+                                    <td t-attf-style="border: 1px solid #000000; padding: #{dyn_pad}; font-size: #{dyn_font}; line-height: #{dyn_line_height}; text-align: right; font-weight: 800; vertical-align: middle;" t-esc="'{0:,.0f}'.format(l.price_subtotal).replace(',', ' ') + ' FCFA'"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- 4. BLOC DES TOTAUX ET CONDITIONS (DEUX COLONNES CÔTE À CÔTE SOUS LA TABLE DES ARTICLES) -->
+                    <div style="width: 100%; margin-top: 0; margin-bottom: 10px; page-break-inside: avoid;">
+                        <div style="display: table; width: 100%; border-collapse: collapse;">
+                            <!-- COLONNE GAUCHE (48%) : CONDITIONS DE PAIEMENT + HOMOLOGATION DGI -->
+                            <div style="display: table-cell; width: 48%; vertical-align: top; padding-right: 15px; padding-top: 4px;">
+                                <div style="font-weight: 900; font-size: 11.5px; color: #000000; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px;">
+                                    Conditions et modalités de paiement
+                                </div>
+                                <div style="font-size: 10.5px; color: #1f2937; margin-bottom: 10px; line-height: 1.45;">
+                                    <span t-if="o.payment_terms" t-esc="o.payment_terms"/>
+                                    <span t-else="">Paiement à réception de facture</span>
+                                    <div t-if="o.payment_method" style="margin-top: 2px;">
+                                        Mode de règlement : 
+                                        <strong t-if="o.payment_method == 'transfer'">Virement bancaire</strong>
+                                        <strong t-elif="o.payment_method == 'check'">Chèque</strong>
+                                        <strong t-elif="o.payment_method == 'cash'">Espèces</strong>
+                                        <strong t-elif="o.payment_method == 'mobile'">Mobile Money</strong>
+                                        <strong t-else="">Selon convention</strong>
+                                    </div>
+                                </div>
+
+                                <!-- CADRE HOMOLOGATION DGI QUAND CERTIFIÉE -->
+                                <t t-if="o.is_certified_dgi">
+                                    <div style="border: 1.5px solid #166534; background: #f0fdf4; border-radius: 4px; padding: 8px 10px; font-size: 9.5px; color: #14532d; line-height: 1.45;">
+                                        <div style="font-weight: 900; text-transform: uppercase; margin-bottom: 3px; color: #166534; font-size: 10px; letter-spacing: 0.5px;">
+                                            HOMOLOGATION DGI / e-MCF
+                                        </div>
+                                        <div>Réf. FNE : <strong t-esc="o.dgi_reference"/></div>
+                                        <div>Sceau Fiscal : <span style="font-family: monospace; font-size: 8px; word-break: break-all;" t-esc="o.dgi_security_code"/></div>
+                                        <div style="margin-top: 2px;">NIM : <strong t-esc="resto_nim"/> - Daté du : <span t-esc="o.dgi_certified_at or o.date_invoice"/></div>
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- COLONNE DROITE (52%) : TABLEAU DES TOTAUX ACCROCHÉ AUX ARTICLES -->
+                            <div style="display: table-cell; width: 52%; vertical-align: top;">
+                                <table style="width: 100%; border-collapse: collapse; border-top: none; font-size: 11px;">
+                                    <tr>
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; border-top: none; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000; text-transform: uppercase;">
+                                            MONTANT HT
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; border-top: none; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'{0:,.0f}'.format(o.amount_untaxed).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000;">
+                                            TVA
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: center; font-weight: 700; color: #000000; width: 45px;">
+                                            <span t-esc="o.tax_rate"/>%
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'{0:,.0f}'.format(o.amount_tax).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr t-if="o.is_certified_dgi and o.amount_aib &gt; 0">
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000;">
+                                            AIB
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: center; font-weight: 700; color: #000000; width: 45px;">
+                                            <span t-esc="o.aib_rate"/>%
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'- ' + '{0:,.0f}'.format(o.amount_aib).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr t-if="o.amount_deposit &gt; 0">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 800; color: #000000;">
+                                            ACOMPTE VERSÉ
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 700; color: #000000;" t-esc="'- ' + '{0:,.0f}'.format(o.amount_deposit).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <!-- TOTAL TTC EN FOND NOIR ET ÉCRITURE BLANCHE IDENTIQUE À L'IMAGE -->
+                                    <tr style="background-color: #000000; color: #ffffff;">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_ttc_font}; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase;">
+                                            TOTAL TTC
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_ttc_font}; text-align: right; font-weight: 900;" t-esc="'{0:,.0f}'.format(o.amount_total).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr t-if="o.is_certified_dgi and o.amount_aib &gt; 0" style="background-color: #1e293b; color: #ffffff;">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 900; text-transform: uppercase;">
+                                            NET À PAYER
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 900;" t-esc="'{0:,.0f}'.format(o.dgi_net_payable).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                    <tr t-if="o.amount_deposit &gt; 0 and o.amount_residual &gt; 0">
+                                        <td colspan="2" t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; font-weight: 900; color: #b91c1c;">
+                                            SOLDE RESTANT
+                                        </td>
+                                        <td t-attf-style="border: 1px solid #000000; padding: #{tot_pad}; font-size: #{tot_font}; text-align: right; font-weight: 900; color: #b91c1c;" t-esc="'{0:,.0f}'.format(o.amount_residual).replace(',', ' ') + ' FCFA'"/>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. PIED DE PAGE EN FLUX NORMAL (AUCUN CHEVAUCHEMENT POSSIBLE) -->
+                    <div t-attf-style="border-top: 1.5px solid #000000; padding-top: 14px; margin-top: #{'10px' if line_count &gt; 25 else '16px' if line_count &gt; 18 else '26px' if line_count &gt; 10 else '55px'}; font-size: #{'8px' if line_count &gt; 25 else '8.5px' if line_count &gt; 18 else '9.5px' if line_count &gt; 10 else '10px'}; color: #374151; line-height: 1.45;">
+                        <div style="display: table; width: 100%;">
+                            <!-- COLONNE 1 : MON ENTREPRISE -->
+                            <div style="display: table-cell; width: 34%; vertical-align: top; padding-right: 10px;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;" t-esc="resto_name"/>
+                                <div t-esc="resto_address"/>
+                                <div>N° IFU : <strong t-esc="resto_ifu"/></div>
+                                <div>N° RCCM : <strong t-esc="resto_rccm"/></div>
+                            </div>
+
+                            <!-- COLONNE 2 : COORDONNÉES -->
+                            <div style="display: table-cell; width: 33%; vertical-align: top; padding-right: 10px;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;">Coordonnées</div>
+                                <div t-if="o.manager_id">Gérant : <span t-esc="o.manager_id.name"/></div>
+                                <div>Téléphone : <span t-esc="resto_phone"/></div>
+                                <div>Email : <span t-esc="resto_email"/></div>
+                                <div t-if="resto_website">Site : <span t-esc="resto_website"/></div>
+                            </div>
+
+                            <!-- COLONNE 3 : DÉTAILS BANCAIRES & DGI -->
+                            <div style="display: table-cell; width: 33%; vertical-align: top;">
+                                <div style="font-weight: 800; color: #000000; margin-bottom: 2px;">Détails bancaires &amp; DGI</div>
+                                <div>Régime : <strong t-esc="resto_regime"/></div>
+                                <div>NIM e-MCF : <strong t-esc="resto_nim"/></div>
+                                <div style="color: #166534; font-weight: 700;">
+                                    <t t-if="o.is_certified_dgi">Facture certifiée conforme DGI</t>
+                                    <t t-else="">Facture Grand Marché</t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+"""
+
+# Template 7: report_invoice_wizard_preview_restaurant
+wiz_full = f"""    <!-- ========================================================================= -->
+    <!-- 5. APERÇU CONFIGURATEUR D'AGENCEMENT (MODAL "Configurer l'agencement") -->
+    <!-- ========================================================================= -->
+    <template id="report_invoice_wizard_preview_restaurant" inherit_id="web.report_invoice_wizard_preview" priority="99">
+{wiz_xml}
+    </template>
+"""
+
+# Template 8: report_invoice_document_inherit_restaurant
+doc_full = f"""    <!-- ========================================================================= -->
+    <!-- 6. MODÈLE HERITÉ DE FACTURATION COMPTABLE STANDARD -->
+    <!-- ========================================================================= -->
+    <template id="report_invoice_document_inherit_restaurant" inherit_id="account.report_invoice_document" priority="99">
+{doc_xml}
+    </template>
+"""
+
+full_xml = f"{header_xml}\n{daily_tmpl}\n{pos_tmpl}\n{move_tmpl}\n{receipt_tmpl}\n{marche_dgi_tmpl}\n{grand_marche_tmpl}\n{wiz_full}\n{doc_full}\n</odoo>\n"
+
+# Verify XML
+ET.fromstring(full_xml)
+print("XML successfully validated! Length:", len(full_xml))
+
+target_path = r"c:\Users\840 G5\Contacts\Bureau\restaurant-management\odoo_addon\restaurant_core\views\report_invoice.xml"
+with open(target_path, 'w', encoding='utf-8') as f:
+    f.write(full_xml)
+print("Written to target_path successfully!")

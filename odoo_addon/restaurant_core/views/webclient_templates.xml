@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================================= -->
+    <!-- 1. STYLE PERSONNALISÉ DE LA PAGE D'AUTHENTIFICATION ODOO         -->
+    <!-- Modèle Sombre JustGo Navy & Or (Bon retour !)                     -->
+    <!-- ================================================================= -->
+    <template id="custom_login_style_inherit" inherit_id="web.login_layout" name="Restaurant Core Login Style">
+        <xpath expr="//div[hasclass('container')]" position="before">
+            <link rel="stylesheet" type="text/css" href="/restaurant_core/static/src/css/odoo_login_style.css?v=5.0"/>
+        </xpath>
+    </template>
+
+    <!-- ================================================================= -->
+    <!-- 2. GESTION DES CADRES DIFFÉRENCIÉS BACKEND ODOO                  -->
+    <!-- ADMIN  : Sidebar Verticale Sombre Prune à gauche                 -->
+    <!-- GÉRANT : Horizon Supérieur Moderne Bleu Marine & Or Plein Écran  -->
+    <!-- ================================================================= -->
+    <template id="custom_backend_sidebar_inherit" inherit_id="web.webclient_bootstrap" name="Restaurant Core Backend Layout">
+        <xpath expr="//t[@t-call='web.layout']" position="inside">
+            <link rel="stylesheet" type="text/css" href="/restaurant_core/static/src/css/odoo_backend_sidebar.css?v=6.0"/>
+            <script type="text/javascript">
+                (function() {
+                    // 1. Détection Immédiate Ultra Rapide pour éviter tout clignotement
+                    function checkAndApplyRole(isGerant) {
+                        if (isGerant) {
+                            document.documentElement.classList.add('o_resto_gerant_mode');
+                            if (document.body) document.body.classList.add('o_resto_gerant_mode');
+                        } else {
+                            document.documentElement.classList.remove('o_resto_gerant_mode');
+                            if (document.body) document.body.classList.remove('o_resto_gerant_mode');
+                        }
+                    }
+
+                    var sInfo = window.odoo &amp;&amp; (window.odoo.__session_info__ || window.odoo.session_info);
+                    var cachedIsGerant = localStorage.getItem('resto_is_gerant');
+
+                    if (sInfo &amp;&amp; typeof sInfo.is_restaurant_manager !== 'undefined') {
+                        checkAndApplyRole(Boolean(sInfo.is_restaurant_manager));
+                    } else if (sInfo &amp;&amp; sInfo.uid) {
+                        var isG = Boolean(sInfo.uid !== 2 &amp;&amp; !sInfo.is_system);
+                        checkAndApplyRole(isG);
+                    } else if (cachedIsGerant !== null) {
+                        checkAndApplyRole(cachedIsGerant === 'true');
+                    }
+
+                    var cachedName = localStorage.getItem('resto_brand_name') || '';
+                    var cachedSub = localStorage.getItem('resto_brand_subtitle') || '';
+                    var cachedLogo = localStorage.getItem('resto_brand_logo') || '/web/binary/company_logo';
+
+                    function renderOrUpdateBrand(data) {
+                        var navbar = document.querySelector('.o_main_navbar');
+                        if (!navbar) return;
+
+                        var isGerant = false;
+                        if (data &amp;&amp; typeof data.is_gerant !== 'undefined') {
+                            isGerant = Boolean(data.is_gerant);
+                        } else if (sInfo &amp;&amp; typeof sInfo.is_restaurant_manager !== 'undefined') {
+                            isGerant = Boolean(sInfo.is_restaurant_manager);
+                        } else if (sInfo &amp;&amp; sInfo.uid) {
+                            isGerant = Boolean(sInfo.uid !== 2 &amp;&amp; !sInfo.is_system);
+                        } else {
+                            isGerant = (localStorage.getItem('resto_is_gerant') === 'true');
+                        }
+
+                        checkAndApplyRole(isGerant);
+
+                        // Conteneur de Marque
+                        var brand = navbar.querySelector('.o_restaurant_brand_container');
+                        if (!brand) {
+                            brand = document.createElement('div');
+                            brand.className = 'o_restaurant_brand_container';
+                            navbar.insertBefore(brand, navbar.firstChild);
+                        }
+
+                        var logoUrl = (data &amp;&amp; data.logo_url) ? data.logo_url : cachedLogo;
+                        var rName = (data &amp;&amp; data.name) ? data.name : (cachedName || 'RESTAURANT');
+                        var rSub = (data &amp;&amp; data.subtitle) ? data.subtitle : cachedSub;
+
+                        if (isGerant) {
+                            brand.innerHTML = [
+                                '&lt;div class="o_restaurant_logo_card"&gt;',
+                                '    &lt;img src="' + logoUrl + '" alt="Logo" class="o_restaurant_logo_img"/&gt;',
+                                '&lt;/div&gt;',
+                                '&lt;div class="o_restaurant_brand_text_block"&gt;',
+                                '    &lt;div class="o_restaurant_brand_name"&gt;' + rName + '&lt;/div&gt;',
+                                '    &lt;div class="o_restaurant_brand_badge"&gt;✦ ESPACE GÉRANT ✦&lt;/div&gt;',
+                                '&lt;/div&gt;'
+                            ].join('');
+                            brand.onclick = function() {
+                                window.location.hash = '#action=restaurant_core.action_restaurant_gerant_own_orders';
+                            };
+
+                            // Bouton d\'action rapide caisse
+                            var systray = navbar.querySelector('.o_menu_systray');
+                            var existingBtn = navbar.querySelector('.o_gerant_quick_pos_btn');
+                            if (!existingBtn) {
+                                var quickBtn = document.createElement('a');
+                                quickBtn.className = 'o_gerant_quick_pos_btn';
+                                quickBtn.href = '/pos/ui?config_id=2';
+                                quickBtn.innerHTML = '⚡ Ouvrir la Caisse ➔';
+                                if (systray) {
+                                    navbar.insertBefore(quickBtn, systray);
+                                } else {
+                                    navbar.appendChild(quickBtn);
+                                }
+                            }
+                        } else {
+                            brand.innerHTML = [
+                                '&lt;div class="o_restaurant_logo_card"&gt;',
+                                '    &lt;img src="' + logoUrl + '" alt="Logo" class="o_restaurant_logo_img"/&gt;',
+                                '&lt;/div&gt;',
+                                '&lt;div class="o_restaurant_brand_name"&gt;' + rName + '&lt;/div&gt;',
+                                '&lt;div class="o_restaurant_brand_subtitle"&gt;' + rSub + '&lt;/div&gt;'
+                            ].join('');
+                            brand.onclick = function() {
+                                window.location.hash = '#action=restaurant_core.action_restaurant_sales_dashboard';
+                            };
+
+                            var existingQuick = navbar.querySelector('.o_gerant_quick_pos_btn');
+                            if (existingQuick) existingQuick.remove();
+                        }
+
+                        if (data) {
+                            if (data.name) localStorage.setItem('resto_brand_name', data.name);
+                            if (data.subtitle) localStorage.setItem('resto_brand_subtitle', data.subtitle);
+                            if (data.logo_url) localStorage.setItem('resto_brand_logo', data.logo_url);
+                            localStorage.setItem('resto_is_gerant', isGerant ? 'true' : 'false');
+                        }
+                    }
+
+                    function syncBrandFromAPI() {
+                        fetch('/restaurant/api/brand', { cache: 'no-store' })
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) {
+                                if (data) renderOrUpdateBrand(data);
+                            })
+                            .catch(function() {});
+                    }
+
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', function() {
+                            renderOrUpdateBrand(null);
+                            syncBrandFromAPI();
+                        });
+                    } else {
+                        renderOrUpdateBrand(null);
+                        syncBrandFromAPI();
+                    }
+
+                    setInterval(syncBrandFromAPI, 2000);
+                    window.addEventListener('focus', syncBrandFromAPI);
+                    window.addEventListener('hashchange', syncBrandFromAPI);
+
+                    // Capture globale de sécurité pour garantir l'action immédiate au clic sur Mes Ventes
+                    document.addEventListener('click', function(ev) {
+                        var target = ev.target &amp;&amp; ev.target.closest &amp;&amp; ev.target.closest('.o_nav_entry, a[data-menu-xmlid="restaurant_core.menu_restaurant_gerant_orders"]');
+                        if (target &amp;&amp; (target.innerText.indexOf('Ventes') !== -1 || (target.dataset &amp;&amp; target.dataset.menuXmlid === 'restaurant_core.menu_restaurant_gerant_orders'))) {
+                            if (window.odoo &amp;&amp; window.odoo.__WOWL_DEBUG__ &amp;&amp; window.odoo.__WOWL_DEBUG__.root &amp;&amp; window.odoo.__WOWL_DEBUG__.root.env &amp;&amp; window.odoo.__WOWL_DEBUG__.root.env.services &amp;&amp; window.odoo.__WOWL_DEBUG__.root.env.services.action) {
+                                ev.preventDefault();
+                                ev.stopPropagation();
+                                window.odoo.__WOWL_DEBUG__.root.env.services.action.doAction("restaurant_core.action_restaurant_gerant_own_orders", { clearBreadcrumbs: true });
+                            }
+                        }
+                    }, true);
+                })();
+            </script>
+        </xpath>
+    </template>
+</odoo>

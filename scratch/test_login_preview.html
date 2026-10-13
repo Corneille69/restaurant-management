@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Login - Bleu Marine & Jaune Or</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #081326;
+            background-image: 
+                radial-gradient(circle at 18% 22%, rgba(245, 158, 11, 0.28) 0%, transparent 40%),
+                radial-gradient(circle at 82% 78%, rgba(30, 58, 138, 0.5) 0%, transparent 45%),
+                linear-gradient(135deg, #050d1a 0%, #0b192c 45%, #10243e 100%);
+            padding: 2rem 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient glowing background shapes */
+        .ambient-glow-1 {
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, transparent 70%);
+            top: -100px;
+            left: -100px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .ambient-glow-2 {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(30, 58, 138, 0.35) 0%, transparent 70%);
+            bottom: -120px;
+            right: -100px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Outer Liquid Layer Effect */
+        .blob-login-container {
+            position: relative;
+            width: 440px;
+            max-width: 94vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Layer 1: Glowing soft shadow blob */
+        .blob-layer-back {
+            position: absolute;
+            inset: -14px -14px -10px -10px;
+            border-radius: 52% 48% 68% 32% / 44% 56% 44% 56%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f2744 35%, #d97706 75%, #f59e0b 100%);
+            opacity: 0.85;
+            filter: blur(12px);
+            z-index: 1;
+        }
+
+        /* Layer 2: Secondary liquid edge visible behind the card (giving the multi-tone rim) */
+        .blob-layer-rim {
+            position: absolute;
+            inset: -6px -10px -6px -4px;
+            border-radius: 46% 54% 34% 66% / 54% 46% 54% 46%;
+            background: linear-gradient(145deg, #2563eb 0%, #1e3a8a 30%, #b45309 70%, #f59e0b 100%);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+            z-index: 2;
+        }
+
+        /* Main Liquid Card */
+        .blob-card {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            padding: 2.75rem 2.25rem 2.5rem;
+            border-radius: 45% 55% 63% 37% / 44% 42% 58% 56%;
+            background: linear-gradient(150deg, #1b3864 0%, #224c80 30%, #466088 55%, #b2822a 82%, #d98e14 100%);
+            box-shadow: 
+                inset 0 2px 4px rgba(255, 255, 255, 0.4),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.3),
+                0 25px 60px rgba(4, 11, 23, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Floating Avatar Circle */
+        .avatar-badge-wrap {
+            position: relative;
+            margin-top: -0.5rem;
+            margin-bottom: 1.1rem;
+        }
+        .avatar-badge {
+            width: 82px;
+            height: 82px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .avatar-icon-svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        /* Title */
+        .sign-in-title {
+            color: #ffffff;
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-bottom: 1.6rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        }
+
+        /* Form layout */
+        .login-form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.15rem;
+        }
+
+        /* Input Row with Squircle Badge + Pill Input */
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        /* Cute Squircle Badge Icon */
+        .input-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px 6px 14px 6px;
+            background: linear-gradient(135deg, #f59e0b 0%, #1e3a8a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        /* Pill Input Field */
+        .input-pill {
+            flex: 1;
+            position: relative;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1.5px solid rgba(255, 255, 255, 0.65);
+            border-radius: 50px;
+            padding: 0.65rem 1.15rem;
+            display: flex;
+            align-items: center;
+            backdrop-filter: blur(8px);
+            transition: all 0.25s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .input-pill:focus-within {
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+        }
+        .input-pill input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .input-pill input::placeholder {
+            color: rgba(255, 255, 255, 0.72);
+            font-weight: 400;
+        }
+        .eye-toggle-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            cursor: pointer;
+            padding: 0 0.25rem;
+            transition: color 0.2s;
+        }
+        .eye-toggle-btn:hover {
+            color: #ffd700;
+        }
+
+        /* Remember me & Forgot password row */
+        .options-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0 0.5rem;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: -0.25rem;
+        }
+        .remember-label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .remember-label input[type="checkbox"] {
+            accent-color: #f59e0b;
+            cursor: pointer;
+            width: 14px;
+            height: 14px;
+        }
+        .forgot-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .forgot-link:hover {
+            color: #ffd700;
+            text-decoration: underline;
+        }
+
+        /* Login Button */
+        .login-btn-wrap {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        .btn-login-pill {
+            background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 25%, #d97706 75%, #f59e0b 100%);
+            border: none;
+            border-radius: 50px;
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            padding: 0.75rem 2.8rem;
+            cursor: pointer;
+            box-shadow: 0 8px 22px rgba(245, 158, 11, 0.45), 0 3px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.25s ease;
+            text-transform: uppercase;
+        }
+        .btn-login-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(245, 158, 11, 0.6), 0 4px 10px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(90deg, #2563eb 0%, #3b82f6 25%, #f59e0b 75%, #fbbf24 100%);
+        }
+        .btn-login-pill:active {
+            transform: translateY(1px);
+        }
+
+        /* Sign up / Footer text */
+        .bottom-links {
+            margin-top: 0.85rem;
+            text-align: center;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .bottom-links a {
+            color: #ffd700;
+            font-weight: 700;
+            text-decoration: none;
+            margin-left: 0.25rem;
+        }
+        .bottom-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Quick role buttons for admin & gerant */
+        .role-quick-chips {
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 0.85rem;
+        }
+        .chip-btn {
+            background: rgba(11, 25, 44, 0.55);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            color: #ffd700;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .chip-btn:hover {
+            background: rgba(245, 158, 11, 0.25);
+            border-color: #ffd700;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div class="blob-login-container">
+        <!-- Layer 1: Ambient blur halo -->
+        <div class="blob-layer-back"></div>
+        <!-- Layer 2: Liquid rim accent -->
+        <div class="blob-layer-rim"></div>
+
+        <!-- Layer 3: Main morphing liquid card -->
+        <div class="blob-card">
+            <!-- 1. Avatar Badge -->
+            <div class="avatar-badge-wrap">
+                <div class="avatar-badge">
+                    <svg class="avatar-icon-svg" viewBox="0 0 100 100">
+                        <defs>
+                            <linearGradient id="userGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#1E3A8A" />
+                                <stop offset="50%" stop-color="#2563EB" />
+                                <stop offset="100%" stop-color="#F59E0B" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Head -->
+                        <circle cx="50" cy="35" r="18" fill="url(#userGrad)" />
+                        <!-- Torso -->
+                        <path d="M 22 80 C 22 58, 35 52, 50 52 C 65 52, 78 58, 78 80 Z" fill="url(#userGrad)" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 2. Sign In Title -->
+            <h2 class="sign-in-title">Sign In</h2>
+
+            <!-- 3. Form -->
+            <form class="login-form" onsubmit="event.preventDefault();">
+                <!-- Username Row -->
+                <div class="input-row">
+                    <div class="input-badge" title="Nom d'utilisateur">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <div class="input-pill">
+                        <input type="text" id="username" placeholder="Username" value="admin" autocomplete="username">
+                    </div>
+                </div>
+
+                <!-- Password Row -->
+                <div class="input-row">
+                    <div class="input-badge" title="Mot de passe">
+                        <i class="fa fa-lock"></i>
+                    </div>
+                    <div class="input-pill">
+                        <input type="password" id="password" placeholder="••••••••••••" value="admin123" autocomplete="current-password">
+                        <button type="button" class="eye-toggle-btn" onclick="togglePass()">
+                            <i id="eyeIcon" class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="options-row">
+                    <label class="remember-label">
+                        <input type="checkbox" checked>
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="login-btn-wrap">
+                    <button type="submit" class="btn-login-pill">
+                        LOGIN
+                    </button>
+                </div>
+
+                <!-- Bottom Links -->
+                <div class="bottom-links">
+                    <span>Don't have account?</span>
+                    <a href="#">Sign up!</a>
+                </div>
+
+                <!-- Quick role switch for convenience -->
+                <div class="role-quick-chips">
+                    <button type="button" class="chip-btn" onclick="fillAdmin()">👑 Admin</button>
+                    <button type="button" class="chip-btn" onclick="fillGerant()">🧑‍💼 Gérant</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function togglePass() {
+            const p = document.getElementById('password');
+            const eye = document.getElementById('eyeIcon');
+            if (p.type === 'password') {
+                p.type = 'text';
+                eye.classList.remove('fa-eye');
+                eye.classList.add('fa-eye-slash');
+            } else {
+                p.type = 'password';
+                eye.classList.remove('fa-eye-slash');
+                eye.classList.add('fa-eye');
+            }
+        }
+
+        function fillAdmin() {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'admin123';
+        }
+
+        function fillGerant() {
+            document.getElementById('username').value = 'gerant';
+            document.getElementById('password').value = 'gerant123';
+        }
+    </script>
+</body>
+</html>

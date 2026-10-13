@@ -1,0 +1,1070 @@
+/* =========================================================================
+   STYLE PERSONNALISÉ ÉCRAN DE CAISSE POINT DE VENTE (ODOO 17 POS)
+   - Thème Haute Gastronomie : Blanc Pur, Vert Forêt / Émeraude & Or Doré Noble
+   - Haute Densité : Cases et écritures compactes pour accueillir des centaines de menus
+   - Saisie ultra-rapide sans erreur avec raccourci instantané
+   - Ticket de caisse client petit format imprimable avec tout centré
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   1. STRUCTURE GÉNÉRALE & FOND
+   ------------------------------------------------------------------------- */
+.pos,
+.pos-content,
+.product-screen {
+    background-color: #f8fafc !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    color: #064e3b !important;
+}
+
+/* -------------------------------------------------------------------------
+   2. BARRE SUPÉRIEURE (HEADER) : VERT PROFOND ET LISERÉ OR DORÉ
+   ------------------------------------------------------------------------- */
+.pos-topheader {
+    background: linear-gradient(135deg, #064e3b 0%, #043a2d 100%) !important;
+    border-bottom: 3px solid #d4af37 !important; /* Liseré Or Doré */
+    color: #ffffff !important;
+    padding: 0 1rem !important;
+    height: 48px !important;
+    box-shadow: 0 3px 12px rgba(6, 78, 59, 0.35) !important;
+}
+
+.pos-topheader .pos-branding .pos-logo {
+    filter: brightness(0) invert(1) !important;
+    max-height: 28px !important;
+}
+
+.pos-topheader button,
+.pos-topheader .btn {
+    border-radius: 7px !important;
+    font-weight: 800 !important;
+    font-size: 0.82rem !important;
+    transition: all 0.2s ease !important;
+}
+
+/* BOUTON ULTRA-PROFESSIONNEL ACCUEIL (TAILLE ET FORME DES AUTRES CASES) */
+.pos-home-sales-wrapper {
+    height: 100% !important;
+}
+
+.pos .pos-topheader .pos-sales-nav-btn,
+.pos .pos-topheader .pos-home-nav-btn {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #fdfbf7 100%) !important;
+    color: #064e3b !important;
+    border: 2px solid #d4af37 !important; /* Liseré Or Noble */
+    border-radius: 8px !important; /* Taille et forme identique aux autres cases */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+    padding: 0 16px !important;
+    font-size: 13.5px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.3px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+    user-select: none !important;
+}
+
+.pos .pos-topheader .pos-sales-nav-btn:hover,
+.pos .pos-topheader .pos-home-nav-btn:hover {
+    background: #ffffff !important;
+    color: #047857 !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.5) !important;
+    transform: translateY(-1px) scale(1.02) !important;
+}
+
+.pos .pos-topheader .pos-sales-nav-btn:active,
+.pos .pos-topheader .pos-home-nav-btn:active {
+    transform: scale(0.97) !important;
+}
+
+.pos .pos-topheader .pos-sales-nav-btn .sales-btn-icon,
+.pos .pos-topheader .pos-home-nav-btn .sales-btn-icon {
+    font-size: 16px !important;
+    line-height: 1 !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15)) !important;
+}
+
+.pos .pos-topheader .pos-sales-nav-btn .sales-btn-text,
+.pos .pos-topheader .pos-home-nav-btn .sales-btn-text {
+    font-weight: 900 !important;
+    color: #064e3b !important;
+    letter-spacing: 0.4px !important;
+}
+
+/* MASQUAGE TOTAL DU PLAN DE SALLE / FLOOR SCREEN & BOUTONS ASSOCIÉS */
+.floor-screen,
+.pos .floor-screen,
+.pos-restaurant-floor-screen,
+.pos .floor-map,
+.pos-topheader button.table-button,
+.pos-topheader .table-button,
+.pos-topheader .floor-button,
+.pos-topheader button.back-button,
+.pos-topheader .table-name-button {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.pos-topheader .status-buttons .oe_status {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+
+/* -------------------------------------------------------------------------
+   3. BARRE DE RECHERCHE ULTRA-RAPIDE PAR NOM
+   ------------------------------------------------------------------------- */
+.pos .search-box,
+.pos .search-bar,
+.pos .input-container {
+    background: #ffffff !important;
+    border: 2px solid #059669 !important; /* Vert émeraude */
+    border-radius: 20px !important;
+    padding: 4px 12px !important;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.1) !important;
+    transition: all 0.2s ease !important;
+    min-width: 270px !important;
+    height: 38px !important;
+}
+
+.pos .search-box:focus-within,
+.pos .search-bar:focus-within,
+.pos .input-container:focus-within {
+    border-color: #d4af37 !important; /* Halo Or Doré */
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3) !important;
+}
+
+.pos .search-bar input,
+.pos .input-container input {
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+    color: #064e3b !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    width: 100% !important;
+}
+
+.pos .search-bar input::placeholder,
+.pos .input-container input::placeholder {
+    color: #64748b !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+}
+
+.pos .input-container i,
+.pos .search-bar i {
+    color: #059669 !important;
+    font-size: 0.95rem !important;
+    font-weight: 900 !important;
+}
+
+/* -------------------------------------------------------------------------
+   4. BARRE DES CATÉGORIES (ONGLETS DU MENU)
+   ------------------------------------------------------------------------- */
+.pos-rightheader {
+    background: #ffffff !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding: 4px 10px !important;
+}
+
+.pos-rightheader .category-list,
+.pos-rightheader .category-selector,
+.pos-rightheader .pos-category-list {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    padding: 2px 0 !important;
+    overflow-x: auto !important;
+}
+
+.pos-rightheader .category-button,
+.pos-rightheader .category-simple-button,
+.pos-rightheader button.btn-secondary {
+    background: #ffffff !important;
+    border: 1.5px solid #059669 !important;
+    border-radius: 14px !important;
+    padding: 4px 12px !important;
+    font-weight: 800 !important;
+    font-size: 0.80rem !important;
+    color: #064e3b !important;
+    white-space: nowrap !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.pos-rightheader .category-button:hover,
+.pos-rightheader button.btn-secondary:hover {
+    border-color: #d4af37 !important;
+    color: #b45309 !important;
+    background: #f0fdf4 !important;
+}
+
+.pos-rightheader .category-button.active,
+.pos-rightheader .category-button.selected,
+.pos-rightheader button.btn-secondary.active {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    color: #ffffff !important;
+    border-color: #d4af37 !important; /* Liseré Or */
+    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3) !important;
+}
+
+/* -------------------------------------------------------------------------
+   5. GRILLE DE PLATS HAUTE DENSITÉ (POUR CONTENIR DES CENTAINES DE MENUS)
+   ------------------------------------------------------------------------- */
+.product-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)) !important;
+    gap: 6px !important;
+    padding: 8px !important;
+    background-color: #f8fafc !important;
+}
+
+/* Carte individuelle compacte */
+.pos article.product {
+    background: #ffffff !important;
+    border: 1.5px solid #059669 !important; /* Vert émeraude */
+    border-radius: 8px !important;
+    padding: 6px 8px !important;
+    min-height: 64px !important;
+    max-height: 76px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: stretch !important;
+    box-shadow: 0 1px 4px rgba(6, 78, 59, 0.08) !important;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.pos article.product:hover {
+    border-color: #d4af37 !important; /* Liseré Or Doré au survol */
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3) !important;
+}
+
+.pos article.product:active {
+    transform: scale(0.97) !important;
+}
+
+/* Masquage total de l'icône disgracieuse d'info en coin */
+.product-information-tag,
+.product-information-tag-logo,
+.pos article.product .product-information-tag,
+.pos article.product .product-information-tag-logo {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    border: none !important;
+}
+
+/* Nom du plat / boisson compact et bien gras */
+.pos article.product .product-name,
+.pos article.product .product-content,
+.pos article.product .text-start,
+.pos article.product > span:first-child,
+.pos article.product > div:first-child {
+    font-size: 0.82rem !important;
+    font-weight: 800 !important;
+    color: #064e3b !important; /* Vert forêt profond */
+    line-height: 1.15 !important;
+    margin-bottom: 2px !important;
+    word-break: break-word !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-align: left !important;
+}
+
+/* Badge de prix : Or Doré bien doré éclatant */
+.pos article.product .price-tag,
+.pos article.product .price,
+.pos article.product .product-price {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: linear-gradient(135deg, #d4af37 0%, #b45309 100%) !important; /* Or Doré Riche */
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    font-size: 0.76rem !important;
+    letter-spacing: 0.2px !important;
+    padding: 2px 7px !important;
+    border-radius: 5px !important;
+    width: fit-content !important;
+    box-shadow: 0 1px 3px rgba(180, 83, 9, 0.25) !important;
+    margin-top: auto !important;
+}
+
+/* -------------------------------------------------------------------------
+   6. PANIER ET LIGNES DE COMMANDE (GAUCHE)
+   ------------------------------------------------------------------------- */
+.order-container,
+.order-widget,
+.pos .leftpane {
+    background: #ffffff !important;
+    border-right: 2px solid #cbd5e1 !important;
+}
+
+.order-container .order-empty,
+.order-widget .order-empty {
+    color: #64748b !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    padding: 2rem 1rem !important;
+    text-align: center !important;
+}
+
+/* Ligne de commande enregistrée */
+.pos .orderline {
+    padding: 8px 12px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    transition: background 0.15s ease !important;
+}
+
+.pos .orderline.selected {
+    background: #f0fdf4 !important; /* Léger fond menthe */
+    border-left: 4px solid #059669 !important; /* Vert émeraude */
+}
+
+.pos .orderline .product-name {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    color: #064e3b !important;
+    line-height: 1.2 !important;
+}
+
+.pos .orderline .price {
+    font-size: 0.98rem !important;
+    font-weight: 900 !important;
+    color: #b45309 !important; /* Or / Ambré noble */
+}
+
+.pos .orderline .info-list {
+    color: #475569 !important;
+    font-weight: 700 !important;
+    font-size: 0.80rem !important;
+}
+
+.pos .orderline .info-list em {
+    font-style: normal !important;
+    font-weight: 800 !important;
+    color: #064e3b !important;
+}
+
+/* -------------------------------------------------------------------------
+   7. TOTAUX ET CALCULS AUTOMATIQUES INSTANTANÉS
+   ------------------------------------------------------------------------- */
+.pos .order-summary,
+.pos .order-total,
+.pos .summary {
+    background: #ffffff !important;
+    border-top: 3px solid #059669 !important; /* Liseré vert */
+    padding: 10px 14px !important;
+    box-shadow: 0 -3px 12px rgba(5, 150, 105, 0.08) !important;
+}
+
+.pos .order-summary .label,
+.pos .summary .label {
+    font-size: 1.10rem !important;
+    font-weight: 900 !important;
+    color: #064e3b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.pos .order-summary .value,
+.pos .summary .value,
+.pos .order-total .value {
+    font-size: 1.55rem !important;
+    font-weight: 900 !important;
+    color: #b45309 !important; /* Or Doré Chaud */
+    text-shadow: 0 1px 2px rgba(180, 83, 9, 0.15) !important;
+    letter-spacing: 0.5px !important;
+}
+
+.pos .summary .subentry,
+.pos .order-summary .subentry {
+    font-weight: 700 !important;
+    color: #64748b !important;
+    font-size: 0.82rem !important;
+}
+
+/* -------------------------------------------------------------------------
+   8. BOUTONS DE CONTRÔLE RAPIDE (Remboursement, Client, etc.)
+   ------------------------------------------------------------------------- */
+.control-buttons {
+    background: #f8fafc !important;
+    padding: 4px !important;
+    gap: 3px !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+.control-buttons .control-button,
+.control-buttons button,
+.control-buttons .btn {
+    background: #ffffff !important;
+    border: 1.5px solid #059669 !important;
+    border-radius: 6px !important;
+    color: #064e3b !important;
+    font-weight: 800 !important;
+    font-size: 0.78rem !important;
+    padding: 4px 8px !important;
+    transition: all 0.15s ease !important;
+}
+
+.control-buttons .control-button:hover,
+.control-buttons button:hover {
+    border-color: #d4af37 !important;
+    background: #f0fdf4 !important;
+    color: #b45309 !important;
+}
+
+.control-buttons .control-button-number {
+    background: #d4af37 !important;
+    color: #042f24 !important;
+    font-weight: 900 !important;
+}
+
+/* -------------------------------------------------------------------------
+   9. SOUS-PANNEAU PAIEMENT & PAVÉ NUMÉRIQUE
+   ------------------------------------------------------------------------- */
+.subpads {
+    display: flex !important;
+    background: #ffffff !important;
+    width: 100% !important;
+}
+
+/* Panneau d'action gauche (Paiement + Ordre) */
+.subpads .actionpad {
+    width: 135px !important;
+    min-width: 125px !important;
+    max-width: 145px !important;
+    flex: 0 0 135px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    border-right: 2px solid #cbd5e1 !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    background: #ffffff !important;
+}
+
+/* Bouton Paiement : Dégradé Vert Émeraude & Bordure Or Doré */
+.actionpad .pay-order-button,
+.actionpad button.pay-order-button,
+.subpads .actionpad button.button.pay-order-button {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    color: #ffffff !important;
+    border: 2.5px solid #d4af37 !important; /* Bordure Or Doré */
+    border-radius: 8px !important;
+    font-weight: 900 !important;
+    font-size: 1.02rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 12px rgba(4, 120, 87, 0.35) !important;
+    transition: all 0.2s ease !important;
+    min-height: 56px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+.actionpad .pay-order-button:hover,
+.actionpad button.pay-order-button:hover {
+    background: linear-gradient(135deg, #047857 0%, #064e3b 100%) !important;
+    border-color: #f59e0b !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Bouton Ordre (Envoi en cuisine) */
+.actionpad .submit-order,
+.actionpad button.submit-order,
+.subpads .actionpad button.submit-order {
+    background: #064e3b !important;
+    color: #ffffff !important;
+    border: 2px solid #d4af37 !important; /* Liseré Or */
+    border-radius: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    font-weight: 800 !important;
+    font-size: 0.90rem !important;
+    letter-spacing: 0.3px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-grow: 1 !important;
+    box-shadow: 0 2px 6px rgba(6, 78, 59, 0.2) !important;
+    transition: all 0.2s ease !important;
+}
+
+.actionpad .submit-order:hover,
+.actionpad button.submit-order:hover {
+    background: #042f24 !important;
+    border-color: #f59e0b !important;
+}
+
+.actionpad .submit-order i {
+    font-size: 1.2rem !important;
+    margin-bottom: 3px !important;
+    color: #d4af37 !important;
+}
+
+.actionpad .submit-order .badge,
+.actionpad .submit-order > span {
+    background: #d4af37 !important;
+    color: #042f24 !important;
+    font-weight: 900 !important;
+    border-radius: 6px !important;
+}
+
+/* -------------------------------------------------------------------------
+   10. PAVÉ NUMÉRIQUE (NUMPAD) EN 4 COLONNES PARFAITES
+   ------------------------------------------------------------------------- */
+.subpads .numpad {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 3px !important;
+    padding: 3px !important;
+    flex: 1 1 auto !important;
+    width: calc(100% - 135px) !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+}
+
+/* Boutons individuels du pavé */
+.numpad button,
+.numpad .col,
+.numpad .input-button,
+.numpad .mode-button {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #064e3b !important;
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    border-radius: 7px !important;
+    min-height: 44px !important;
+    height: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    margin: 0 !important;
+    padding: 6px 2px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.12s ease !important;
+}
+
+.numpad button:hover,
+.numpad .col:hover {
+    background: #f0fdf4 !important;
+    border-color: #059669 !important;
+}
+
+.numpad button:active,
+.numpad .col:active {
+    background: #dcfce7 !important;
+    transform: scale(0.97) !important;
+}
+
+/* Touches de mode spéciales (Qté, % Rem., Prix) */
+.numpad button.active,
+.numpad button.border-primary,
+.numpad .mode-button.active {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid #d4af37 !important;
+    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3) !important;
+}
+
+/* Touche Effacer (Backspace ⌫) */
+.numpad button:last-child {
+    font-size: 1.15rem !important;
+    background: #f8fafc !important;
+    color: #b45309 !important;
+    font-weight: 900 !important;
+}
+
+/* -------------------------------------------------------------------------
+   11. BOUTONS DIVERS & POPUPS
+   ------------------------------------------------------------------------- */
+.pos .btn-primary,
+.pos button.btn-primary,
+.pos .book-table,
+.pos button.book-table,
+.pos .search-more-button button,
+.pos .search-more-button .btn-primary,
+.search-more-button button,
+.search-more-button .btn {
+    background: #064e3b !important;
+    border: 2px solid #d4af37 !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 6px rgba(6, 78, 59, 0.2) !important;
+    transition: all 0.2s ease !important;
+}
+
+.pos .btn-primary:hover,
+.pos button.book-table:hover,
+.pos .search-more-button button:hover,
+.search-more-button button:hover {
+    background: #042f24 !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+}
+
+/* -------------------------------------------------------------------------
+   12. ÉCRAN DE PAIEMENT : ESPÈCES DIRECTES & GRAND CHAMP VISIBLE
+   ------------------------------------------------------------------------- */
+.payment-screen {
+    background: #f8fafc !important;
+}
+
+.payment-screen .main-content {
+    background: #f8fafc !important;
+}
+
+/* Colonne centrale de paiement (Statut + Pavé numérique) */
+.payment-screen .center-content {
+    background: #ffffff !important;
+    padding: 10px 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    overflow-y: auto !important;
+    border-left: 2px solid #cbd5e1 !important;
+    border-right: 2px solid #cbd5e1 !important;
+}
+
+/* Pavé numérique de l'écran de paiement */
+.payment-screen .center-content .numpad {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 6px !important;
+    padding: 6px 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    flex-grow: 1 !important;
+}
+
+.payment-screen .center-content .numpad button,
+.payment-screen .center-content .numpad .col {
+    background: #ffffff !important;
+    border: 2px solid #cbd5e1 !important;
+    color: #064e3b !important;
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+    border-radius: 8px !important;
+    min-height: 52px !important;
+    height: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    margin: 0 !important;
+    padding: 8px 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.12s ease !important;
+}
+
+.payment-screen .center-content .numpad button:hover {
+    background: #f0fdf4 !important;
+    border-color: #059669 !important;
+}
+
+.payment-screen .center-content .numpad button:active {
+    background: #dcfce7 !important;
+    transform: scale(0.97) !important;
+}
+
+/* Boutons de montants rapides (+10, +20, +50) */
+.payment-screen .center-content .numpad button:nth-child(4),
+.payment-screen .center-content .numpad button:nth-child(8),
+.payment-screen .center-content .numpad button:nth-child(12) {
+    background: #f0fdf4 !important;
+    border: 2px solid #059669 !important;
+    color: #064e3b !important;
+    font-weight: 900 !important;
+}
+
+/* Touche Effacer (⌫) */
+.payment-screen .center-content .numpad button:last-child {
+    color: #b45309 !important;
+    font-weight: 900 !important;
+    font-size: 1.4rem !important;
+    background: #fef2f2 !important;
+    border-color: #fca5a5 !important;
+}
+
+/* Panneau de gauche (Méthodes et validation) */
+.payment-screen .left-content {
+    background: #f8fafc !important;
+    border-right: 2px solid #cbd5e1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 8px !important;
+}
+
+.payment-screen .paymentmethods-container .paymentmethod {
+    background: #f0fdf4 !important;
+    border: 2.5px solid #059669 !important;
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    font-size: 1.05rem !important;
+    color: #064e3b !important;
+    padding: 12px 14px !important;
+    margin: 8px 4px !important;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.12) !important;
+}
+
+.payment-screen .paymentlines .paymentline {
+    background: #ffffff !important;
+    border: 2px solid #059669 !important;
+    border-radius: 10px !important;
+    font-weight: 800 !important;
+    color: #064e3b !important;
+    margin: 6px 4px !important;
+}
+
+.payment-screen .paymentlines .payment-amount {
+    font-size: 1.4rem !important;
+    font-weight: 900 !important;
+    color: #b45309 !important;
+}
+
+/* Bouton Valider l'encaissement */
+.payment-screen .button.next,
+.payment-screen .validation,
+.payment-screen .btn-primary {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    color: #ffffff !important;
+    border: 2.5px solid #d4af37 !important;
+    font-weight: 900 !important;
+    font-size: 1.25rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    border-radius: 12px !important;
+    min-height: 75px !important;
+    margin: 8px 4px !important;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
+    transition: all 0.2s ease !important;
+}
+
+.payment-screen .button.next:hover,
+.payment-screen .validation:hover {
+    background: linear-gradient(135deg, #047857 0%, #064e3b 100%) !important;
+    border-color: #f59e0b !important;
+    transform: translateY(-1px) !important;
+}
+
+/* CHAMP À CÔTÉ DU MONTANT À PAYER */
+.payment-screen .total-to-pay-box {
+    background: #f1f5f9 !important;
+    border: 2.5px solid #064e3b !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(6, 78, 59, 0.1) !important;
+}
+
+/* CHAMP GÉANT DU MONTANT REÇU (ESPÈCES) */
+.payment-screen .cash-entered-box {
+    background: #ffffff !important;
+    border: 3px solid #d4af37 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.22) !important;
+    padding: 10px !important;
+}
+
+.payment-screen .entered-amount-display {
+    font-size: 2.8rem !important;
+    font-weight: 900 !important;
+    color: #b45309 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 1px !important;
+    text-shadow: 0 1px 2px rgba(180, 83, 9, 0.15) !important;
+}
+
+
+
+/* -------------------------------------------------------------------------
+   13. TICKET DE CAISSE CLIENT : PETIT FORMAT IMPRIMABLE & ÉCRITURES CENTRÉES
+   ------------------------------------------------------------------------- */
+.pos-receipt-container,
+.receipt-screen .default-view .pos-receipt-container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    background: #f1f5f9 !important;
+    padding: 16px 0 !important;
+    overflow-y: auto !important;
+}
+
+/* Le ticket physique à l'écran (Format Petit Ticket 58mm / 80mm) */
+.pos-receipt,
+.styled-receipt,
+.pos-receipt-print {
+    width: 275px !important;
+    max-width: 275px !important;
+    min-width: 275px !important;
+    margin: 0 auto !important;
+    padding: 16px 12px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: "Courier New", Courier, monospace, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    border: 1px dashed #94a3b8 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1) !important;
+    text-align: center !important; /* CENTRAGE GLOBAL */
+}
+
+/* Tous les enfants et textes du ticket parfaitement centrés */
+.pos-receipt *,
+.pos-receipt div,
+.pos-receipt p,
+.pos-receipt span,
+.pos-receipt h1,
+.pos-receipt h2 {
+    text-align: center !important;
+}
+
+/* Logo du restaurant centré */
+.pos-receipt .pos-receipt-logo {
+    display: block !important;
+    margin: 0 auto 8px auto !important;
+    max-width: 110px !important;
+    height: auto !important;
+}
+
+/* En-tête coordonnées / contact centré */
+.pos-receipt .pos-receipt-contact {
+    text-align: center !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    margin-bottom: 8px !important;
+}
+
+/* Nom du serveur / caissier centré */
+.pos-receipt .cashier {
+    text-align: center !important;
+    margin: 6px auto !important;
+    font-weight: 700 !important;
+    font-size: 11px !important;
+}
+
+/* Lignes d'articles commandés : Bloc centré propre */
+.pos-receipt .orderlines {
+    text-align: center !important;
+    margin: 10px auto !important;
+    width: 100% !important;
+}
+
+.pos-receipt .orderline {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    margin-bottom: 6px !important;
+    padding-bottom: 4px !important;
+    border-bottom: 1px dotted #e2e8f0 !important;
+    width: 100% !important;
+}
+
+.pos-receipt .orderline .product-name {
+    font-weight: 800 !important;
+    font-size: 12.5px !important;
+    text-align: center !important;
+    width: 100% !important;
+    color: #000000 !important;
+}
+
+.pos-receipt .orderline .line-details,
+.pos-receipt .orderline .pos-receipt-right-align {
+    float: none !important;
+    display: block !important;
+    text-align: center !important;
+    font-weight: 700 !important;
+    font-size: 11.5px !important;
+    margin-top: 2px !important;
+    color: #222222 !important;
+}
+
+/* Bloc TOTAL sur le ticket : Encadré en pointillés et très visible au centre */
+.pos-receipt .pos-receipt-amount {
+    text-align: center !important;
+    padding: 8px 0 !important;
+    margin: 10px auto !important;
+    border-top: 2px dashed #000000 !important;
+    border-bottom: 2px dashed #000000 !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+.pos-receipt .pos-receipt-amount .pos-receipt-right-align,
+.pos-receipt .pos-receipt-amount span {
+    float: none !important;
+    display: block !important;
+    text-align: center !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    margin-top: 4px !important;
+    color: #000000 !important;
+}
+
+/* Mode de paiement et Rendu Monnaie centrés */
+.pos-receipt .paymentlines,
+.pos-receipt .receipt-change {
+    text-align: center !important;
+    display: block !important;
+    margin: 6px auto !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+.pos-receipt .paymentlines .pos-receipt-right-align,
+.pos-receipt .receipt-change .pos-receipt-right-align {
+    float: none !important;
+    display: inline-block !important;
+    margin-left: 6px !important;
+    font-weight: 900 !important;
+}
+
+/* Taxes et détails centrés */
+.pos-receipt .pos-receipt-taxes {
+    justify-items: center !important;
+    text-align: center !important;
+    margin: 6px auto !important;
+    font-size: 10.5px !important;
+}
+
+/* Pied de page et date centrés */
+.pos-receipt .pos-receipt-center-align,
+.pos-receipt .pos-receipt-order-data,
+.pos-receipt .before-footer,
+.pos-receipt .after-footer {
+    text-align: center !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    margin: 6px auto !important;
+}
+
+.pos-receipt .pos-receipt-qrcode {
+    display: block !important;
+    margin: 8px auto !important;
+    max-width: 100px !important;
+}
+
+/* -------------------------------------------------------------------------
+   14. RÈGLES D'IMPRESSION (@media print) : PETIT FORMAT CENTRÉ POUR IMPRIMANTE
+   ------------------------------------------------------------------------- */
+@media print {
+    @page {
+        margin: 0 !important;
+        size: 80mm auto !important;
+    }
+    body {
+        background-color: transparent !important;
+    }
+    body * {
+        visibility: hidden !important;
+    }
+    .render-container,
+    .render-container * {
+        visibility: visible !important;
+    }
+    .render-container {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+    }
+    .render-container .pos-receipt,
+    .pos-receipt-print,
+    .pos-receipt {
+        visibility: visible !important;
+        width: 260px !important;
+        max-width: 260px !important;
+        min-width: 260px !important;
+        margin: 0 auto !important;
+        border: none !important;
+        box-shadow: none !important;
+        text-align: center !important;
+        font-size: 11.5px !important;
+        line-height: 1.3 !important;
+        padding: 4px !important;
+    }
+    .pos-receipt * {
+        visibility: visible !important;
+        text-align: center !important;
+        color: #000000 !important;
+    }
+}
+
+/* -------------------------------------------------------------------------
+   15. BOUTONS DE L'ÉCRAN REÇU / TICKET (IMPRIMER & NOUVELLE COMMANDE)
+   ------------------------------------------------------------------------- */
+.receipt-screen .button.print,
+.receipt-screen .btn.print,
+.receipt-screen button.print {
+    background: #064e3b !important;
+    color: #ffffff !important;
+    border: 2px solid #d4af37 !important;
+    font-weight: 800 !important;
+    font-size: 1.05rem !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 10px rgba(6, 78, 59, 0.25) !important;
+    transition: all 0.2s ease !important;
+}
+
+.receipt-screen .button.print:hover,
+.receipt-screen .btn.print:hover {
+    background: #042f24 !important;
+    border-color: #f59e0b !important;
+}
+
+.receipt-screen .button.next,
+.receipt-screen .btn.next,
+.receipt-screen .validation,
+.receipt-screen .btn-primary {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    color: #ffffff !important;
+    border: 2.5px solid #d4af37 !important;
+    font-weight: 900 !important;
+    font-size: 1.15rem !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
+}
+

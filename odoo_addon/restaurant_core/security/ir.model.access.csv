@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_restaurant_activity_log,restaurant.activity.log,model_restaurant_activity_log,base.group_user,1,1,1,1
+access_restaurant_daily_report,restaurant.daily.report,model_restaurant_daily_report,base.group_user,1,1,1,1
+access_restaurant_configuration,restaurant.configuration,model_restaurant_configuration,base.group_user,1,1,1,1
+access_restaurant_grand_marche,restaurant.grand.marche,model_restaurant_grand_marche,base.group_user,1,1,1,1
+access_restaurant_grand_marche_line,restaurant.grand.marche.line,model_restaurant_grand_marche_line,base.group_user,1,1,1,1
+access_discuss_channel_rtc_session_user,discuss.channel.rtc.session.user,mail.model_discuss_channel_rtc_session,base.group_user,1,1,1,1
+access_ir_actions_client_user,ir.actions.client.user,base.model_ir_actions_client,base.group_user,1,0,0,0

@@ -1,0 +1,1380 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ===================================================================== -->
+    <!-- 1. GÉRANTS DU RESTAURANT : VUES & ACTIONS                            -->
+    <!-- ===================================================================== -->
+
+    <!-- Vue Liste des Gérants avec Statut en Direct & Ventes -->
+    <record id="view_restaurant_manager_tree" model="ir.ui.view">
+        <field name="name">res.users.restaurant.manager.tree</field>
+        <field name="model">res.users</field>
+        <field name="arch" type="xml">
+            <tree string="Gérants du Restaurant" sample="1">
+                <field name="name" string="Nom du Gérant" decoration-bf="1"/>
+                <field name="login" string="Identifiant (Login)"/>
+                <field name="is_online" string="Présence en Direct" widget="boolean_toggle"/>
+                <field name="last_login_time" string="Prise de Service (Début)"/>
+                <field name="last_logout_time" string="Fin de Service (Déconnexion)"/>
+                <field name="session_sales_total" string="Ventes Réalisées (FCFA)" decoration-bf="1"/>
+                <field name="active" string="Compte Actif" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue Formulaire pour Créer / Gérer un Gérant -->
+    <record id="view_restaurant_manager_form" model="ir.ui.view">
+        <field name="name">res.users.restaurant.manager.form</field>
+        <field name="model">res.users</field>
+        <field name="arch" type="xml">
+            <form string="Gérant de Restaurant">
+                <header>
+                    <button name="action_confirm_create_manager"
+                            string="✅ Valider et Enregistrer le Gérant"
+                            type="object"
+                            class="btn-primary"
+                            style="font-size: 14px; font-weight: bold; padding: 6px 14px;"/>
+                    <button name="action_deactivate_manager"
+                            string="⛔ Mettre fin aux accès (Désactiver)"
+                            type="object"
+                            class="btn-warning"
+                            confirm="Êtes-vous sûr de vouloir bloquer et mettre fin aux accès de ce gérant ?"
+                            invisible="not active or not id"/>
+                    <button name="action_reactivate_manager"
+                            string="🔓 Réactiver les accès du Gérant"
+                            type="object"
+                            class="btn-success"
+                            invisible="active or not id"/>
+                    <button name="action_delete_manager"
+                            string="🗑️ Supprimer définitivement"
+                            type="object"
+                            class="btn-danger"
+                            confirm="Êtes-vous sûr de vouloir supprimer définitivement ce compte gérant ? Cette action est irréversible."
+                            invisible="not id"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info" role="alert" style="margin-bottom: 20px;">
+                        <strong>👑 Espace Administrateur :</strong> Vous contrôlez ici les gérants du restaurant.
+                        Vous pouvez <strong>créer un gérant</strong>, <strong>suivre ses heures de connexion</strong>,
+                        <strong>ses ventes en temps réel</strong>, <strong>mettre fin à ses accès</strong> ou <strong>le supprimer</strong>.
+                        <em>L'administrateur ne vend pas ; seuls les gérants ont la capacité d'encaisser les commandes.</em>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" string="Nom complet du Gérant"/>
+                        <h1>
+                            <field name="name" placeholder="ex: Mamadou Traoré" required="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Identifiants d'Accès">
+                            <field name="login" placeholder="ex: gerant_mamadou ou email" required="1" string="Identifiant (Login)"/>
+                            <field name="manager_password" string="Mot de passe du Gérant" placeholder="Tapez le mot de passe du gérant ici" password="True" required="1"/>
+                            <field name="is_restaurant_manager" invisible="1"/>
+                        </group>
+                        <group string="Suivi en Direct &amp; État du Compte">
+                            <field name="is_online" string="Statut en Direct" widget="badge" decoration-success="is_online" decoration-muted="not is_online" readonly="1"/>
+                            <field name="last_login_time" string="Dernière Prise de Service" readonly="1"/>
+                            <field name="last_logout_time" string="Dernière Fin de Service" readonly="1"/>
+                            <field name="session_sales_total" string="Cumul Ventes Actuelles (FCFA)" readonly="1"/>
+                            <field name="active" string="Accès Autorisé &amp; Actif" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action Gérants de Restaurant -->
+    <record id="action_restaurant_managers" model="ir.actions.act_window">
+        <field name="name">👥 Gérants du Restaurant</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_manager_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_manager_form')})]"/>
+        <field name="domain">[('is_restaurant_manager', '=', True)]</field>
+        <field name="context">{'default_is_restaurant_manager': True, 'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer un nouveau compte Gérant de Restaurant
+            </p>
+            <p>
+                Renseignez le nom, l'identifiant et le mot de passe.
+                Le gérant pourra se connecter immédiatement dans son espace dédié pour encaisser les commandes.
+            </p>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- 2. TABLEAU DE BORD DES VENTES (ADMIN)                                -->
+    <!-- ===================================================================== -->
+    <record id="action_restaurant_sales_dashboard" model="ir.actions.act_window">
+        <field name="name">📊 Tableau de Bord des Ventes</field>
+        <field name="res_model">pos.order</field>
+        <field name="view_mode">graph,pivot,tree,form</field>
+        <field name="domain">[('state', 'in', ['paid', 'done', 'invoiced'])]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                Aucune vente enregistrée pour le moment
+            </p>
+            <p>
+                Consultez ici les graphiques, analyses croisées et chiffres d'affaires réalisés par chaque gérant en temps réel.
+            </p>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- 3. FAITS & GESTES DES GÉRANTS (JOURNAL D'ACTIVITÉ)                   -->
+    <!-- ===================================================================== -->
+    <record id="view_restaurant_activity_log_tree" model="ir.ui.view">
+        <field name="name">restaurant.activity.log.tree</field>
+        <field name="model">restaurant.activity.log</field>
+        <field name="arch" type="xml">
+            <tree string="Faits et Gestes des Gérants" create="false" edit="false" delete="false" sample="1">
+                <field name="activity_time" string="Date &amp; Heure" decoration-bf="1"/>
+                <field name="manager_name" string="Gérant"/>
+                <field name="action_type" string="Nature de l'Action" widget="badge"
+                       decoration-success="action_type == 'login'"
+                       decoration-muted="action_type == 'logout'"
+                       decoration-info="action_type == 'order_sale'"
+                       decoration-warning="action_type == 'price_adjusted'"/>
+                <field name="order_number" string="N° Commande"/>
+                <field name="amount" string="Montant en Jeu (FCFA)" decoration-bf="1"/>
+                <field name="payment_method" string="Mode Paiement"/>
+                <field name="description" string="Détails des Faits et Gestes"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_restaurant_activity_log_form" model="ir.ui.view">
+        <field name="name">restaurant.activity.log.form</field>
+        <field name="model">restaurant.activity.log</field>
+        <field name="arch" type="xml">
+            <form string="Détail de l'Action" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group string="Contexte">
+                            <field name="activity_time" string="Date &amp; Heure"/>
+                            <field name="manager_name" string="Nom du Gérant"/>
+                            <field name="manager_login" string="Identifiant (Login)"/>
+                            <field name="action_type" string="Nature de l'Action"/>
+                        </group>
+                        <group string="Données Financières">
+                            <field name="order_number" string="N° Commande"/>
+                            <field name="amount" string="Montant (FCFA)"/>
+                            <field name="payment_method" string="Mode de Paiement"/>
+                        </group>
+                    </group>
+                    <group string="Faits et Gestes Constatés">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_restaurant_activity_log" model="ir.actions.act_window">
+        <field name="name">📜 Faits &amp; Gestes des Gérants</field>
+        <field name="res_model">restaurant.activity.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_activity_log_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_activity_log_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                Aucune activité enregistrée
+            </p>
+            <p>
+                Ce journal retrace automatiquement l'historique complet des actions : connexions, déconnexions, encaissements et ajustements de prix des gérants.
+            </p>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- 4. FACTURATION GÉNÉRALE & CERTIFICATION DGI                           -->
+    <!-- ===================================================================== -->
+    <record id="view_restaurant_daily_report_tree" model="ir.ui.view">
+        <field name="name">restaurant.daily.report.tree</field>
+        <field name="model">restaurant.daily.report</field>
+        <field name="arch" type="xml">
+            <tree string="Factures Générales Journalières DGI" sample="1"
+                  decoration-success="state == 'certified'" decoration-info="state == 'draft'">
+                <field name="name" string="N° Facture Fiscale" decoration-bf="1"/>
+                <field name="active_manager_name" string="👤 Gérant Connecté" decoration-bf="1"/>
+                <field name="session_opened_at" string="⏰ Connexion (Date &amp; Heure)"/>
+                <field name="date" string="Date Fiscale"/>
+                <field name="total_orders" string="Nb Ventes"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="total_ttc" string="Total Brut TTC (FCFA)" decoration-bf="1" widget="monetary"/>
+                <field name="total_ht" string="Base HT (FCFA)" widget="monetary"/>
+                <field name="total_tva" string="TVA 18% (FCFA)" widget="monetary"/>
+                <field name="state" string="Statut Fiscal" widget="badge"
+                       decoration-success="state == 'certified'" decoration-primary="state == 'draft'"/>
+                <field name="dgi_reference" string="Réf. DGI (FNE)"/>
+                <field name="invoice_id" string="Facture Comptable Odoo" widget="many2one"/>
+                <field name="certified_by" string="Certifié Par"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_restaurant_daily_report_form" model="ir.ui.view">
+        <field name="name">restaurant.daily.report.form</field>
+        <field name="model">restaurant.daily.report</field>
+        <field name="arch" type="xml">
+            <form string="Facture Générale Journalière &amp; Certification DGI">
+                <header>
+                    <button name="action_calculate_from_orders"
+                            string="⚡ Actualiser l'Accumulation des Ventes"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-refresh"
+                            invisible="state == 'certified'"/>
+                    <button name="action_certify_dgi"
+                            string="🏛️ Certifier la Facture Globale avec la DGI"
+                            type="object"
+                            class="btn-success"
+                            icon="fa-shield"
+                            confirm="Confirmez-vous la certification fiscale DGI de cette facture globale journalière ? Les encaissements de la journée seront verrouillés, le sceau cryptographique SHA-256 sera généré et la facture client comptable officielle sera validée."
+                            invisible="state == 'certified'"/>
+                    <button name="action_view_invoice"
+                            string="🧾 Voir Facture Client Comptable Odoo"
+                            type="object"
+                            class="btn-info"
+                            icon="fa-file-text-o"
+                            invisible="not invoice_id"/>
+                    <button name="action_reset_draft"
+                            string="🔄 Déverrouiller &amp; Réactualiser"
+                            type="object"
+                            class="btn-warning"
+                            icon="fa-unlock"
+                            invisible="state != 'certified'"
+                            groups="base.group_system"/>
+                    <button name="action_print_pdf_invoice"
+                            string="🖨️ Imprimer la Facture en PDF"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-print"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,certified"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoice"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o"
+                                invisible="not invoice_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Facture Client</span>
+                                <span class="o_stat_text">Comptabilité</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Alerte Statut -->
+                    <div class="alert alert-success d-flex align-items-center mb-3" role="alert" invisible="state != 'certified'" style="border-radius: 12px; border-left: 6px solid #16a34a;">
+                        <i class="fa fa-check-circle fa-2x text-success me-3"/>
+                        <div>
+                            <h5 class="mb-1 fw-bold text-success">Facture Globale Journalière Certifiée DGI</h5>
+                            <p class="mb-0 text-muted">Cette facture a été vérifiée, verrouillée et scellée avec le protocole fiscal DGI (FNE). Référence : <strong><field name="dgi_reference" class="oe_inline"/></strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info d-flex align-items-center mb-3" role="alert" invisible="state == 'certified'" style="border-radius: 12px; border-left: 6px solid #2563eb;">
+                        <i class="fa fa-info-circle fa-2x text-primary me-3"/>
+                        <div>
+                            <h5 class="mb-1 fw-bold text-primary">Facturation Globale Dynamique en Temps Réel</h5>
+                            <p class="mb-0 text-muted">Toutes les cases ci-dessous sont calculées et pré-remplies automatiquement à chaque vente encaissée par un gérant. Aucune saisie manuelle requise.</p>
+                        </div>
+                    </div>
+                    <!-- EN-TÊTE SUPÉRIEUR OFFICIEL DGI : LOGO + IDENTITÉ RESTAURANT + IDENTIFIANTS + CODE QR TOUJOURS EN HAUT -->
+                    <field name="top_dgi_header_html" readonly="1" nolabel="1"/>
+
+                    <!-- BLOC 1 : IDENTIFICATION FISCALE EN 4 CASES BIEN DISPOSÉES -->
+                    <div class="p-3 mb-4 rounded-3 border" style="background-color: #f8fafc; border-color: #cbd5e1 !important;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-uppercase fw-bold text-secondary" style="font-size: 11px; letter-spacing: 1px;">
+                                📑 Identification Fiscale &amp; Gérant en Service
+                            </span>
+                            <span class="badge rounded-pill bg-light text-dark border">Norme DGI-FNE 2026</span>
+                        </div>
+                        <div class="row g-2">
+                            <!-- Case 1: N° Facture Globale -->
+                            <div class="col-12 col-md-3">
+                                <div class="p-3 bg-white rounded-3 border shadow-sm h-100" style="border-color: #e2e8f0 !important;">
+                                    <small class="text-muted d-block fw-semibold mb-1" style="font-size: 11px;">📋 N° FACTURE GLOBALE</small>
+                                    <div class="fs-5 fw-bold text-dark font-monospace">
+                                        <field name="name" readonly="state == 'certified'"/>
+                                    </div>
+                                    <small class="text-muted" style="font-size: 10px;">Identifiant fiscal unique</small>
+                                </div>
+                            </div>
+                            <!-- Case 2: Gérant Connecté -->
+                            <div class="col-12 col-md-3">
+                                <div class="p-3 bg-white rounded-3 border shadow-sm h-100" style="border-color: #e2e8f0 !important; border-left: 4px solid #2563eb !important;">
+                                    <small class="text-primary d-block fw-semibold mb-1" style="font-size: 11px;">👤 GÉRANT CONNECTÉ</small>
+                                    <div class="fs-5 fw-bold text-dark">
+                                        <field name="active_manager_name" readonly="1"/>
+                                    </div>
+                                    <small class="text-muted" style="font-size: 10px;">Responsable de caisse</small>
+                                </div>
+                            </div>
+                            <!-- Case 3: Date & Heure Connexion -->
+                            <div class="col-12 col-md-3">
+                                <div class="p-3 bg-white rounded-3 border shadow-sm h-100" style="border-color: #e2e8f0 !important;">
+                                    <small class="text-muted d-block fw-semibold mb-1" style="font-size: 11px;">⏰ DATE &amp; HEURE CONNEXION</small>
+                                    <div class="fs-6 fw-bold text-dark">
+                                        <field name="session_opened_at" readonly="1"/>
+                                    </div>
+                                    <small class="text-muted" style="font-size: 10px;">Exercice : <field name="date" readonly="1"/></small>
+                                </div>
+                            </div>
+                            <!-- Case 4: Statut Fiscal & NIF -->
+                            <div class="col-12 col-md-3">
+                                <div class="p-3 bg-white rounded-3 border shadow-sm h-100" style="border-color: #e2e8f0 !important;">
+                                    <small class="text-muted d-block fw-semibold mb-1" style="font-size: 11px;">🛡️ STATUT &amp; FISCALITÉ</small>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-success py-1 px-2 fs-6" invisible="state != 'certified'">
+                                            🏛️ Certifiée DGI
+                                        </span>
+                                        <span class="badge bg-primary py-1 px-2 fs-6" invisible="state == 'certified'">
+                                            ⚡ Session Active
+                                        </span>
+                                    </div>
+                                    <small class="text-muted d-block mt-1" style="font-size: 10px;">NIF DGI: <field name="company_nif" readonly="1"/></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <field name="currency_id" invisible="1"/>
+
+                    <!-- BLOC 2 : LES 4 GRANDES CASES FINANCIÈRES KPI (FORT IMPACT VISUEL) -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-uppercase fw-bold text-secondary" style="font-size: 11px; letter-spacing: 1px;">
+                                💰 Synthèse Financière &amp; Ventilation Fiscale DGI
+                            </span>
+                            <span class="text-muted" style="font-size: 12px;">Calculs automatiques 100% pré-remplis</span>
+                        </div>
+                        <div class="row g-3">
+                            <!-- Grande Case 1: Total TTC -->
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <div class="p-3 rounded-3 shadow-sm h-100" style="background-color: #f0fdf4; border: 2px solid #86efac;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="fw-bold text-uppercase" style="color: #166534; font-size: 11px; letter-spacing: 0.5px;">TOTAL BRUT TTC</small>
+                                        <span class="badge" style="background-color: #bbf7d0; color: #14532d; font-size: 10px;">Net Encaissé</span>
+                                    </div>
+                                    <div class="my-2" style="font-size: 26px; font-weight: 800; color: #14532d; line-height: 1.1;">
+                                        <field name="total_ttc" readonly="1" widget="monetary"/>
+                                    </div>
+                                    <div class="text-muted" style="font-size: 11px;">Montant total payé par les clients</div>
+                                </div>
+                            </div>
+
+                            <!-- Grande Case 2: Base Hors Taxes -->
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <div class="p-3 rounded-3 shadow-sm h-100" style="background-color: #eff6ff; border: 2px solid #93c5fd;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="fw-bold text-uppercase" style="color: #1e40af; font-size: 11px; letter-spacing: 0.5px;">BASE HORS TAXES (HT)</small>
+                                        <span class="badge" style="background-color: #bfdbfe; color: #1e3a8a; font-size: 10px;">C.A. Net</span>
+                                    </div>
+                                    <div class="my-2" style="font-size: 26px; font-weight: 800; color: #1e3a8a; line-height: 1.1;">
+                                        <field name="total_ht" readonly="1" widget="monetary"/>
+                                    </div>
+                                    <div class="text-muted" style="font-size: 11px;">Base imposable DGI (TTC ÷ 1.18)</div>
+                                </div>
+                            </div>
+
+                            <!-- Grande Case 3: TVA DGI 18% -->
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <div class="p-3 rounded-3 shadow-sm h-100" style="background-color: #fffbeb; border: 2px solid #fde68a;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="fw-bold text-uppercase" style="color: #92400e; font-size: 11px; letter-spacing: 0.5px;">TVA DGI COLLECTÉE</small>
+                                        <span class="badge" style="background-color: #fef08a; color: #713f12; font-size: 10px;">18% Légal</span>
+                                    </div>
+                                    <div class="my-2" style="font-size: 26px; font-weight: 800; color: #78350f; line-height: 1.1;">
+                                        <field name="total_tva" readonly="1" widget="monetary"/>
+                                    </div>
+                                    <div class="text-muted" style="font-size: 11px;">Taxe reversée à l'État (TTC - HT)</div>
+                                </div>
+                            </div>
+
+                            <!-- Grande Case 4: Nombre de Ventes -->
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <div class="p-3 rounded-3 shadow-sm h-100" style="background-color: #faf5ff; border: 2px solid #d8b4fe;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="fw-bold text-uppercase" style="color: #6b21a8; font-size: 11px; letter-spacing: 0.5px;">VENTES ENCAISSÉES</small>
+                                        <span class="badge" style="background-color: #e9d5ff; color: #581c87; font-size: 10px;">Commandes</span>
+                                    </div>
+                                    <div class="my-2" style="font-size: 26px; font-weight: 800; color: #581c87; line-height: 1.1;">
+                                        <field name="total_orders" readonly="1"/> <span style="font-size: 16px; font-weight: 600;">Reçus</span>
+                                    </div>
+                                    <div class="text-muted" style="font-size: 11px;">Nombre de transactions validées</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLOC 3 : ONGLETS DÉTAILLÉS (GRILLE REÇUS, GÉRANTS, MODES RÈGLEMENT, DGI) -->
+                    <notebook>
+                        <page string="🧾 Grille des Encaissements &amp; Ventes de la Journée" name="daily_orders">
+                            <div class="p-2 mb-2 bg-light rounded border text-muted" style="font-size: 12px;">
+                                💡 Cette grille détaille chaque commande encaissée par les gérants pour la journée. Toutes les cellules sont reliées directement aux tickets de caisse.
+                            </div>
+                            <field name="order_ids" readonly="1">
+                                <tree string="Encaissements de la Journée" decoration-success="state in ['paid', 'done']">
+                                    <field name="date_order" string="Heure Encaissement"/>
+                                    <field name="name" string="N° Reçu / Commande" decoration-bf="1"/>
+                                    <field name="user_id" string="👤 Gérant Vendeur"/>
+                                    <field name="amount_total" string="💰 Brut TTC (Sans Monnaie)" decoration-bf="1" sum="Total Brut TTC (FCFA)"/>
+                                    <field name="tendered_amount" string="💵 Versé Client"/>
+                                    <field name="change_amount" string="🪙 Monnaie Rendue"/>
+                                    <field name="payment_method_name" string="💳 Mode Règlement"/>
+                                    <field name="state" widget="badge" decoration-success="state in ['paid', 'done']"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="👥 Ventilation par Gérant" name="managers_breakdown">
+                            <field name="managers_summary_html" readonly="1"/>
+                        </page>
+
+                        <page string="💳 Répartition par Mode de Règlement" name="payment_breakdown">
+                            <field name="payment_methods_html" readonly="1"/>
+                        </page>
+
+                        <page string="🏛️ Certification DGI &amp; Sceau Numérique" name="dgi_certification">
+                            <div class="row g-3 p-3">
+                                <div class="col-12 col-md-8">
+                                    <div class="p-3 bg-light rounded border">
+                                        <h5 class="fw-bold text-dark mb-3">Informations de Certification Fiscale</h5>
+                                        <div class="mb-2"><strong>Référence DGI (FNE) :</strong> <field name="dgi_reference" readonly="1" class="oe_inline"/></div>
+                                        <div class="mb-2"><strong>Date &amp; Heure de Certification :</strong> <field name="dgi_certified_at" readonly="1" class="oe_inline"/></div>
+                                        <div class="mb-2"><strong>Certifié Par :</strong> <field name="certified_by" readonly="1" class="oe_inline"/></div>
+                                        <div class="mb-2"><strong>Facture Client Comptabilité :</strong> <field name="invoice_id" readonly="1" class="oe_inline"/></div>
+                                        <div class="mt-3" invisible="not dgi_security_code">
+                                            <strong>Empreinte Numérique SHA-256 (Inviolable) :</strong>
+                                            <div class="p-2 bg-white rounded border font-monospace text-break text-muted mt-1" style="font-size: 11px;">
+                                                <field name="dgi_security_code" readonly="1"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <field name="dgi_qr_html" readonly="1"/>
+                                </div>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_restaurant_daily_report" model="ir.actions.act_window">
+        <field name="name">🏛️ Facturation Générale &amp; Certification DGI</field>
+        <field name="res_model">restaurant.daily.report</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_daily_report_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_daily_report_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer une Facture Générale de la Journée
+            </p>
+            <p>
+                Rassemblez toutes les ventes encaissées de la journée, calculez la base HT et la TVA, et générez la certification officielle DGI.
+            </p>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- 5. SUIVI DES COMMANDES & SESSIONS DES GÉRANTS                         -->
+    <!-- ===================================================================== -->
+    <record id="action_restaurant_sales_monitoring" model="ir.actions.act_window">
+        <field name="name">📋 Commandes &amp; Ventes Encaissées</field>
+        <field name="res_model">pos.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', 'in', ['paid', 'done', 'invoiced'])]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                Aucune commande encaissée pour le moment
+            </p>
+            <p>
+                L'administrateur suit ici en direct toutes les commandes et encaissements réalisés par les gérants.
+            </p>
+        </field>
+    </record>
+
+    <record id="view_restaurant_pos_session_tree" model="ir.ui.view">
+        <field name="name">pos.session.restaurant.tree</field>
+        <field name="model">pos.session</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <tree string="Sessions &amp; Prises de Service des Gérants" sample="1" decoration-info="state == 'closed'" decoration-success="state == 'opened'">
+                <field name="name" string="Réf. Session" decoration-bf="1"/>
+                <field name="user_id" string="Gérant en Service" decoration-bf="1"/>
+                <field name="state" string="État" widget="badge" decoration-success="state == 'opened'" decoration-muted="state == 'closed'"/>
+                <field name="start_at" string="Heure de Début du Travail"/>
+                <field name="stop_at" string="Heure de Fin (Clôture)"/>
+                <field name="total_payments_amount" string="Total Encaissé (FCFA)" decoration-bf="1"/>
+                <field name="cash_register_difference" string="Écart de Caisse" decoration-danger="cash_register_difference &lt; 0" decoration-success="cash_register_difference &gt;= 0"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_restaurant_session_tracking" model="ir.actions.act_window">
+        <field name="name">🕒 Sessions &amp; Horaires des Gérants</field>
+        <field name="res_model">pos.session</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_restaurant_pos_session_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                Aucune session de caisse enregistrée
+            </p>
+            <p>
+                L'administrateur retrace ici chaque gérant connecté : l'heure de début de service, l'heure de clôture et le total encaissé.
+            </p>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- MENU PRINCIPAL DU RESTAURANT (ADMINISTRATION STRICTE)                 -->
+    <!-- ===================================================================== -->
+    <menuitem id="menu_restaurant_root"
+              name="Gestion Restaurant"
+              sequence="1"
+              web_icon="restaurant_core,static/description/icon.png"
+              action="action_restaurant_gerant_own_orders"
+              groups="base.group_user"/>
+
+    <!-- Redirection automatique de l'Administrateur directement sur le Tableau de Bord Restaurant -->
+    <record id="base.user_admin" model="res.users">
+        <field name="action_id" ref="restaurant_core.action_restaurant_sales_dashboard"/>
+    </record>
+
+    <!-- 1. TABLEAU DE BORD (Supervision Administrateur uniquement, jamais affiché au Gérant) -->
+    <menuitem id="menu_restaurant_dashboard"
+              name="📊 Tableau de Bord"
+              parent="menu_restaurant_root"
+              action="action_restaurant_sales_dashboard"
+              sequence="50"
+              groups="base.group_system"/>
+
+    <!-- ===================================================================== -->
+    <!-- ESPACE OPÉRATIONNEL DU GÉRANT DU RESTAURANT (ACCÈS COMPLET INTÉGRAL)  -->
+    <!-- Caisse, Ventes, Reçus et Facturation isolés pour chaque Gérant         -->
+    <!-- ===================================================================== -->
+
+    <!-- Action Commandes & Ventes propres au Gérant connecté -->
+    <record id="action_restaurant_gerant_own_orders" model="ir.actions.act_window">
+        <field name="name">📋 Mes Ventes Encaissées</field>
+        <field name="res_model">pos.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="context">{'default_user_id': uid}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                Aucune commande ou vente effectuée par vous pour le moment.
+            </p>
+            <p>
+                Dès que vous encaissez une commande client, elle apparaîtra ici avec son montant net sans monnaie.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action Factures Clients propres au Gérant connecté -->
+    <record id="action_restaurant_gerant_own_invoices" model="ir.actions.act_window">
+        <field name="name">🧾 Facturation &amp; Reçus Clients</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[('move_type', '=', 'out_invoice'), ('invoice_user_id', '=', uid)]</field>
+        <field name="context">{'default_move_type': 'out_invoice', 'default_invoice_user_id': uid}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                Aucune facture enregistrée par vous pour le moment.
+            </p>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- 6. GRANDS MARCHÉS & FACTURES SUR MESURE DU GÉRANT                     -->
+    <!-- ===================================================================== -->
+    <record id="view_restaurant_grand_marche_tree" model="ir.ui.view">
+        <field name="name">restaurant.grand.marche.tree</field>
+        <field name="model">restaurant.grand.marche</field>
+        <field name="arch" type="xml">
+            <tree string="Grands Marchés &amp; Factures Sur Mesure" sample="1" decoration-success="state == 'paid'" decoration-info="state == 'confirmed'" decoration-muted="state == 'cancel'">
+                <field name="name" string="N° Facture Marché" decoration-bf="1"/>
+                <field name="date_invoice" string="Date"/>
+                <field name="partner_name" string="Client / Entreprise" decoration-bf="1"/>
+                <field name="subject" string="Objet de la Prestation"/>
+                <field name="manager_id" string="Gérant"/>
+                <field name="amount_repas" string="🍲 Repas" optional="show" widget="monetary"/>
+                <field name="amount_boissons" string="🥤 Boissons" optional="show" widget="monetary"/>
+                <field name="amount_services" string="✨ Prestations" optional="show" widget="monetary"/>
+                <field name="amount_untaxed" string="Total Commande" decoration-bf="1" widget="monetary"/>
+                <field name="amount_total" string="Total TTC DGI" optional="hide" groups="base.group_system" widget="monetary"/>
+                <field name="amount_residual" string="Reste à Payer" decoration-danger="amount_residual &gt; 0" widget="monetary"/>
+                <field name="dgi_status" string="Statut Fiscal DGI" widget="badge" decoration-success="dgi_status == 'certified'" decoration-warning="dgi_status == 'to_certify'" decoration-muted="dgi_status == 'draft'"/>
+                <field name="state" string="État Commercial" widget="badge" decoration-success="state == 'paid'" decoration-primary="state == 'confirmed'" decoration-warning="state == 'draft'" decoration-danger="state == 'cancel'"/>
+                <field name="currency_id" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_restaurant_grand_marche_form" model="ir.ui.view">
+        <field name="name">restaurant.grand.marche.form</field>
+        <field name="model">restaurant.grand.marche</field>
+        <field name="arch" type="xml">
+            <form string="Grand Marché &amp; Facture Sur Mesure">
+                <header>
+                    <button name="action_confirm"
+                            string="✅ Valider la Facture Marché"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_print_client_receipt"
+                            string="🖨️ Imprimer le Reçu Client"
+                            type="object"
+                            class="btn-success"
+                            icon="fa-print"/>
+                    <button name="action_print_pdf"
+                            string="📄 Imprimer Facture A4 (PDF)"
+                            type="object"
+                            class="btn-outline-secondary"
+                            icon="fa-file-pdf-o"/>
+                    <button name="action_mark_paid"
+                            string="💵 Encaisser &amp; Soldé"
+                            type="object"
+                            class="btn-info"
+                            invisible="state not in ['confirmed', 'draft']"/>
+                    <button name="action_load_default_template"
+                            string="📋 Charger le Modèle Type"
+                            type="object"
+                            class="btn-outline-primary"
+                            invisible="state != 'draft'"/>
+                    <!-- BOUTONS RÉSERVÉS À L'ADMINISTRATEUR (SUPERVISION FISCALE DGI STRICTE) -->
+                    <button name="action_certify_dgi"
+                            string="🏛️ Certifier la Facture DGI (Admin)"
+                            type="object"
+                            class="btn-warning fw-bold"
+                            groups="base.group_system"
+                            invisible="is_certified_dgi or state == 'draft'"
+                            confirm="Confirmez-vous la certification fiscale DGI officielle de cette facture de Grand Marché ? Le sceau cryptographique SHA-256 et la référence FNE e-MCF seront générés."/>
+                    <button name="action_print_dgi_invoice"
+                            string="🏛️ Imprimer Facture Normalisée DGI (PDF)"
+                            type="object"
+                            class="btn-dark"
+                            groups="base.group_system"
+                            icon="fa-shield"
+                            invisible="not is_certified_dgi"/>
+                    <button name="action_view_accounting_invoice"
+                            string="📑 Facture Comptable"
+                            type="object"
+                            class="btn-outline-dark"
+                            groups="base.group_system"
+                            invisible="not invoice_id"/>
+                    <button name="action_set_draft"
+                            string="🔄 Modifier (Brouillon)"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state in ['draft'] or is_certified_dgi"/>
+                    <button name="action_cancel"
+                            string="❌ Annuler le Marché"
+                            type="object"
+                            class="btn-danger"
+                            confirm="Êtes-vous sûr de vouloir annuler cette facture de grand marché ?"
+                            invisible="state in ['cancel', 'paid'] or is_certified_dgi"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,paid"/>
+                </header>
+                <sheet>
+                    <field name="is_certified_dgi" invisible="1"/>
+                    <field name="invoice_id" invisible="1"/>
+
+                    <!-- BANNIÈRE DYNAMIQUE : CERTIFICATION DGI AVEC QR CODE IMMÉDIATEMENT VISIBLE -->
+                    <div class="alert alert-success d-flex align-items-center justify-content-between mb-3 shadow-sm" role="alert" style="border-radius: 10px; border-left: 5px solid #059669; background-color: #ecfdf5;" invisible="not is_certified_dgi">
+                        <div class="d-flex align-items-start me-3">
+                            <span class="fs-1 me-3">🏛️</span>
+                            <div>
+                                <strong class="text-success" style="font-size: 15px;">FACTURE GRAND MARCHÉ CERTIFIÉE DGI (e-MCF) :</strong>
+                                <p class="mb-1 text-dark" style="font-size: 12px;">
+                                    Cette facture a été vérifiée et certifiée auprès de la Direction Générale des Impôts avec son QR Code fiscal et son sceau cryptographique officiel.
+                                </p>
+                                <div style="font-size: 11px; color: #475569;">
+                                    <span>Référence FNE : <strong class="text-primary font-monospace"><field name="dgi_reference" readonly="1"/></strong></span> • 
+                                    <span>Sceau SHA-256 : <code class="text-dark"><field name="dgi_security_code" readonly="1"/></code></span><br/>
+                                    <span>Certifiée le : <strong><field name="dgi_certified_at" readonly="1"/></strong> par <strong><field name="dgi_certified_by" readonly="1"/></strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 bg-white p-1 rounded border text-center shadow-sm" style="border-color: #059669 !important;">
+                            <field name="dgi_qr_html" readonly="1" nolabel="1"/>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning d-flex align-items-center mb-3" role="alert" style="border-radius: 10px; border-left: 5px solid #f59e0b; background-color: #fffbeb;" invisible="is_certified_dgi or state not in ['confirmed', 'paid']">
+                        <span class="fs-2 me-3">⚡</span>
+                        <div class="flex-grow-1">
+                            <strong class="text-dark" style="font-size: 14px;">FACTURE ENVOYÉE AUTOMATIQUEMENT À L'ADMINISTRATION :</strong>
+                            <p class="mb-0 text-muted" style="font-size: 12px;">
+                                Les calculs de montants fiscaux DGI (Base HT, TVA 18%, AIB) sont prêts et vérifiés sans aucune erreur. La facture est transmise en un clin d'œil dans l'espace Admin, prête pour certification fiscale.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info d-flex align-items-center mb-3" role="alert" style="border-radius: 10px; border-left: 5px solid #064e3b; background-color: #f0fdf4;" invisible="state != 'draft'">
+                        <span class="fs-2 me-3">🍽️</span>
+                        <div class="flex-grow-1">
+                            <strong class="text-success" style="font-size: 14px;">SAISIE HORIZONTALE LIBRE &amp; CALCUL AUTOMATIQUE :</strong>
+                            <p class="mb-0 text-muted" style="font-size: 12px;">
+                                Mentionnez librement chaque plat ou boisson sur la ligne horizontale et indiquez son prix : le système classe automatiquement la catégorie (Repas, Boisson, etc.) et calcule instantanément le montant total au fur et à mesure. Aucune donnée n'est imposée, vous avez le choix total !
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- TITRE / NUMÉRO DE FACTURE & STATUT DGI -->
+                    <div class="oe_title mb-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted fw-bold" style="font-size: 12px; letter-spacing: 0.5px;">FACTURE GRAND MARCHÉ &amp; TRAITEUR</span>
+                            <h1 class="d-flex align-items-center gap-2 mb-0">
+                                <field name="name" readonly="1" class="font-monospace text-primary"/>
+                            </h1>
+                        </div>
+                        <div>
+                            <field name="dgi_status" widget="badge" decoration-success="dgi_status == 'certified'" decoration-warning="dgi_status == 'to_certify'" decoration-info="dgi_status == 'draft'" style="font-size: 14px; padding: 8px 14px;"/>
+                        </div>
+                    </div>
+
+                    <!-- OBJET DU MARCHÉ (CADRE PRINCIPAL) -->
+                    <div class="p-3 mb-3 rounded-3" style="background-color: #f8fafc; border: 2px solid #cbd5e1;">
+                        <label for="subject" string="🎯 Objet du Marché / Prestation (Titre de la Commande)" class="fw-bolder text-dark mb-1" style="font-size: 13px;"/>
+                        <field name="subject" placeholder="ex: Prestation Buffet VIP, Banquet, Mariage, Dîner gala..." required="1" style="font-size: 16px; font-weight: 700;"/>
+                    </div>
+
+                    <!-- INFORMATIONS CLIENT & MODALITÉS -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-6">
+                            <div class="p-3 bg-white rounded-3 border shadow-sm h-100" style="border-left: 4px solid #064e3b !important;">
+                                <h6 class="fw-bold text-success mb-3">🏢 Client / Entreprise / Donneur d'Ordre</h6>
+                                <group>
+                                    <field name="partner_id" placeholder="Choisir un client enregistré (optionnel)"/>
+                                    <field name="partner_name" placeholder="ex: Direction Générale, Société ABC..." required="1"/>
+                                    <field name="partner_ifu" placeholder="ex: 020202020202 (NIF / IFU Fiscal)"/>
+                                    <field name="partner_phone" placeholder="ex: +229 97 00 00 00"/>
+                                    <field name="partner_email" placeholder="ex: contact@entreprise.com"/>
+                                    <field name="partner_address" placeholder="ex: Lieu de livraison ou réception..."/>
+                                </group>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="p-3 bg-white rounded-3 border shadow-sm h-100" style="border-left: 4px solid #d4af37 !important;">
+                                <h6 class="fw-bold text-dark mb-3">📋 Paramètres Financiers &amp; Règlement</h6>
+                                <group>
+                                    <field name="date_invoice"/>
+                                    <field name="date_due"/>
+                                    <field name="manager_id" readonly="1"/>
+                                    <field name="tax_rate" widget="radio" options="{'horizontal': true}" groups="base.group_system"/>
+                                    <field name="aib_rate" widget="radio" options="{'horizontal': true}" groups="base.group_system"/>
+                                    <field name="payment_method"/>
+                                    <field name="payment_terms"/>
+                                </group>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI FINANCIERS PAR CATÉGORIE & TOTAUX AUTOMATIQUES -->
+                    <div class="row g-2 mb-4">
+                        <div class="col-6 col-md-2">
+                            <div class="p-2 rounded-3 shadow-sm text-center" style="background-color: #f0fdf4; border: 1.5px solid #86efac;">
+                                <small class="text-success fw-bold text-uppercase d-block" style="font-size: 10px;">🍲 Total Repas</small>
+                                <span class="fs-6 fw-bolder text-dark" style="font-weight: 800;">
+                                    <field name="amount_repas" widget="monetary"/>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <div class="p-2 rounded-3 shadow-sm text-center" style="background-color: #fffbeb; border: 1.5px solid #fde68a;">
+                                <small class="text-warning fw-bold text-uppercase d-block" style="font-size: 10px; color: #b45309 !important;">🥤 Total Boissons</small>
+                                <span class="fs-6 fw-bolder text-dark" style="font-weight: 800;">
+                                    <field name="amount_boissons" widget="monetary"/>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <div class="p-2 rounded-3 shadow-sm text-center" style="background-color: #eef2ff; border: 1.5px solid #c7d2fe;">
+                                <small class="text-primary fw-bold text-uppercase d-block" style="font-size: 10px;">✨ Prestations</small>
+                                <span class="fs-6 fw-bolder text-dark" style="font-weight: 800;">
+                                    <field name="amount_services" widget="monetary"/>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-2 rounded-3 shadow-sm text-center" style="background-color: #064e3b; border: 1.5px solid #064e3b;">
+                                <small class="text-white fw-bold text-uppercase d-block" style="font-size: 10px; color: #ffd700 !important;">MONTANT TOTAL COMMANDE</small>
+                                <span class="fs-6 fw-bolder text-white" style="font-weight: 900;">
+                                    <field name="amount_untaxed" widget="monetary"/>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-2 rounded-3 shadow-sm text-center" style="background-color: #fef2f2; border: 1.5px solid #fca5a5;">
+                                <small class="text-danger fw-bold text-uppercase d-block" style="font-size: 10px;">Solde Reste à Payer</small>
+                                <span class="fs-6 fw-bolder text-danger" style="font-weight: 800;">
+                                    <field name="amount_residual" widget="monetary"/>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ONGLETS : LIGNES CADRÉES HORIZONTALES, DGI ADMIN, CONDITIONS -->
+                    <notebook>
+                        <page string="📋 Commande des Plats, Boissons &amp; Prestations" name="marche_lines">
+                            <!-- BOUTONS D'AJOUT RAPIDE HORIZONTAL -->
+                            <div class="d-flex flex-wrap gap-2 mb-3 p-2 bg-light rounded border align-items-center">
+                                <span class="fw-bold text-muted me-2" style="font-size: 12px;">➕ Ajouter une Ligne Horizontale :</span>
+                                <button name="action_add_repas_line"
+                                        string="🍲 Ligne Plat / Repas"
+                                        type="object"
+                                        class="btn btn-sm btn-outline-success"
+                                        invisible="state != 'draft'"/>
+                                <button name="action_add_boisson_line"
+                                        string="🥤 Ligne Boisson"
+                                        type="object"
+                                        class="btn btn-sm btn-outline-warning"
+                                        invisible="state != 'draft'"/>
+                                <button name="action_add_service_line"
+                                        string="✨ Ligne Prestation"
+                                        type="object"
+                                        class="btn btn-sm btn-outline-primary"
+                                        invisible="state != 'draft'"/>
+                                <button name="action_load_default_template"
+                                        string="📋 Déposer Grille Vierge"
+                                        type="object"
+                                        class="btn btn-sm btn-outline-secondary ms-auto"
+                                        invisible="state != 'draft'"/>
+                            </div>
+
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="name" string="Nom du Plat ou Boisson (Saisie Libre)" placeholder="Mentionnez le plat ou la boisson..." required="1"/>
+                                    <field name="item_type" string="Classement (Auto)" widget="selection"/>
+                                    <field name="quantity" string="Quantité" width="85px"/>
+                                    <field name="price_unit" string="Prix Unitaire (FCFA)" widget="monetary" width="140px"/>
+                                    <field name="price_subtotal" string="Montant Calculé (FCFA)" widget="monetary" sum="Total Commande"/>
+                                    <field name="product_id" string="Carte / Menu (Optionnel)" placeholder="Choisir de la carte (optionnel)" optional="hide"/>
+                                    <field name="notes" string="Précisions" placeholder="ex: Cuisson, conditionnement..." optional="hide"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                </tree>
+                            </field>
+
+                            <div class="row justify-content-end mt-3">
+                                <div class="col-12 col-md-5">
+                                    <table class="table table-sm text-end" style="font-size: 13px;">
+                                        <tr invisible="amount_repas == 0">
+                                            <td class="text-muted">Sous-total Plats &amp; Repas :</td>
+                                            <td class="fw-bold"><field name="amount_repas" widget="monetary"/></td>
+                                        </tr>
+                                        <tr invisible="amount_boissons == 0">
+                                            <td class="text-muted">Sous-total Boissons :</td>
+                                            <td class="fw-bold"><field name="amount_boissons" widget="monetary"/></td>
+                                        </tr>
+                                        <tr invisible="amount_services == 0">
+                                            <td class="text-muted">Sous-total Prestations :</td>
+                                            <td class="fw-bold"><field name="amount_services" widget="monetary"/></td>
+                                        </tr>
+                                        <tr class="table-success">
+                                            <td class="fw-bolder fs-5 text-success">TOTAL DE LA COMMANDE :</td>
+                                            <td class="fw-bolder fs-5 text-success"><field name="amount_untaxed" widget="monetary"/></td>
+                                        </tr>
+                                        <tr groups="base.group_system" class="table-light">
+                                            <td class="fw-bold text-muted">TVA DGI (<field name="tax_rate" class="oe_inline"/>%) :</td>
+                                            <td class="fw-bold text-muted"><field name="amount_tax" widget="monetary"/></td>
+                                        </tr>
+                                        <tr groups="base.group_system" class="table-light">
+                                            <td class="fw-bold text-muted">Total TTC DGI :</td>
+                                            <td class="fw-bold text-muted"><field name="amount_total" widget="monetary"/></td>
+                                        </tr>
+                                        <tr invisible="amount_deposit == 0">
+                                            <td class="fw-bold text-muted">Acompte Reçu :</td>
+                                            <td><field name="amount_deposit" widget="monetary"/></td>
+                                        </tr>
+                                        <tr class="table-warning" invisible="amount_deposit == 0">
+                                            <td class="fw-bolder text-danger">SOLDE RESTANT :</td>
+                                            <td class="fw-bolder text-danger"><field name="amount_residual" widget="monetary"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </page>
+
+                        <!-- ONGLET FISCALITÉ DGI ADMINISTRATEUR (STRICTEMENT RÉSERVÉ À L'ADMINISTRATION) -->
+                        <page string="🏛️ Traitement Fiscal DGI (Réservé Administration)" name="marche_dgi" groups="base.group_system">
+                            <div class="p-3 mb-3 rounded-3" style="background-color: #f0fdf4; border: 2px solid #10b981;">
+                                <h5 class="fw-bold text-success mb-2">🏛️ Déclaration &amp; Certification Fiscale Grand Marché (DGI e-MCF)</h5>
+                                <p class="mb-0 text-muted" style="font-size: 12px;">
+                                    Cet espace permet à l'administrateur de certifier le grand marché auprès de la DGI en toute sérénité.
+                                    <strong>Cette facture reste totalement distincte des factures de caisse ordinaires pour éviter tout mélange comptable ou fiscal.</strong>
+                                </p>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-md-3">
+                                    <div class="p-3 bg-white rounded-3 border text-center shadow-sm">
+                                        <small class="text-muted fw-bold text-uppercase d-block" style="font-size: 11px;">Base Imposable DGI HT</small>
+                                        <span class="fs-4 fw-bolder text-dark">
+                                            <field name="dgi_base_ht" widget="monetary"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <div class="p-3 bg-white rounded-3 border text-center shadow-sm">
+                                        <small class="text-muted fw-bold text-uppercase d-block" style="font-size: 11px;">TVA DGI Collectée (18%)</small>
+                                        <span class="fs-4 fw-bolder text-dark">
+                                            <field name="dgi_tax_amount" widget="monetary"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <div class="p-3 bg-white rounded-3 border text-center shadow-sm" style="border-left: 4px solid #0284c7 !important;">
+                                        <small class="text-primary fw-bold text-uppercase d-block" style="font-size: 11px;">Retenue AIB DGI (<field name="aib_rate" class="oe_inline"/>%)</small>
+                                        <span class="fs-4 fw-bolder text-primary">
+                                            <field name="amount_aib" widget="monetary"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <div class="p-3 bg-white rounded-3 border text-center shadow-sm" style="border-left: 4px solid #059669 !important;">
+                                        <small class="text-success fw-bold text-uppercase d-block" style="font-size: 11px;">Net Commercial à Percevoir</small>
+                                        <span class="fs-4 fw-bolder text-success">
+                                            <field name="dgi_net_payable" widget="monetary"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-md-7">
+                                    <div class="p-3 bg-white rounded-3 border shadow-sm">
+                                        <h6 class="fw-bold text-dark mb-3">🛡️ Identifiants Fiscaux &amp; Sceau Numérique DGI</h6>
+                                        <group>
+                                            <field name="dgi_reference" readonly="1"/>
+                                            <field name="dgi_certified_at" readonly="1"/>
+                                            <field name="dgi_certified_by" readonly="1"/>
+                                            <field name="dgi_security_code" readonly="1"/>
+                                        </group>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-5">
+                                    <field name="dgi_qr_html" readonly="1"/>
+                                </div>
+                            </div>
+                        </page>
+
+                        <page string="📝 Notes &amp; Spécifications Particulières" name="marche_notes">
+                            <group>
+                                <field name="notes" placeholder="Précisez les conditions du marché, modalités de livraison, clauses particulières..."/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_restaurant_grand_marche_kanban" model="ir.ui.view">
+        <field name="name">restaurant.grand.marche.kanban</field>
+        <field name="model">restaurant.grand.marche</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" sample="1">
+                <field name="name"/>
+                <field name="partner_name"/>
+                <field name="subject"/>
+                <field name="date_invoice"/>
+                <field name="amount_total"/>
+                <field name="amount_residual"/>
+                <field name="dgi_status"/>
+                <field name="state"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click p-3 rounded-3 border shadow-sm mb-2 bg-white">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-primary font-monospace" style="font-size: 13px;"><field name="name"/></strong>
+                                <field name="dgi_status" widget="badge" decoration-success="dgi_status == 'certified'" decoration-warning="dgi_status == 'to_certify'" decoration-info="dgi_status == 'draft'"/>
+                            </div>
+                            <div class="fw-bold text-dark fs-6 mb-1"><field name="partner_name"/></div>
+                            <div class="small text-muted mb-2 text-truncate"><field name="subject"/></div>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                <span class="small text-muted"><field name="date_invoice"/></span>
+                                <span class="fw-bolder fs-5 text-success"><field name="amount_total" widget="monetary"/></span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- VUE DE RECHERCHE & FILTRES RAPIDES DGI -->
+    <record id="view_restaurant_grand_marche_search" model="ir.ui.view">
+        <field name="name">restaurant.grand.marche.search</field>
+        <field name="model">restaurant.grand.marche</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Grands Marchés">
+                <field name="name" string="N° Facture"/>
+                <field name="partner_name" string="Client / Entreprise"/>
+                <field name="partner_ifu" string="NIF / IFU Client"/>
+                <field name="subject" string="Objet de la Prestation"/>
+                <field name="manager_id" string="Gérant"/>
+                <separator/>
+                <filter name="to_certify" string="⚡ Prêt pour Certification DGI (Transmis Admin)" domain="[('dgi_status', '=', 'to_certify')]"/>
+                <filter name="certified" string="🏛️ Factures Certifiées DGI" domain="[('is_certified_dgi', '=', True)]"/>
+                <filter name="draft" string="📝 Brouillons" domain="[('state', '=', 'draft')]"/>
+                <filter name="unpaid" string="⚠️ Solde Restant Dû" domain="[('amount_residual', '&gt;', 0)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Statut Fiscal DGI" name="group_dgi" context="{'group_by': 'dgi_status'}"/>
+                    <filter string="Gérant" name="group_manager" context="{'group_by': 'manager_id'}"/>
+                    <filter string="Date de Facturation" name="group_date" context="{'group_by': 'date_invoice'}"/>
+                    <filter string="Mode de Règlement" name="group_payment" context="{'group_by': 'payment_method'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION POUR LE GÉRANT -->
+    <record id="action_restaurant_grand_marche" model="ir.actions.act_window">
+        <field name="name">📑 Grands Marchés &amp; Factures Sur Mesure</field>
+        <field name="res_model">restaurant.grand.marche</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_restaurant_grand_marche_search"/>
+        <field name="context">{'default_manager_id': uid}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer une nouvelle Facture Grand Marché sur mesure
+            </p>
+            <p>
+                Renseignez le client, l'objet de la prestation et ajustez les lignes types (Repas, Boissons, Prestations). Les montants et totaux se calculent automatiquement.
+            </p>
+        </field>
+    </record>
+
+    <!-- ACTION DÉDIÉE POUR L'ADMINISTRATION (SUPERVISION FISCALE DGI STRICTE) -->
+    <record id="action_restaurant_grand_marche_admin" model="ir.actions.act_window">
+        <field name="name">📑 Grands Marchés &amp; Certification DGI</field>
+        <field name="res_model">restaurant.grand.marche</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_restaurant_grand_marche_search"/>
+        <field name="context">{'search_default_to_certify': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Toutes les Factures Grands Marchés transmises par les gérants
+            </p>
+            <p>
+                Consultez les calculs fiscaux (Base HT, TVA 18%, Retenue AIB) et validez la certification fiscale DGI en un clic.
+            </p>
+        </field>
+    </record>
+
+    <!-- 1. Mes Commandes & Ventes : Suivi des ventes réalisées par le Gérant (PREMIER MENU DU GÉRANT) -->
+    <menuitem id="menu_restaurant_gerant_orders"
+              name="📋 Mes Ventes"
+              parent="menu_restaurant_root"
+              action="action_restaurant_gerant_own_orders"
+              sequence="1"
+              groups="point_of_sale.group_pos_user"/>
+
+    <!-- 2. Caisse & Point de Vente : Accès direct pour le Gérant pour encaisser et vendre -->
+    <menuitem id="menu_restaurant_gerant_pos"
+              name="🖥️ Caisse Directe"
+              parent="menu_restaurant_root"
+              action="point_of_sale.action_pos_config_kanban"
+              sequence="2"
+              groups="point_of_sale.group_pos_user"/>
+
+    <!-- 3. Grands Marchés & Prestations sur mesure : Facturation libre du Gérant -->
+    <menuitem id="menu_restaurant_grand_marche"
+              name="📑 Grands Marchés"
+              parent="menu_restaurant_root"
+              action="action_restaurant_grand_marche"
+              sequence="3"
+              groups="point_of_sale.group_pos_user"/>
+
+    <!-- 4. Facturation & Reçus Clients : Factures et reçus du Gérant -->
+    <menuitem id="menu_restaurant_gerant_invoices"
+              name="🧾 Factures &amp; Reçus"
+              parent="menu_restaurant_root"
+              action="action_restaurant_gerant_own_invoices"
+              sequence="4"
+              groups="point_of_sale.group_pos_user"/>
+
+    <!-- ===================================================================== -->
+    <!-- MENUS DE PILOTAGE DU RESTAURANT (SUPERVISION STRICTE ADMINISTRATEUR)  -->
+    <!-- ===================================================================== -->
+    <!-- 1. Gérants du Restaurant (Administrateur uniquement) -->
+    <menuitem id="menu_restaurant_managers"
+              name="👥 Gérants du Restaurant"
+              parent="menu_restaurant_root"
+              action="action_restaurant_managers"
+              sequence="10"
+              groups="base.group_system"/>
+
+    <!-- 2. Menus & Plats (Supervision & Gestion Complète - Administrateur uniquement) -->
+    <menuitem id="menu_restaurant_dishes_all"
+              name="🍽️ Menus &amp; Plats"
+              parent="menu_restaurant_root"
+              action="action_restaurant_dishes"
+              sequence="15"
+              groups="base.group_system"/>
+
+    <!-- 2bis. Menus & Plats (Consultation Seule - Gérant uniquement, Aucun ajout ni modification) -->
+    <menuitem id="menu_restaurant_dishes_gerant"
+              name="🍽️ Menus &amp; Plats"
+              parent="menu_restaurant_root"
+              action="action_restaurant_dishes_gerant"
+              sequence="5"
+              groups="point_of_sale.group_pos_user"/>
+
+    <!-- 3. Sessions & Horaires des Gérants (Supervision Admin) -->
+    <menuitem id="menu_restaurant_sessions"
+              name="🕒 Sessions &amp; Horaires des Gérants"
+              parent="menu_restaurant_root"
+              action="action_restaurant_session_tracking"
+              sequence="20"
+              groups="base.group_system"/>
+
+    <!-- 4. Commandes & Ventes Encaissées -->
+    <menuitem id="menu_restaurant_orders"
+              name="📋 Commandes &amp; Ventes Encaissées"
+              parent="menu_restaurant_root"
+              action="action_restaurant_sales_monitoring"
+              sequence="25"
+              groups="base.group_system"/>
+
+    <!-- 5. Facturation Générale Journalière & Certification DGI (Unique Facturation) -->
+    <menuitem id="menu_restaurant_invoices"
+              name="🏛️ Facturation &amp; DGI"
+              parent="menu_restaurant_root"
+              action="action_restaurant_daily_report"
+              sequence="30"
+              groups="base.group_system"/>
+
+    <!-- 6. Grands Marchés & Certification DGI (Supervision Admin Dédiée) -->
+    <menuitem id="menu_restaurant_grand_marche_admin"
+              name="📑 Grands Marchés &amp; DGI"
+              parent="menu_restaurant_root"
+              action="action_restaurant_grand_marche_admin"
+              sequence="35"
+              groups="base.group_system"/>
+
+    <!-- Vue Héritée Facture Comptable (account.move) avec Bouton d'accès au Rapport DGI Restaurant -->
+    <record id="view_move_form_inherit_restaurant_core" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.restaurant.core</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <field name="restaurant_daily_report_id" invisible="1"/>
+                <button name="action_open_restaurant_daily_report"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-cutlery"
+                        invisible="not restaurant_daily_report_id">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Rapport DGI</span>
+                        <span class="o_stat_text">Restaurant</span>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//sheet" position="before">
+                <field name="restaurant_daily_report_id" invisible="1"/>
+                <div class="p-3 mb-3 border rounded-3 bg-white shadow-sm" invisible="not restaurant_daily_report_id" style="border-left: 6px solid #2563eb !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h4 class="mb-0 fw-bold text-dark">🏛️ Facture Globale Dynamique Restaurant (DGI)</h4>
+                            <small class="text-muted">Calculs pré-remplis et synchronisés en temps réel avec les ventes des gérants</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button name="action_print_restaurant_invoice"
+                                    string="🖨️ Imprimer Facture Restaurant &amp; DGI (PDF)"
+                                    type="object"
+                                    class="btn btn-primary btn-sm"
+                                    icon="fa-print"/>
+                            <button name="action_open_restaurant_daily_report"
+                                    string="📊 Tableau Ventes Gérants"
+                                    type="object"
+                                    class="btn btn-outline-primary btn-sm"/>
+                        </div>
+                    </div>
+
+                    <!-- LES 4 GRANDES CASES FINANCIÈRES KPI DIRECTEMENT SUR LA FACTURE -->
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <div class="p-2 rounded border" style="background-color: #f0fdf4; border-color: #86efac !important;">
+                                <small class="fw-bold d-block text-uppercase" style="color: #166534; font-size: 10px;">TOTAL BRUT TTC</small>
+                                <span class="fs-4 fw-bold" style="color: #14532d;">
+                                    <field name="amount_total" readonly="1" widget="monetary"/>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <div class="p-2 rounded border" style="background-color: #eff6ff; border-color: #93c5fd !important;">
+                                <small class="fw-bold d-block text-uppercase" style="color: #1e40af; font-size: 10px;">BASE HT (TTC ÷ 1.18)</small>
+                                <span class="fs-4 fw-bold" style="color: #1e3a8a;">
+                                    <field name="amount_untaxed" readonly="1" widget="monetary"/>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <div class="p-2 rounded border" style="background-color: #fffbeb; border-color: #fde68a !important;">
+                                <small class="fw-bold d-block text-uppercase" style="color: #92400e; font-size: 10px;">TVA DGI COLLECTÉE (18%)</small>
+                                <span class="fs-4 fw-bold" style="color: #78350f;">
+                                    <field name="amount_tax" readonly="1" widget="monetary"/>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-3">
+                            <div class="p-2 rounded border" style="background-color: #faf5ff; border-color: #d8b4fe !important;">
+                                <small class="fw-bold d-block text-uppercase" style="color: #6b21a8; font-size: 10px;">VENTES ENCAISSÉES</small>
+                                <span class="fs-4 fw-bold" style="color: #581c87;">
+                                    <field name="restaurant_order_count" readonly="1"/> Reçus
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Raccourci Direct dans le Module Facturation Odoo (Clients -> Factures Générales Restaurant) -->
+    <menuitem id="menu_invoicing_restaurant_daily_report"
+              name="🏛️ Facturation Générale Restaurant (DGI)"
+              parent="account.menu_finance_receivables"
+              action="action_restaurant_daily_report"
+              sequence="15"
+              groups="base.group_system"/>
+
+    <!-- ===================================================================== -->
+    <!-- CONFIGURATION DE L'ÉTABLISSEMENT & FISCALITÉ DGI                     -->
+    <!-- ===================================================================== -->
+    <record id="view_restaurant_configuration_form" model="ir.ui.view">
+        <field name="name">restaurant.configuration.form</field>
+        <field name="model">restaurant.configuration</field>
+        <field name="arch" type="xml">
+            <form string="⚙️ Configuration du Restaurant &amp; Fiscalité DGI">
+                <header>
+                    <button name="action_save_and_sync"
+                            string="💾 Enregistrer &amp; Synchroniser la Configuration"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-floppy-o"/>
+                </header>
+                <sheet>
+                    <!-- SECTION 1 : IDENTITÉ & LOGO DE L'ENTREPRISE -->
+                    <div class="p-3 mb-4 rounded-3 border bg-light">
+                        <h5 class="fw-bold text-dark mb-3">🎨 Identité du Restaurant &amp; Logo Officiel</h5>
+                        <div class="row g-3 align-items-center">
+                            <div class="col-12 col-md-3 text-center">
+                                <label for="logo" class="fw-bold d-block mb-2">Logo Entreprise</label>
+                                <field name="logo" widget="image" class="oe_avatar" options="{'size': [130, 130]}"/>
+                                <small class="text-muted d-block mt-1">Apparaît sur toutes les factures</small>
+                            </div>
+                            <div class="col-12 col-md-9">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label for="name" class="fw-bold">Nom du Restaurant *</label>
+                                        <field name="name" placeholder="ex: Lemo Daje Restaurant" class="form-control fw-bold fs-5"/>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="subtitle" class="fw-bold">Sous-Titre / Slogan</label>
+                                        <field name="subtitle" placeholder="ex: Restaurant &amp; Grill Gastronomique" class="form-control"/>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="phone" class="fw-bold">Téléphone(s) (tel) *</label>
+                                        <field name="phone" placeholder="ex: +226 25 30 00 00" class="form-control"/>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="email" class="fw-bold">Adresse Email (Email) *</label>
+                                        <field name="email" placeholder="ex: contact@lemodaje.com" class="form-control"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="address" class="fw-bold">Adresse Physique Complète (Adress) *</label>
+                                        <field name="address" placeholder="ex: Avenue Kwame Nkrumah, Ouagadougou" class="form-control"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2 : IDENTIFIANTS FISCAUX OBLIGATOIRES (DGI / e-MCF) -->
+                    <div class="p-3 mb-4 rounded-3 border bg-light">
+                        <h5 class="fw-bold text-dark mb-3">🏛️ Identifiants Légaux &amp; Fiscaux Obligatoires (DGI e-MCF)</h5>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-4">
+                                <label for="ifu" class="fw-bold text-primary">IFU (Identifiant Fiscal Unique) *</label>
+                                <field name="ifu" placeholder="ex: 000123456789A" class="form-control font-monospace fw-bold"/>
+                                <small class="text-muted">Numéro d'identification fiscale légal</small>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label for="rccm" class="fw-bold">RCCM (Registre du Commerce) *</label>
+                                <field name="rccm" placeholder="ex: BF-OUA-01-2024-B12-00456" class="form-control font-monospace"/>
+                                <small class="text-muted">Immatriculation au registre du commerce</small>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label for="tax_regime" class="fw-bold">Régime Fiscal *</label>
+                                <field name="tax_regime" class="form-control"/>
+                                <small class="text-muted">Régime d'imposition de l'établissement</small>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="fiscal_division" class="fw-bold">Division Fiscale (Centre des Impôts) *</label>
+                                <field name="fiscal_division" placeholder="ex: DGI - Division Fiscale des Moyennes Entreprises" class="form-control"/>
+                                <small class="text-muted">Division fiscale de rattachement</small>
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label for="nim" class="fw-bold">NIM Machine e-MCF</label>
+                                <field name="nim" placeholder="ex: RESTO-DGI-MCF-01" class="form-control font-monospace"/>
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label for="tax_rate" class="fw-bold">Taux de TVA Normalisé (%)</label>
+                                <field name="tax_rate" class="form-control"/>
+                            </div>
+                            <div class="col-12">
+                                <label for="legal_mention" class="fw-bold">Mention Légale Obligatoire imprimée au bas des factures</label>
+                                <field name="legal_mention" class="form-control"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button name="action_save_and_sync"
+                                string="💾 Enregistrer la Configuration du Restaurant &amp; DGI"
+                                type="object"
+                                class="btn-primary btn-lg"
+                                icon="fa-check-circle"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION SERVEUR POUR OUVRIR DIRECTEMENT LE FORMULAIRE DE CONFIGURATION -->
+    <record id="action_server_restaurant_configuration" model="ir.actions.server">
+        <field name="name">⚙️ Configuration du Restaurant &amp; DGI</field>
+        <field name="model_id" ref="model_restaurant_configuration"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_configuration()</field>
+    </record>
+
+    <!-- MENU UNIQUE : CONFIGURATION RESTAURANT & DGI -->
+    <menuitem id="menu_restaurant_config_direct"
+              name="⚙️ Configuration Restaurant &amp; DGI"
+              parent="menu_restaurant_root"
+              action="action_server_restaurant_configuration"
+              sequence="35"
+              groups="base.group_system"/>
+
+</odoo>
+

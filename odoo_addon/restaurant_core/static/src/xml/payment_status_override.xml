@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="restaurant_core.PaymentScreenStatus" t-inherit="point_of_sale.PaymentScreenStatus" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('payment-status-container')]" position="replace">
+            <div class="payment-status-container d-flex flex-column justify-content-between p-2 rounded-3" style="background: #ffffff; border: 2.5px solid #059669; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.12); margin-bottom: 8px;">
+                
+                <!-- LIGNE DES DEUX CHAMPS CÔTE À CÔTE : SÉPARATION STRICTE SANS AUCUN MÉLANGE -->
+                <div class="d-flex gap-2 align-items-stretch mb-2">
+                    
+                    <!-- 1. CHAMP À CÔTÉ : TOTAL QUI DOIT ÊTRE PAYÉ (ADDITION) -->
+                    <div class="total-to-pay-box p-2 rounded-3 text-center d-flex flex-column justify-content-center" style="background: #f1f5f9; border: 2.5px solid #064e3b; width: 40%; min-width: 170px;">
+                        <div class="text-uppercase fw-bolder mb-1" style="color: #064e3b; font-size: 0.90rem; letter-spacing: 0.5px;">
+                            📋 Total à Payer :
+                        </div>
+                        <div class="fw-bolder" style="font-size: 2.1rem; font-weight: 900; color: #064e3b; line-height: 1.1;">
+                            <t t-esc="totalDueText" />
+                        </div>
+                        <div class="small fw-bold mt-1" style="color: #64748b; font-size: 0.75rem;">
+                            (Montant de l'addition)
+                        </div>
+                    </div>
+
+                    <!-- 2. LE GRAND CHAMP : MONTANT SAISI À LA MAIN PAR LE GÉRANT -->
+                    <div class="cash-entered-box p-2 rounded-3 text-center flex-grow-1" style="background: #ffffff; border: 3px solid #d4af37; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);">
+                        <div class="text-uppercase fw-bolder mb-1" style="color: #b45309; font-size: 0.90rem; letter-spacing: 0.5px;">
+                            💵 Montant Reçu en Espèces :
+                        </div>
+                        <div class="entered-amount-display fw-bolder" style="font-size: 2.9rem; font-weight: 900; color: #b45309; line-height: 1.1; letter-spacing: 1px;">
+                            <t t-esc="enteredAmountText" />
+                        </div>
+                        <div class="small fw-bold mt-1" style="color: #b45309; font-size: 0.75rem;">
+                            (Saisi à la main au pavé numérique ci-dessous)
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 3. RÉSULTAT DU CALCUL AUTOMATIQUE : MONNAIE OU RESTE -->
+                <!-- Cas A : Monnaie à rendre au client -->
+                <div t-if="props.order.get_change() &gt; 0" class="d-flex justify-content-between align-items-center py-2 px-3 rounded-3" style="background: #f0fdf4; border: 2.5px solid #059669; color: #064e3b; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.15);">
+                    <div class="d-flex align-items-center">
+                        <span class="fs-2 me-2">🪙</span>
+                        <div>
+                            <strong class="d-block fs-5 fw-bolder" style="color: #064e3b;">MONNAIE À REMETTRE AU CLIENT :</strong>
+                            <span class="small fw-bold" style="color: #047857;">Montant exact à restituer au client</span>
+                        </div>
+                    </div>
+                    <span class="fs-1 fw-bolder" style="font-weight: 900; color: #047857; font-size: 2.2rem;">
+                        <t t-esc="changeText" />
+                    </span>
+                </div>
+
+                <!-- Cas B : Argent insuffisant (Reste à encaisser) -->
+                <div t-elif="props.order.get_due() &gt; 0 and enteredAmount &gt; 0" class="d-flex justify-content-between align-items-center py-2 px-3 rounded-3" style="background: #fef2f2; border: 2.5px solid #ef4444; color: #b91c1c;">
+                    <div class="d-flex align-items-center">
+                        <span class="fs-3 me-2">⚠️</span>
+                        <div>
+                            <strong class="d-block fs-6 fw-bolder">Argent insuffisant !</strong>
+                            <span class="small fw-bold">Reste encore à encaisser</span>
+                        </div>
+                    </div>
+                    <span class="fs-2 fw-bolder text-danger" style="font-weight: 900;">
+                        <t t-esc="remainingText" />
+                    </span>
+                </div>
+
+                <!-- Cas C : Compte exact -->
+                <div t-elif="props.order.get_due() === 0 and props.order.get_change() === 0 and props.order.get_total_paid() &gt; 0" class="d-flex justify-content-between align-items-center py-2 px-3 rounded-3" style="background: #eff6ff; border: 2.5px solid #3b82f6; color: #1d4ed8;">
+                    <div class="d-flex align-items-center">
+                        <span class="fs-3 me-2">✅</span>
+                        <span class="fs-5 fw-bolder">Compte Exact (Aucune monnaie à rendre)</span>
+                    </div>
+                    <span class="fs-3 fw-bolder text-primary" style="font-weight: 900;">0 FCFA</span>
+                </div>
+
+                <!-- Cas D : En attente de saisie -->
+                <div t-else="" class="text-center py-1 text-muted small fw-bold" style="color: #64748b;">
+                    👉 Tapez le montant remis par le client sur le pavé numérique pour calculer la monnaie
+                </div>
+
+            </div>
+        </xpath>
+    </t>
+
+    <t t-name="restaurant_core.Navbar" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('pos-branding')]" position="before">
+            <div class="pos-home-sales-wrapper d-flex align-items-center ms-2 me-2">
+                <button type="button"
+                        t-on-click="goToMySales"
+                        data-action="go-to-my-sales"
+                        onclick="window.top.location.href='/web?db=restaurant_odoo#action=restaurant_core.action_restaurant_gerant_own_orders'; return false;"
+                        class="btn pos-sales-nav-btn pos-home-nav-btn d-flex align-items-center gap-2"
+                        title="Quitter la caisse et retourner à l'Accueil (Mes Ventes)">
+                    <span class="sales-btn-icon" style="font-size: 15px; line-height: 1;">🏠</span>
+                    <span class="sales-btn-text" style="font-size: 13.5px; font-weight: 900; letter-spacing: 0.3px;">Accueil</span>
+                </button>
+            </div>
+        </xpath>
+    </t>
+</templates>

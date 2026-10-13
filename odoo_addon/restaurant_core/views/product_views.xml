@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Vue Kanban : Cartes Carrées, Belles et Bien Ordonnées par Catégorie -->
+    <record id="view_restaurant_dish_kanban" model="ir.ui.view">
+        <field name="name">product.template.restaurant.dish.kanban</field>
+        <field name="model">product.template</field>
+        <field name="priority">80</field>
+        <field name="arch" type="xml">
+            <kanban sample="1" class="o_kanban_dashboard">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="list_price"/>
+                <field name="restaurant_category_id"/>
+                <field name="available_in_pos"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click text-center p-3 m-2"
+                             style="width: 210px; height: 210px; border-radius: 18px; border: 2px solid #e2e8f0; background: #ffffff; box-shadow: 0 8px 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; align-items: center; transition: all 0.25s ease;">
+                            
+                            <!-- Haut de la carte : Badge Catégorie & Statut -->
+                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                                <span class="badge rounded-pill" style="font-size: 11px; font-weight: 600; padding: 5px 10px; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
+                                    <field name="restaurant_category_id"/>
+                                </span>
+                                <span class="badge rounded-pill" style="font-size: 10px; font-weight: bold; padding: 4px 8px; background-color: #dcfce7; color: #15803d;">
+                                    ● En Caisse
+                                </span>
+                            </div>
+
+                            <!-- Milieu de la carte : Nom du plat -->
+                            <div style="margin: auto 0; padding: 10px 4px; width: 100%;">
+                                <div style="font-size: 16px; font-weight: 800; color: #1e293b; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                    <field name="name"/>
+                                </div>
+                            </div>
+
+                            <!-- Bas de la carte : Prix en Grand et Stylé -->
+                            <div style="width: 100%; padding-top: 8px; border-top: 1px dashed #e2e8f0;">
+                                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 16px; font-weight: 800; padding: 6px 14px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);">
+                                    <field name="list_price"/> FCFA
+                                </div>
+                            </div>
+
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- 2. Vue Liste Simplifiée des Plats / Boissons du Restaurant -->
+    <record id="view_restaurant_dish_tree" model="ir.ui.view">
+        <field name="name">product.template.restaurant.dish.tree</field>
+        <field name="model">product.template</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <tree string="Carte du Restaurant" sample="1">
+                <field name="name" string="Nom du Plat / Boisson"/>
+                <field name="restaurant_category_id" string="Catégorie"/>
+                <field name="list_price" string="Prix (FCFA)"/>
+                <field name="available_in_pos" string="Disponible en Caisse" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- 3. Vue Formulaire Ultra-Simplifiée avec Catégorie, Nom et Prix -->
+    <record id="view_restaurant_dish_form" model="ir.ui.view">
+        <field name="name">product.template.restaurant.dish.form</field>
+        <field name="model">product.template</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <form string="Plat du Restaurant">
+                <header>
+                    <button name="action_confirm_dish"
+                            string="✅ Valider et Enregistrer le Plat"
+                            type="object"
+                            class="btn-primary"
+                            groups="base.group_system"
+                            style="font-size: 15px; font-weight: bold; padding: 8px 16px;"/>
+                    <button name="action_delete_dish"
+                            string="🗑️ Retirer de la Carte"
+                            type="object"
+                            class="btn-danger"
+                            groups="base.group_system"
+                            confirm="Êtes-vous sûr de vouloir retirer ce plat du menu du restaurant ?"
+                            invisible="not id"/>
+                </header>
+                <sheet>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
+                    
+                    <div class="oe_title" style="margin-bottom: 25px;">
+                        <label for="name" string="Nom du Plat ou de la Boisson" style="font-size: 16px; font-weight: bold; color: #1e293b;"/>
+                        <h1>
+                            <field name="name" placeholder="ex: Babeda, Poulet Braisé, Coca-Cola..." required="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Classification &amp; Tarif">
+                            <field name="restaurant_category_id" string="Catégorie" required="1" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="list_price" string="Prix (FCFA)" placeholder="ex: 2500" required="1" style="font-size: 18px; font-weight: bold; color: #047857;"/>
+                        </group>
+                        <group string="Service &amp; Présentation">
+                            <field name="available_in_pos" string="Disponible en Caisse" widget="boolean_toggle"/>
+                            <field name="description_sale" string="Description du Plat" placeholder="ex: Servi avec frites et sauce pimentée..."/>
+                        </group>
+                        <group invisible="1">
+                            <field name="pos_categ_ids"/>
+                            <field name="detailed_type"/>
+                            <field name="is_restaurant_dish"/>
+                            <field name="sale_ok"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 4. Vue Recherche & Filtres par Catégorie -->
+    <record id="view_restaurant_dish_search" model="ir.ui.view">
+        <field name="name">product.template.restaurant.dish.search</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <search string="Recherche dans la Carte">
+                <field name="name" string="Nom du Plat / Boisson"/>
+                <field name="restaurant_category_id" string="Catégorie"/>
+                <filter string="🍛 Plats Principaux" name="filter_main" domain="[('restaurant_category_id.name', '=', 'Plats Principaux')]"/>
+                <filter string="🥤 Boissons" name="filter_drinks" domain="[('restaurant_category_id.name', '=', 'Boissons')]"/>
+                <filter string="🍰 Desserts" name="filter_desserts" domain="[('restaurant_category_id.name', '=', 'Desserts')]"/>
+                <filter string="🥗 Entrées" name="filter_starters" domain="[('restaurant_category_id.name', '=', 'Entrées')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Catégorie" name="group_by_category" context="{'group_by': 'restaurant_category_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- 5. Action : Toute la Carte (Cartes carrées par défaut, groupées par Catégorie) -->
+    <record id="action_restaurant_dishes" model="ir.actions.act_window">
+        <field name="name">🍽️ Menus &amp; Plats</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_restaurant_dish_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form')})]"/>
+        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True)]</field>
+        <field name="context">{'default_available_in_pos': True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'search_default_group_by_category': 1}</field>
+    </record>
+
+    <!-- 6. Action : Plats Principaux (Cartes carrées uniquement pour Plats Principaux) -->
+    <record id="action_restaurant_main_dishes" model="ir.actions.act_window">
+        <field name="name">🍛 Plats Principaux</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_restaurant_dish_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form')})]"/>
+        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Plats Principaux')]</field>
+        <field name="context" eval="{'default_available_in_pos': True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'default_restaurant_category_id': ref('restaurant_core.pos_categ_main_dish'), 'search_default_filter_main': 1}"/>
+    </record>
+
+    <!-- 7. Action : Boissons (Cartes carrées uniquement pour Boissons) -->
+    <record id="action_restaurant_drinks" model="ir.actions.act_window">
+        <field name="name">🥤 Boissons</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_restaurant_dish_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form')})]"/>
+        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Boissons')]</field>
+        <field name="context" eval="{'default_available_in_pos': True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'default_restaurant_category_id': ref('restaurant_core.pos_categ_drinks'), 'search_default_filter_drinks': 1}"/>
+    </record>
+
+    <!-- 8. Action : Desserts (Cartes carrées uniquement pour Desserts) -->
+    <record id="action_restaurant_desserts" model="ir.actions.act_window">
+        <field name="name">🍰 Desserts</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_restaurant_dish_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form')})]"/>
+        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Desserts')]</field>
+        <field name="context" eval="{'default_available_in_pos': True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'default_restaurant_category_id': ref('restaurant_core.pos_categ_desserts'), 'search_default_filter_desserts': 1}"/>
+    </record>
+
+    <!-- 9. Action : Entrées (Cartes carrées uniquement pour Entrées) -->
+    <record id="action_restaurant_starters" model="ir.actions.act_window">
+        <field name="name">🥗 Entrées</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_restaurant_dish_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form')})]"/>
+        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Entrées')]</field>
+        <field name="context" eval="{'default_available_in_pos': True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'default_restaurant_category_id': ref('restaurant_core.pos_categ_starters'), 'search_default_filter_starters': 1}"/>
+    </record>
+    <!-- 10. Vues Consultation Seule pour Gérants (Aucun Ajout, Aucune Modification, Aucune Suppression) -->
+    <record id="view_restaurant_dish_kanban_readonly" model="ir.ui.view">
+        <field name="name">product.template.restaurant.dish.kanban.readonly</field>
+        <field name="model">product.template</field>
+        <field name="priority">95</field>
+        <field name="arch" type="xml">
+            <kanban create="0" edit="0" delete="0" group_create="0" group_edit="0" group_delete="0" quick_create="0" records_draggable="0" sample="1" class="o_kanban_dashboard">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="list_price"/>
+                <field name="restaurant_category_id"/>
+                <field name="available_in_pos"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click text-center p-3 m-2"
+                             style="width: 210px; height: 210px; border-radius: 18px; border: 2px solid #e2e8f0; background: #ffffff; box-shadow: 0 8px 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; align-items: center; transition: all 0.25s ease;">
+                            
+                            <!-- Haut de la carte : Badge Catégorie & Statut -->
+                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                                <span class="badge rounded-pill" style="font-size: 11px; font-weight: 600; padding: 5px 10px; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
+                                    <field name="restaurant_category_id" options="{'no_create': True, 'no_open': True}"/>
+                                </span>
+                                <span class="badge rounded-pill" style="font-size: 10px; font-weight: bold; padding: 4px 8px; background-color: #dcfce7; color: #15803d;">
+                                    ● En Caisse
+                                </span>
+                            </div>
+
+                            <!-- Milieu de la carte : Nom du plat -->
+                            <div style="margin: auto 0; padding: 10px 4px; width: 100%;">
+                                <div style="font-size: 16px; font-weight: 800; color: #1e293b; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                    <field name="name"/>
+                                </div>
+                            </div>
+
+                            <!-- Bas de la carte : Prix en Grand et Stylé -->
+                            <div style="width: 100%; padding-top: 8px; border-top: 1px dashed #e2e8f0;">
+                                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 16px; font-weight: 800; padding: 6px 14px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);">
+                                    <field name="list_price"/> FCFA
+                                </div>
+                            </div>
+
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_restaurant_dish_tree_readonly" model="ir.ui.view">
+        <field name="name">product.template.restaurant.dish.tree.readonly</field>
+        <field name="model">product.template</field>
+        <field name="priority">95</field>
+        <field name="arch" type="xml">
+            <tree string="Carte du Restaurant (Consultation)" create="0" edit="0" delete="0" sample="1">
+                <field name="name" string="Nom du Plat / Boisson"/>
+                <field name="restaurant_category_id" string="Catégorie" options="{'no_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                <field name="list_price" string="Prix (FCFA)"/>
+                <field name="available_in_pos" string="Disponible en Caisse" widget="boolean_toggle" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_restaurant_dish_form_readonly" model="ir.ui.view">
+        <field name="name">product.template.restaurant.dish.form.readonly</field>
+        <field name="model">product.template</field>
+        <field name="priority">95</field>
+        <field name="arch" type="xml">
+            <form string="Plat du Restaurant (Consultation)" create="0" edit="0" delete="0">
+                <sheet>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}" readonly="1"/>
+                    
+                    <div class="oe_title" style="margin-bottom: 25px;">
+                        <label for="name" string="Nom du Plat ou de la Boisson" style="font-size: 16px; font-weight: bold; color: #1e293b;"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Classification &amp; Tarif">
+                            <field name="restaurant_category_id" string="Catégorie" readonly="1" options="{'no_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                            <field name="list_price" string="Prix (FCFA)" readonly="1" style="font-size: 18px; font-weight: bold; color: #047857;"/>
+                        </group>
+                        <group string="Service &amp; Présentation">
+                            <field name="available_in_pos" string="Disponible en Caisse" widget="boolean_toggle" readonly="1"/>
+                            <field name="description_sale" string="Description du Plat" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_restaurant_dishes_gerant" model="ir.actions.act_window">
+        <field name="name">🍽️ Menus &amp; Plats (Consultation)</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_restaurant_dish_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban_readonly')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree_readonly')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form_readonly')})]"/>
+        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True)]</field>
+        <field name="context">{'search_default_group_by_category': 1}</field>
+    </record>
+</odoo>
