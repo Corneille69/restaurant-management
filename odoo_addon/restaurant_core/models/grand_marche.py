@@ -4,6 +4,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 import logging
 import hashlib
+from .restaurant_sync import _notify_backend
 
 _logger = logging.getLogger(__name__)
 
@@ -421,12 +422,42 @@ class RestaurantGrandMarche(models.Model):
             rec.state = 'confirmed'
             # Synchronisation automatique en coulisses pour l'admin
             rec._sync_accounting_invoice()
+            try:
+                _notify_backend('order', {
+                    'order_name': rec.name,
+                    'total': rec.amount_total,
+                    'tendered_amount': rec.amount_total,
+                    'change_amount': 0.0,
+                    'odoo_id': rec.id + 1000000,
+                    'state': 'paid',
+                    'manager_name': rec.manager_id.name if rec.manager_id else 'Gérant',
+                    'manager_login': rec.manager_id.login if rec.manager_id else 'gerant',
+                    'payment_method': rec.payment_method or 'Grand Marché / Prestation',
+                    'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+                })
+            except Exception as notify_err:
+                _logger.warning("Notification backend marché: %s", notify_err)
         return True
 
     def action_mark_paid(self):
         for rec in self:
             rec.amount_deposit = rec.amount_total
             rec.state = 'paid'
+            try:
+                _notify_backend('order', {
+                    'order_name': rec.name,
+                    'total': rec.amount_total,
+                    'tendered_amount': rec.amount_total,
+                    'change_amount': 0.0,
+                    'odoo_id': rec.id + 1000000,
+                    'state': 'paid',
+                    'manager_name': rec.manager_id.name if rec.manager_id else 'Gérant',
+                    'manager_login': rec.manager_id.login if rec.manager_id else 'gerant',
+                    'payment_method': rec.payment_method or 'Grand Marché / Prestation',
+                    'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+                })
+            except Exception as notify_err:
+                _logger.warning("Notification backend marché: %s", notify_err)
         return True
 
     def action_set_draft(self):

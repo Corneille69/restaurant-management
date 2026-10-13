@@ -530,6 +530,57 @@ class OdooService:
         except Exception as e:
             logger.error(f"Erreur lors de la synchro des sessions depuis Odoo: {e}")
 
+        # 6. Grands Marchés (Factures Prestations B2B)
+        try:
+            odoo_marches = self.execute_kw('restaurant.grand.marche', 'search_read', [
+                [['state', 'in', ['confirmed', 'paid']]]
+            ], {
+                'fields': ['id', 'name', 'subject', 'amount_total', 'state', 'date_invoice', 'manager_id', 'payment_method']
+            })
+            for m in odoo_marches:
+                order = db.query(Order).filter(Order.order_number == m.get('name')).first()
+                mgr_name = m['manager_id'][1] if isinstance(m.get('manager_id'), (list, tuple)) else None
+                mgr_login = None
+                if m.get('manager_id'):
+                    mid = m['manager_id'][0] if isinstance(m['manager_id'], (list, tuple)) else m['manager_id']
+                    u_matched = db.query(User).filter(User.odoo_user_id == mid).first()
+                    if u_matched:
+                        mgr_login = u_matched.username
+                        if not mgr_name:
+                            mgr_name = u_matched.full_name
+
+                order_dt = None
+                if m.get('date_invoice'):
+                    try:
+                        order_dt = datetime.datetime.fromisoformat(m['date_invoice'])
+                    except Exception:
+                        pass
+
+                if not order:
+                    order = Order(
+                        order_number=m['name'],
+                        status='paid',
+                        total_amount=float(m.get('amount_total', 0.0)),
+                        odoo_pos_order_id=m['id'] + 1000000,
+                        odoo_sync_status='synced',
+                        manager_name=mgr_name,
+                        manager_login=mgr_login,
+                        payment_method=m.get('payment_method') or "Grand Marché / Prestation",
+                        created_at=order_dt or datetime.datetime.utcnow()
+                    )
+                    db.add(order)
+                    counts["orders"] += 1
+                else:
+                    if abs(order.total_amount - float(m.get('amount_total', 0.0))) > 0.01:
+                        order.total_amount = float(m.get('amount_total', order.total_amount))
+                        counts["orders"] += 1
+                    if mgr_name and not order.manager_name:
+                        order.manager_name = mgr_name
+                    if mgr_login and not order.manager_login:
+                        order.manager_login = mgr_login
+        except Exception as e:
+            logger.error(f"Erreur lors de la synchro des grands marchés depuis Odoo: {e}")
+
         db.commit()
         return counts
 
