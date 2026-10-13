@@ -649,27 +649,30 @@ class ResUsers(models.Model):
         return users
 
     def write(self, vals):
-        pos_mgr_group = self.env.ref('point_of_sale.group_pos_manager', raise_if_not_found=False)
-        pos_user_group = self.env.ref('point_of_sale.group_pos_user', raise_if_not_found=False)
-        billing_group = self.env.ref('account.group_account_invoice', raise_if_not_found=False)
-        base_user_group = self.env.ref('base.group_user', raise_if_not_found=False)
-
-        mgr_groups = []
-        if base_user_group:
-            mgr_groups.append(base_user_group.id)
-        if pos_mgr_group:
-            mgr_groups.append(pos_mgr_group.id)
-        elif pos_user_group:
-            mgr_groups.append(pos_user_group.id)
-        if billing_group:
-            mgr_groups.append(billing_group.id)
-
         if vals.get('is_restaurant_manager'):
+            pos_mgr_group = self.env.ref('point_of_sale.group_pos_manager', raise_if_not_found=False)
+            pos_user_group = self.env.ref('point_of_sale.group_pos_user', raise_if_not_found=False)
+            billing_group = self.env.ref('account.group_account_invoice', raise_if_not_found=False)
+            base_user_group = self.env.ref('base.group_user', raise_if_not_found=False)
+
+            mgr_groups = []
+            if base_user_group:
+                mgr_groups.append(base_user_group.id)
+            if pos_mgr_group:
+                mgr_groups.append(pos_mgr_group.id)
+            elif pos_user_group:
+                mgr_groups.append(pos_user_group.id)
+            if billing_group:
+                mgr_groups.append(billing_group.id)
+
             order_action = self.env.ref('restaurant_core.action_restaurant_gerant_own_orders', raise_if_not_found=False)
             if order_action:
                 vals['action_id'] = order_action.id
             if mgr_groups:
                 vals['groups_id'] = [(6, 0, mgr_groups)]
+        elif vals.get('is_restaurant_manager') is False:
+            vals['action_id'] = False
+
         res = super().write(vals)
         if vals.get('manager_password'):
             for user in self:
@@ -767,37 +770,114 @@ class ResUsers(models.Model):
         }
 
     def action_delete_manager(self):
-        """Supprime définitivement le gérant d'Odoo et du backend."""
-        user_name = self.name
-        user_login = self.login
-        user_id = self.id
-        partner = self.partner_id
+        """Supprime ou retire sécuritairement le gérant d'Odoo et du backend."""
+        user_names = []
+        pos_mgr_group = self.env.ref('point_of_sale.group_pos_manager', raise_if_not_found=False)
+        pos_user_group = self.env.ref('point_of_sale.group_pos_user', raise_if_not_found=False)
+        groups_to_remove = []
+        if pos_mgr_group:
+            groups_to_remove.append((3, pos_mgr_group.id))
+        if pos_user_group:
+            groups_to_remove.append((3, pos_user_group.id))
 
-        _notify_backend('manager_delete', {
-            'odoo_id': user_id,
-            'login': user_login
-        })
+        has_any_history = False
 
-        try:
-            self.unlink()
-            if partner and partner.active:
+        for user in self:
+            user_names.append(user.name or user.login)
+            user_id = user.id
+            user_login = user.login
+            partner = user.partner_id
+
+            # Vérification de l'existence d'opérations financières ou de documents
+            has_orders = bool(self.env['pos.order'].sudo().search_count([('user_id', '=', user_id)]))
+            has_marches = bool(self.env['restaurant.grand.marche'].sudo().search_count([('manager_id', '=', user_id)]))
+            has_sessions = bool(self.env['pos.session'].sudo().search_count([('user_id', '=', user_id)]))
+            has_invoices = bool(self.env['account.move'].sudo().search_count([('invoice_user_id', '=', user_id)])) if 'invoice_user_id' in self.env['account.move']._fields else False
+
+            has_history = has_orders or has_marches or has_sessions or has_invoices
+
+            if has_history:
+                has_any_history = True
+                # Révocation complète des accès et archivage sécurisé (respect des obligations fiscales DGI/OHADA)
+                vals_archive = {
+                    'active': False,
+                    'is_restaurant_manager': False,
+                    'action_id': False,
+                }
+                if groups_to_remove:
+                    vals_archive['groups_id'] = groups_to_remove
+                user.write(vals_archive)
+                if partner and partner.active:
+                    try:
+                        partner.write({'active': False})
+                    except Exception:
+                        pass
+
+                _notify_backend('manager_delete', {
+                    'odoo_id': user_id,
+                    'login': user_login
+                })
+            else:
+                # Aucun historique : tentative de suppression physique sous savepoint PostgreSQL
+                deleted_physically = False
                 try:
-                    partner.unlink()
-                except Exception:
-                    pass
-        except Exception as e:
-            _logger.warning("Suppression directe bloquée par des contraintes, désactivation de sécurité: %s", e)
-            self.write({'active': False, 'is_restaurant_manager': False})
+                    with self.env.cr.savepoint():
+                        _notify_backend('manager_delete', {
+                            'odoo_id': user_id,
+                            'login': user_login
+                        })
+                        user.unlink()
+                        if partner and partner.active:
+                            with self.env.cr.savepoint():
+                                try:
+                                    partner.unlink()
+                                except Exception:
+                                    pass
+                        deleted_physically = True
+                except Exception as e:
+                    _logger.warning("Suppression physique directe annulée par contrainte SQL: %s", e)
+                    deleted_physically = False
 
-        action = self.env.ref('restaurant_core.action_restaurant_managers').read()[0]
+                if not deleted_physically:
+                    has_any_history = True
+                    vals_archive = {
+                        'active': False,
+                        'is_restaurant_manager': False,
+                        'action_id': False,
+                    }
+                    if groups_to_remove:
+                        vals_archive['groups_id'] = groups_to_remove
+                    user.write(vals_archive)
+                    if partner and partner.active:
+                        try:
+                            partner.write({'active': False})
+                        except Exception:
+                            pass
+
+        action_ref = self.env.ref('restaurant_core.action_restaurant_managers', raise_if_not_found=False)
+        action = action_ref.read()[0] if action_ref else False
+
+        names_str = ", ".join(user_names)
+        if has_any_history:
+            msg = (
+                f"Le compte du gérant {names_str} a été retiré et ses accès révoqués avec succès. "
+                f"Ses ventes et pièces comptables sont intégralement conservées pour la conformité fiscale (DGI) et l'audit."
+            )
+            notif_type = 'warning'
+            notif_title = 'Gérant Retiré & Archivé'
+        else:
+            msg = f"Le compte du gérant {names_str} a été définitivement supprimé."
+            notif_type = 'success'
+            notif_title = 'Gérant Supprimé'
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': 'Gérant Supprimé',
-                'message': f"Le compte de {user_name} ({user_login}) a été retiré.",
+                'title': notif_title,
+                'message': msg,
                 'sticky': False,
-                'type': 'danger',
+                'type': notif_type,
                 'next': action,
             }
         }
@@ -805,6 +885,17 @@ class ResUsers(models.Model):
     def unlink(self):
         for user in self:
             if user.is_restaurant_manager:
+                has_orders = bool(self.env['pos.order'].sudo().search_count([('user_id', '=', user.id)]))
+                has_marches = bool(self.env['restaurant.grand.marche'].sudo().search_count([('manager_id', '=', user.id)]))
+                has_sessions = bool(self.env['pos.session'].sudo().search_count([('user_id', '=', user.id)]))
+                if has_orders or has_marches or has_sessions:
+                    raise UserError(
+                        f"Impossible de supprimer définitivement le compte du gérant '{user.name}' ({user.login}) "
+                        f"car des ventes, caisses ou factures Grand Marché lui sont rattachées.\n\n"
+                        f"Pour la conformité légale et fiscale (DGI / OHADA), l'historique comptable ne peut pas être effacé.\n"
+                        f"Veuillez plutôt utiliser le bouton 'Supprimer définitivement' ou 'Mettre fin aux accès' depuis sa fiche "
+                        f"afin de révoquer ses droits et masquer son compte sans altérer vos déclarations financières."
+                    )
                 _notify_backend('manager_delete', {
                     'odoo_id': user.id,
                     'login': user.login

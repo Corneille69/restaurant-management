@@ -403,8 +403,17 @@ async def webhook_manager_delete(request: Request, db: Session = Depends(get_db)
 
     user = db.query(User).filter((User.username == login) | (User.odoo_user_id == odoo_id)).first()
     if user:
-        db.delete(user)
-        db.commit()
+        try:
+            db.delete(user)
+            db.commit()
+            print(f"✅ Gérant {login} supprimé de la base PostgreSQL.")
+        except Exception as e:
+            db.rollback()
+            print(f"⚠️ Suppression physique bloquée par contraintes d'intégrité ({e}), archivage et désactivation du compte gérant.")
+            user.is_active = False
+            user.is_online = False
+            db.commit()
+            print(f"✅ Gérant {login} désactivé avec succès dans PostgreSQL.")
     return {"status": "ok"}
 
 @router.post("/webhook/sync_settings_from_odoo")

@@ -160,9 +160,17 @@ def delete_manager(
         except Exception:
             pass
 
-    db.delete(manager)
-    db.commit()
-    return {"message": f"Le compte gérant '{manager.username}' a été supprimé avec succès."}
+    username = manager.username
+    try:
+        db.delete(manager)
+        db.commit()
+        return {"message": f"Le compte gérant '{username}' a été supprimé avec succès."}
+    except Exception:
+        db.rollback()
+        manager.is_active = False
+        manager.is_online = False
+        db.commit()
+        return {"message": f"Le compte gérant '{username}' a été désactivé et archivé (ses commandes et rapports sont conservés pour conformité comptable)."}
 
 @router.get("/work-sessions", response_model=List[ManagerWorkSessionResponse])
 def list_manager_work_sessions(
