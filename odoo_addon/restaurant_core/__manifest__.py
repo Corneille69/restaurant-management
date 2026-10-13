@@ -34,6 +34,7 @@
         ],
         "web.assets_backend": [
             "restaurant_core/static/src/css/odoo_backend_sidebar.css",
+            "restaurant_core/static/src/css/restaurant_config_style.css",
             "restaurant_core/static/src/css/composer_voice_send.css",
             "restaurant_core/static/src/js/disable_odoobot.js",
             "restaurant_core/static/src/js/restaurant_navbar.js",
@@ -42,6 +43,7 @@
         ],
         "web.assets_web": [
             "restaurant_core/static/src/css/odoo_backend_sidebar.css",
+            "restaurant_core/static/src/css/restaurant_config_style.css",
             "restaurant_core/static/src/css/composer_voice_send.css",
             "restaurant_core/static/src/js/disable_odoobot.js",
             "restaurant_core/static/src/js/restaurant_navbar.js",

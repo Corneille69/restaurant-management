@@ -1265,95 +1265,172 @@
         <field name="name">restaurant.configuration.form</field>
         <field name="model">restaurant.configuration</field>
         <field name="arch" type="xml">
-            <form string="⚙️ Configuration du Restaurant &amp; Fiscalité DGI">
-                <header>
+            <form string="Configuration Officielle du Restaurant &amp; Fiscalité DGI" class="o_resto_config_form">
+                <header class="resto-config-header" style="background: #ffffff !important; border-bottom: 2px solid #e2e8f0 !important; padding: 0.75rem 1.5rem !important;">
                     <button name="action_save_and_sync"
                             string="💾 Enregistrer &amp; Synchroniser la Configuration"
                             type="object"
-                            class="btn-primary"
+                            class="btn-resto-config-save"
+                            style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important; color: #ffffff !important; border: 1.5px solid #f59e0b !important; border-radius: 8px !important; padding: 9px 22px !important; font-size: 0.95rem !important; font-weight: 800 !important; box-shadow: 0 4px 14px rgba(30, 58, 138, 0.25) !important;"
                             icon="fa-floppy-o"/>
                 </header>
-                <sheet>
-                    <!-- SECTION 1 : IDENTITÉ & LOGO DE L'ENTREPRISE -->
-                    <div class="p-3 mb-4 rounded-3 border bg-light">
-                        <h5 class="fw-bold text-dark mb-3">🎨 Identité du Restaurant &amp; Logo Officiel</h5>
-                        <div class="row g-3 align-items-center">
-                            <div class="col-12 col-md-3 text-center">
-                                <label for="logo" class="fw-bold d-block mb-2">Logo Entreprise</label>
-                                <field name="logo" widget="image" class="oe_avatar" options="{'size': [130, 130]}"/>
-                                <small class="text-muted d-block mt-1">Apparaît sur toutes les factures</small>
+                <sheet class="resto-config-sheet" style="background: #ffffff !important; border-radius: 16px !important; border: 1.5px solid #e2e8f0 !important; box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08) !important; padding: 2rem !important;">
+                    
+                    <!-- BANNIÈRE DE TITRE OFFICIELLE DE L'ÉTABLISSEMENT -->
+                    <div class="resto-config-banner mb-4" style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #fffbeb 100%); border: 1.5px solid #bfdbfe; border-left: 6px solid #1e3a8a; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.75rem; box-shadow: 0 2px 8px rgba(30, 58, 138, 0.04);">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="resto-config-icon-badge" style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.25rem; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);">
+                                    <i class="fa fa-cutlery" title="Restaurant"/>
+                                </div>
+                                <div>
+                                    <h3 class="resto-config-title mb-1" style="color: #0a0f1d; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; margin-bottom: 4px;">
+                                        Configuration Officielle de l'Établissement &amp; Fiscalité DGI
+                                    </h3>
+                                    <p class="resto-config-subtitle mb-0" style="color: #334155; font-weight: 600; font-size: 0.88rem; margin: 0;">
+                                        Identité commerciale, logo certifié et paramètres légaux d'imposition DGI appliqués à toutes vos factures.
+                                    </p>
+                                </div>
                             </div>
-                            <div class="col-12 col-md-9">
-                                <div class="row g-3">
-                                    <div class="col-12 col-md-6">
-                                        <label for="name" class="fw-bold">Nom du Restaurant *</label>
-                                        <field name="name" placeholder="ex: Lemo Daje Restaurant" class="form-control fw-bold fs-5"/>
+                            <div class="resto-config-status-badge" style="background: #ffffff; border: 1.5px solid #f59e0b; padding: 6px 14px; border-radius: 9999px; box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15); display: inline-flex; align-items: center; gap: 8px;">
+                                <span class="resto-gold-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 6px #f59e0b; display: inline-block;"/>
+                                <span class="resto-gold-text" style="color: #92400e; font-weight: 800; font-size: 0.78rem; letter-spacing: 0.02em; text-transform: uppercase;">Paramètres Système Certifiés</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARTE 1 : IDENTITÉ DU RESTAURANT & LOGO OFFICIEL -->
+                    <div class="resto-config-card mb-4" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05); margin-bottom: 1.75rem;">
+                        <div class="resto-card-top-stripe-blue" style="height: 4px; background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 60%, #f59e0b 100%);"/>
+                        <div class="resto-card-header d-flex align-items-center justify-content-between p-3 border-bottom" style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0; padding: 0.9rem 1.25rem;">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="resto-badge-icon resto-badge-icon-gold" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #fef3c7; border: 1px solid #fcd34d; font-size: 0.95rem;">🎨</span>
+                                <h4 class="resto-card-title mb-0" style="color: #0a0f1d; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; margin: 0;">Identité du Restaurant &amp; Logo Officiel</h4>
+                            </div>
+                            <span class="resto-section-pill resto-pill-blue" style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; border-radius: 9999px; padding: 4px 12px; letter-spacing: 0.03em;">Section 01 • Commerce &amp; Marque</span>
+                        </div>
+                        <div class="p-4" style="padding: 1.5rem !important;">
+                            <div class="row g-4 align-items-center">
+                                <!-- ZONE DU LOGO OFFICIEL -->
+                                <div class="col-12 col-md-3 text-center">
+                                    <div class="resto-logo-wrapper p-3" style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 1.25rem;">
+                                        <label for="logo" class="resto-label-bold d-block mb-2" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 8px;">Logo Officiel de l'Entreprise</label>
+                                        <div class="resto-logo-frame mx-auto" style="width: 140px; height: 140px; background: #ffffff; border: 2.5px solid #2563eb; outline: 2.5px dashed #f59e0b; outline-offset: 3px; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15); margin: 0 auto; padding: 4px;">
+                                            <field name="logo" widget="image" class="oe_avatar resto-avatar-img" options="{'size': [130, 130]}"/>
+                                        </div>
+                                        <small class="resto-caption d-block mt-2" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 8px;">Apparaît sur toutes les factures</small>
                                     </div>
-                                    <div class="col-12 col-md-6">
-                                        <label for="subtitle" class="fw-bold">Sous-Titre / Slogan</label>
-                                        <field name="subtitle" placeholder="ex: Restaurant &amp; Grill Gastronomique" class="form-control"/>
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <label for="phone" class="fw-bold">Téléphone(s) (tel) *</label>
-                                        <field name="phone" placeholder="ex: +226 25 30 00 00" class="form-control"/>
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <label for="email" class="fw-bold">Adresse Email (Email) *</label>
-                                        <field name="email" placeholder="ex: contact@lemodaje.com" class="form-control"/>
-                                    </div>
-                                    <div class="col-12">
-                                        <label for="address" class="fw-bold">Adresse Physique Complète (Adress) *</label>
-                                        <field name="address" placeholder="ex: Avenue Kwame Nkrumah, Ouagadougou" class="form-control"/>
+                                </div>
+                                <!-- CHAMPS COORDONNÉES COMMERCE -->
+                                <div class="col-12 col-md-9">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-6">
+                                            <label for="name" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Nom du Restaurant *</label>
+                                            <field name="name" placeholder="ex: Le gout du matin" class="form-control resto-input resto-input-lg" style="background-color: #ffffff !important; border: 1.5px solid #93c5fd !important; border-radius: 8px !important; color: #1e3a8a !important; font-weight: 800 !important; font-size: 1.05rem !important; padding: 9px 13px !important;"/>
+                                            <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Raison commerciale principale imprimée en grand</small>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label for="subtitle" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Sous-Titre / Slogan</label>
+                                            <field name="subtitle" placeholder="ex: Restaurant Gastronomique &amp; Grill" class="form-control resto-input" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 700 !important; font-size: 0.94rem !important; padding: 9px 13px !important;"/>
+                                            <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Devise ou spécialité affichée sous le nom</small>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label for="phone" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Téléphone(s) de Contact *</label>
+                                            <field name="phone" placeholder="ex: +226 25 30 00 00 / 70 00 00 00" class="form-control resto-input" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 700 !important; font-size: 0.94rem !important; padding: 9px 13px !important;"/>
+                                            <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Ligne directe ou mobile de l'établissement</small>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label for="email" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Adresse Email Professionnelle *</label>
+                                            <field name="email" placeholder="ex: contact@restaurant.com" class="form-control resto-input" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 700 !important; font-size: 0.94rem !important; padding: 9px 13px !important;"/>
+                                            <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Courriel officiel pour l'envoi des factures</small>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="address" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Adresse Physique Complète (Localisation) *</label>
+                                            <field name="address" placeholder="ex: Secteur 5, Avenue Kwamé Nkrumah, Ouagadougou" class="form-control resto-input" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 700 !important; font-size: 0.94rem !important; padding: 9px 13px !important;"/>
+                                            <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Adresse physique détaillée figurant sur vos pièces comptables</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SECTION 2 : IDENTIFIANTS FISCAUX OBLIGATOIRES (DGI / e-MCF) -->
-                    <div class="p-3 mb-4 rounded-3 border bg-light">
-                        <h5 class="fw-bold text-dark mb-3">🏛️ Identifiants Légaux &amp; Fiscaux Obligatoires (DGI e-MCF)</h5>
-                        <div class="row g-3">
-                            <div class="col-12 col-md-4">
-                                <label for="ifu" class="fw-bold text-primary">IFU (Identifiant Fiscal Unique) *</label>
-                                <field name="ifu" placeholder="ex: 000123456789A" class="form-control font-monospace fw-bold"/>
-                                <small class="text-muted">Numéro d'identification fiscale légal</small>
+                    <!-- CARTE 2 : IDENTIFIANTS FISCAUX OBLIGATOIRES (DGI e-MCF) -->
+                    <div class="resto-config-card mb-4" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05); margin-bottom: 1.75rem;">
+                        <div class="resto-card-top-stripe-gold" style="height: 4px; background: linear-gradient(90deg, #f59e0b 0%, #d97706 40%, #1e3a8a 100%);"/>
+                        <div class="resto-card-header d-flex align-items-center justify-content-between p-3 border-bottom" style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0; padding: 0.9rem 1.25rem;">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="resto-badge-icon resto-badge-icon-blue" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #eff6ff; border: 1px solid #bfdbfe; font-size: 0.95rem;">🏛️</span>
+                                <h4 class="resto-card-title mb-0" style="color: #0a0f1d; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; margin: 0;">Identifiants Légaux &amp; Fiscaux Obligatoires (DGI e-MCF)</h4>
                             </div>
-                            <div class="col-12 col-md-4">
-                                <label for="rccm" class="fw-bold">RCCM (Registre du Commerce) *</label>
-                                <field name="rccm" placeholder="ex: BF-OUA-01-2024-B12-00456" class="form-control font-monospace"/>
-                                <small class="text-muted">Immatriculation au registre du commerce</small>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <label for="tax_regime" class="fw-bold">Régime Fiscal *</label>
-                                <field name="tax_regime" class="form-control"/>
-                                <small class="text-muted">Régime d'imposition de l'établissement</small>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label for="fiscal_division" class="fw-bold">Division Fiscale (Centre des Impôts) *</label>
-                                <field name="fiscal_division" placeholder="ex: DGI - Division Fiscale des Moyennes Entreprises" class="form-control"/>
-                                <small class="text-muted">Division fiscale de rattachement</small>
-                            </div>
-                            <div class="col-12 col-md-3">
-                                <label for="nim" class="fw-bold">NIM Machine e-MCF</label>
-                                <field name="nim" placeholder="ex: RESTO-DGI-MCF-01" class="form-control font-monospace"/>
-                            </div>
-                            <div class="col-12 col-md-3">
-                                <label for="tax_rate" class="fw-bold">Taux de TVA Normalisé (%)</label>
-                                <field name="tax_rate" class="form-control"/>
-                            </div>
-                            <div class="col-12">
-                                <label for="legal_mention" class="fw-bold">Mention Légale Obligatoire imprimée au bas des factures</label>
-                                <field name="legal_mention" class="form-control"/>
+                            <span class="resto-section-pill resto-pill-gold" style="background: #fef3c7; color: #92400e; border: 1.5px solid #fcd34d; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; border-radius: 9999px; padding: 4px 12px; letter-spacing: 0.03em;">Section 02 • Conformité Fiscale DGI</span>
+                        </div>
+                        <div class="p-4" style="padding: 1.5rem !important;">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4">
+                                    <div class="resto-field-box resto-field-box-highlight" style="background: #fffdfa; border: 1.5px solid #fcd34d; border-left: 5px solid #f59e0b; border-radius: 10px; padding: 0.95rem;">
+                                        <label for="ifu" class="resto-label-bold resto-label-ifu" style="color: #1e3a8a; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">IFU (Identifiant Fiscal Unique) *</label>
+                                        <field name="ifu" placeholder="ex: 000123456789A" class="form-control resto-input resto-input-mono fw-bold" style="background-color: #ffffff !important; border: 1.5px solid #f59e0b !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 800 !important; font-size: 1rem !important; padding: 9px 13px !important; font-family: monospace; letter-spacing: 0.04em;"/>
+                                        <small class="resto-caption resto-caption-blue" style="color: #1e40af; font-weight: 700; font-size: 0.78rem; display: block; margin-top: 4px;">Numéro d'identification fiscale légal certifié</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="resto-field-box" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.95rem;">
+                                        <label for="rccm" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">RCCM (Registre du Commerce) *</label>
+                                        <field name="rccm" placeholder="ex: BF-OUA-01-2024-B12-00456" class="form-control resto-input resto-input-mono" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 700 !important; font-size: 0.94rem !important; padding: 9px 13px !important; font-family: monospace;"/>
+                                        <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Immatriculation au registre du commerce</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="resto-field-box" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.95rem;">
+                                        <label for="tax_regime" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Régime Fiscal de l'Établissement *</label>
+                                        <field name="tax_regime" class="form-control resto-input" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 700 !important; font-size: 0.94rem !important; padding: 9px 13px !important;"/>
+                                        <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Régime d'imposition légal (RNI, RSI, etc.)</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="resto-field-box" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.95rem;">
+                                        <label for="fiscal_division" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Division Fiscale (Centre des Impôts) *</label>
+                                        <field name="fiscal_division" placeholder="ex: DGI - Division Fiscale des Moyennes Entreprises" class="form-control resto-input" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 700 !important; font-size: 0.94rem !important; padding: 9px 13px !important;"/>
+                                        <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Division fiscale de rattachement DGI</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <div class="resto-field-box" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.95rem;">
+                                        <label for="nim" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">NIM (Machine e-MCF DGI)</label>
+                                        <field name="nim" placeholder="ex: RESTO-DGI-MCF-01" class="form-control resto-input resto-input-mono" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 700 !important; font-size: 0.94rem !important; padding: 9px 13px !important; font-family: monospace;"/>
+                                        <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Numéro d'Identification Machine</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <div class="resto-field-box" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.95rem;">
+                                        <label for="tax_rate" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Taux de TVA Normalisé (%)</label>
+                                        <field name="tax_rate" class="form-control resto-input fw-bold" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 800 !important; font-size: 0.94rem !important; padding: 9px 13px !important;"/>
+                                        <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Taux légal de taxe calculé (ex: 18%)</small>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="resto-field-box" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.95rem;">
+                                        <label for="legal_mention" class="resto-label-bold" style="color: #0a0f1d; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Mention Légale Obligatoire (Imprimée au bas de toutes les factures)</label>
+                                        <field name="legal_mention" class="form-control resto-input" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #0a0f1d !important; font-weight: 700 !important; font-size: 0.94rem !important; padding: 9px 13px !important;"/>
+                                        <small class="resto-caption" style="color: #334155; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 4px;">Mention de conformité fiscale imprimée sur vos factures de caisse</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="text-end">
+                    <!-- FOOTER & BOUTON D'ENREGISTREMENT INFÉRIEUR -->
+                    <div class="resto-config-footer d-flex justify-content-between align-items-center flex-wrap gap-3 p-3" style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem;">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="resto-shield-icon" style="font-size: 1.25rem;">🛡️</span>
+                            <span class="resto-footer-note" style="color: #1e3a8a; font-weight: 700; font-size: 0.88rem;">Les modifications sont immédiatement synchronisées sur les factures et le point de vente.</span>
+                        </div>
                         <button name="action_save_and_sync"
                                 string="💾 Enregistrer la Configuration du Restaurant &amp; DGI"
                                 type="object"
-                                class="btn-primary btn-lg"
+                                class="btn-resto-config-save-lg"
+                                style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 70%, #d97706 100%) !important; color: #ffffff !important; border: 2px solid #fbbf24 !important; border-radius: 10px !important; padding: 12px 28px !important; font-size: 1rem !important; font-weight: 800 !important; box-shadow: 0 6px 18px rgba(30, 58, 138, 0.3) !important;"
                                 icon="fa-check-circle"/>
                     </div>
                 </sheet>

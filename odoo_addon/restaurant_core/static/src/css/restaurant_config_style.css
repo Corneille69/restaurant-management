@@ -1,0 +1,386 @@
+/* =========================================================================
+   DESIGN EXÉCUTIF - CONFIGURATION DU RESTAURANT & FISCALITÉ DGI
+   Palette : Bleu Royal / Marine, Blanc Pur, Typographie Noire Grasse, Accents d'Or
+   ========================================================================= */
+
+/* --- 1. CONTENEUR PRINCIPAL DU FORMULAIRE --- */
+.o_resto_config_form {
+    background-color: #f8fafc !important;
+}
+
+.o_resto_config_form .o_form_sheet_bg {
+    background: #f1f5f9 !important;
+    padding-top: 1rem !important;
+    padding-bottom: 2.5rem !important;
+}
+
+.resto-config-sheet {
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04) !important;
+    padding: 2rem !important;
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+}
+
+/* --- 2. BARRE D'ACTION SUPÉRIEURE (HEADER) --- */
+.resto-config-header {
+    background: #ffffff !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding: 0.75rem 1.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 1rem !important;
+}
+
+.btn-resto-config-save {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid #f59e0b !important;
+    border-radius: 8px !important;
+    padding: 9px 20px !important;
+    font-size: 0.92rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+}
+
+.btn-resto-config-save:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%) !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.4) !important;
+    transform: translateY(-1px) !important;
+    color: #ffffff !important;
+}
+
+.btn-resto-config-save:active {
+    transform: translateY(1px) !important;
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2) !important;
+}
+
+/* --- 3. BANNIÈRE DE TITRE ÉTÉBLISSEMENT --- */
+.resto-config-banner {
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 60%, #fffbeb 100%) !important;
+    border: 1px solid #bfdbfe !important;
+    border-left: 5px solid #1e3a8a !important;
+    border-radius: 12px !important;
+    padding: 1.25rem 1.5rem !important;
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.04) !important;
+}
+
+.resto-config-icon-badge {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    border: 2px solid #f59e0b !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #ffffff !important;
+    font-size: 1.25rem !important;
+    box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2) !important;
+}
+
+.resto-config-title {
+    color: #0a0f1d !important;
+    font-weight: 800 !important;
+    font-size: 1.25rem !important;
+    letter-spacing: -0.02em !important;
+    line-height: 1.3 !important;
+}
+
+.resto-config-subtitle {
+    color: #334155 !important;
+    font-weight: 600 !important;
+    font-size: 0.88rem !important;
+    line-height: 1.4 !important;
+}
+
+.resto-config-status-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: #ffffff !important;
+    border: 1px solid #fcd34d !important;
+    padding: 6px 14px !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15) !important;
+}
+
+.resto-gold-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    background: #f59e0b !important;
+    box-shadow: 0 0 6px #f59e0b !important;
+}
+
+.resto-gold-text {
+    color: #92400e !important;
+    font-weight: 800 !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.02em !important;
+    text-transform: uppercase !important;
+}
+
+/* --- 4. CARTES DE CONFIGURATION (BLANC PUR & ACCENTS BLEU / OR) --- */
+.resto-config-card {
+    background: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.resto-config-card:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 6px 20px -2px rgba(15, 23, 42, 0.08) !important;
+}
+
+.resto-card-top-stripe-blue {
+    height: 4px !important;
+    background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 60%, #f59e0b 100%) !important;
+}
+
+.resto-card-top-stripe-gold {
+    height: 4px !important;
+    background: linear-gradient(90deg, #f59e0b 0%, #d97706 40%, #1e3a8a 100%) !important;
+}
+
+.resto-card-header {
+    background: #fafcff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.resto-card-title {
+    color: #0a0f1d !important;
+    font-weight: 800 !important;
+    font-size: 1.05rem !important;
+    letter-spacing: -0.01em !important;
+}
+
+.resto-badge-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
+}
+
+.resto-badge-icon-gold {
+    background: #fef3c7 !important;
+    border: 1px solid #fcd34d !important;
+}
+
+.resto-badge-icon-blue {
+    background: #eff6ff !important;
+    border: 1px solid #bfdbfe !important;
+}
+
+.resto-section-pill {
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+    border-radius: 9999px !important;
+    padding: 4px 12px !important;
+}
+
+.resto-pill-blue {
+    background: #eff6ff !important;
+    color: #1e40af !important;
+    border: 1px solid #bfdbfe !important;
+}
+
+.resto-pill-gold {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #fcd34d !important;
+}
+
+/* --- 5. LOGO ENTREPRISE FRAME (CACHE D'AUTHENTICITÉ) --- */
+.resto-logo-wrapper {
+    background: #f8fafc !important;
+    border: 1px dashed #cbd5e1 !important;
+    border-radius: 12px !important;
+}
+
+.resto-logo-frame {
+    width: 140px !important;
+    height: 140px !important;
+    background: #ffffff !important;
+    border: 2px solid #2563eb !important;
+    outline: 2px dashed #f59e0b !important;
+    outline-offset: 3px !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12) !important;
+    margin: 0 auto !important;
+    padding: 4px !important;
+}
+
+.resto-avatar-img img {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    border-radius: 8px !important;
+}
+
+/* --- 6. ÉCRITURE BIEN LISIBLE EN NOIR EN GRAS & INPUTS PROPRES --- */
+.resto-label-bold {
+    color: #0a0f1d !important;
+    font-weight: 800 !important;
+    font-size: 0.88rem !important;
+    letter-spacing: -0.01em !important;
+    display: block !important;
+    margin-bottom: 6px !important;
+}
+
+.resto-label-ifu {
+    color: #1e3a8a !important;
+}
+
+.resto-caption {
+    color: #334155 !important;
+    font-weight: 600 !important;
+    font-size: 0.78rem !important;
+    display: block !important;
+    margin-top: 4px !important;
+    line-height: 1.35 !important;
+}
+
+.resto-caption-blue {
+    color: #1e40af !important;
+    font-weight: 700 !important;
+}
+
+/* Inputs en Blanc Pur avec bordure nette et texte noir bien gras */
+.resto-input,
+.o_resto_config_form .form-control {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    color: #0a0f1d !important;
+    font-weight: 700 !important;
+    font-size: 0.94rem !important;
+    padding: 9px 13px !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+    transition: all 0.18s ease-in-out !important;
+}
+
+.resto-input:focus,
+.o_resto_config_form .form-control:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+    background-color: #ffffff !important;
+    color: #0a0f1d !important;
+    outline: none !important;
+}
+
+.resto-input::placeholder,
+.o_resto_config_form .form-control::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 500 !important;
+}
+
+.resto-input-lg {
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    border-color: #93c5fd !important;
+    color: #1e3a8a !important;
+}
+
+.resto-input-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    letter-spacing: 0.04em !important;
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+}
+
+/* Bloc d'emphase spéciale pour les identifiants fiscaux */
+.resto-field-box {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 0.85rem !important;
+    height: 100% !important;
+    transition: all 0.2s ease !important;
+}
+
+.resto-field-box:hover {
+    border-color: #cbd5e1 !important;
+    background: #fafcff !important;
+}
+
+.resto-field-box-highlight {
+    border-left: 4px solid #f59e0b !important;
+    background: #fffdfa !important;
+    border-color: #fcd34d !important;
+}
+
+.resto-field-box-highlight:hover {
+    border-color: #f59e0b !important;
+    background: #fffbeb !important;
+}
+
+/* --- 7. FOOTER & BOUTON D'ENREGISTREMENT INFÉRIEUR --- */
+.resto-config-footer {
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%) !important;
+    border: 1.5px solid #bfdbfe !important;
+    border-radius: 12px !important;
+    margin-top: 1.5rem !important;
+}
+
+.resto-shield-icon {
+    font-size: 1.25rem !important;
+}
+
+.resto-footer-note {
+    color: #1e3a8a !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+}
+
+.btn-resto-config-save-lg {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 70%, #d97706 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid #fbbf24 !important;
+    border-radius: 10px !important;
+    padding: 12px 28px !important;
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: 0 6px 18px rgba(30, 58, 138, 0.3) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    cursor: pointer !important;
+}
+
+.btn-resto-config-save-lg:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 70%, #b45309 100%) !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.45) !important;
+    transform: translateY(-2px) !important;
+    color: #ffffff !important;
+}
+
+.btn-resto-config-save-lg:active {
+    transform: translateY(1px) !important;
+    box-shadow: 0 3px 8px rgba(30, 58, 138, 0.2) !important;
+}
