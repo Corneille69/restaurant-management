@@ -108,20 +108,9 @@ patch(NavBar.prototype, {
                     }
                 }
 
-                // Bouton d'accès direct Messages & Appel Vidéo (Admin <-> Gérant)
-                let chatBtn = navbar.querySelector(".o_resto_chat_btn");
-                if (!chatBtn) {
-                    chatBtn = document.createElement("a");
-                    chatBtn.className = "o_resto_chat_btn";
-                    chatBtn.href = "/web?db=restaurant_odoo#action=mail.action_discuss";
-                    chatBtn.style.cssText = "background: linear-gradient(135deg, #f59e0b, #d97706); color: black; font-weight: 800; font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 8px; margin-right: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);";
-                    chatBtn.innerHTML = "💬 SMS &amp; Appel Vidéo (Admin)";
-                    if (systray) {
-                        navbar.insertBefore(chatBtn, systray);
-                    } else {
-                        navbar.appendChild(chatBtn);
-                    }
-                }
+                // Nettoyage de tout bouton redondant pour utiliser l'icône de messagerie native d'Odoo
+                const oldChatBtn = navbar.querySelector(".o_resto_chat_btn");
+                if (oldChatBtn) oldChatBtn.remove();
             } else {
                 brandContainer.innerHTML = `
                     <div class="o_restaurant_logo_card">
@@ -137,20 +126,8 @@ patch(NavBar.prototype, {
                 const quickBtn = navbar.querySelector(".o_gerant_quick_pos_btn");
                 if (quickBtn) quickBtn.remove();
 
-                const systray = navbar.querySelector(".o_menu_systray");
-                let chatBtn = navbar.querySelector(".o_resto_chat_btn");
-                if (!chatBtn) {
-                    chatBtn = document.createElement("a");
-                    chatBtn.className = "o_resto_chat_btn";
-                    chatBtn.href = "/web?db=restaurant_odoo#action=mail.action_discuss";
-                    chatBtn.style.cssText = "background: linear-gradient(135deg, #10b981, #059669); color: white; font-weight: 800; font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 8px; margin-right: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);";
-                    chatBtn.innerHTML = "💬 SMS &amp; Appel Vidéo (Gérants)";
-                    if (systray) {
-                        navbar.insertBefore(chatBtn, systray);
-                    } else {
-                        navbar.appendChild(chatBtn);
-                    }
-                }
+                const oldChatBtn = navbar.querySelector(".o_resto_chat_btn");
+                if (oldChatBtn) oldChatBtn.remove();
             }
 
             localStorage.setItem("resto_brand_name", name);
