@@ -601,8 +601,18 @@ class ResUsers(models.Model):
         help="Total des ventes réalisées lors de sa prise de poste"
     )
 
+    def _is_restaurant_admin(self):
+        """Vérifie si l'utilisateur courant est l'administrateur exclusif."""
+        user = self.env.user
+        return user.id == 2 or (user.has_group('base.group_system') and not user.is_restaurant_manager)
+
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if self._context.get('default_is_restaurant_manager') or vals.get('is_restaurant_manager'):
+                if self.env.uid and not self._is_restaurant_admin():
+                    raise UserError(_("Accès refusé : Seul l'administrateur est autorisé à créer des gérants de restaurant."))
+
         pos_mgr_group = self.env.ref('point_of_sale.group_pos_manager', raise_if_not_found=False)
         pos_user_group = self.env.ref('point_of_sale.group_pos_user', raise_if_not_found=False)
         billing_group = self.env.ref('account.group_account_invoice', raise_if_not_found=False)
@@ -681,6 +691,8 @@ class ResUsers(models.Model):
 
     def action_confirm_create_manager(self):
         """Bouton pour valider et enregistrer définitivement le gérant avec accès Point de Vente et Facturation."""
+        if self.env.uid and not self._is_restaurant_admin():
+            raise UserError(_("Accès refusé : Seul l'administrateur est autorisé à valider et enregistrer un gérant."))
         pos_mgr_group = self.env.ref('point_of_sale.group_pos_manager', raise_if_not_found=False)
         pos_user_group = self.env.ref('point_of_sale.group_pos_user', raise_if_not_found=False)
         billing_group = self.env.ref('account.group_account_invoice', raise_if_not_found=False)
@@ -731,6 +743,8 @@ class ResUsers(models.Model):
 
     def action_deactivate_manager(self):
         """Met fin aux accès du gérant (désactivation immédiate)."""
+        if self.env.uid and not self._is_restaurant_admin():
+            raise UserError(_("Accès refusé : Seul l'administrateur est autorisé à révoquer les accès d'un gérant."))
         for user in self:
             user.write({'active': False})
             _notify_backend('manager_toggle', {
@@ -751,6 +765,8 @@ class ResUsers(models.Model):
 
     def action_reactivate_manager(self):
         """Réactive les accès d'un gérant."""
+        if self.env.uid and not self._is_restaurant_admin():
+            raise UserError(_("Accès refusé : Seul l'administrateur est autorisé à réactiver un gérant."))
         for user in self:
             user.write({'active': True})
             _notify_backend('manager_toggle', {
@@ -771,6 +787,8 @@ class ResUsers(models.Model):
 
     def action_delete_manager(self):
         """Supprime ou retire sécuritairement le gérant d'Odoo et du backend."""
+        if self.env.uid and not self._is_restaurant_admin():
+            raise UserError(_("Accès refusé : Seul l'administrateur est autorisé à supprimer ou retirer un compte gérant."))
         user_names = []
         pos_mgr_group = self.env.ref('point_of_sale.group_pos_manager', raise_if_not_found=False)
         pos_user_group = self.env.ref('point_of_sale.group_pos_user', raise_if_not_found=False)
@@ -885,6 +903,8 @@ class ResUsers(models.Model):
     def unlink(self):
         for user in self:
             if user.is_restaurant_manager:
+                if self.env.uid and not self._is_restaurant_admin():
+                    raise UserError(_("Accès refusé : Seul l'administrateur est autorisé à supprimer un compte gérant."))
                 has_orders = bool(self.env['pos.order'].sudo().search_count([('user_id', '=', user.id)]))
                 has_marches = bool(self.env['restaurant.grand.marche'].sudo().search_count([('manager_id', '=', user.id)]))
                 has_sessions = bool(self.env['pos.session'].sudo().search_count([('user_id', '=', user.id)]))
