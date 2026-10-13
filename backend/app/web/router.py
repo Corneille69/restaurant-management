@@ -671,8 +671,15 @@ def get_web_portal():
             <span id="headerBrandLogo">🍽️</span>
             <span id="headerBrandName" class="app-restaurant-name">Restaurant Engine</span>
         </div>
-        <div id="userNav" class="user-nav hidden">
+        <div id="userNav" class="user-nav hidden" style="display: flex; align-items: center; gap: 0.85rem;">
             <button id="btnHeaderConfig" class="btn btn-primary" onclick="switchAdminTab('config')" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: black; font-weight: 800; font-size: 0.82rem; padding: 0.45rem 1rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); display: none;">⚙️ CONFIGURATION DU RESTAURANT &amp; DGI</button>
+            <a href="http://localhost:8070/web?db=restaurant_odoo#action=mail.action_discuss" target="_blank" id="btnHeaderDiscuss" title="Messagerie &amp; Appels (SMS &amp; Vidéo)" style="position: relative; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 6px; border-radius: 8px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.12); cursor: pointer; transition: all 0.2s ease;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 2H8c-1.1 0-2 .9-2 2v1h10c1.66 0 3 1.34 3 3v8h1c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#94a3b8"/>
+                    <path d="M15 6H4c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h2v3l3.5-3H15c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z" fill="#f8fafc"/>
+                </svg>
+                <span id="headerChatBadge" style="position: absolute; top: -4px; right: -5px; background: #10b981; color: white; border-radius: 9999px; font-size: 0.68rem; font-weight: 800; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.5);">1</span>
+            </a>
             <span id="navUserName" style="font-weight: 600;"></span>
             <span id="navUserBadge" class="role-badge"></span>
             <button class="btn btn-secondary" onclick="logout()">Déconnexion</button>
@@ -832,20 +839,7 @@ def get_web_portal():
                         </button>
                     </div>
 
-                    <!-- Groupe 4 : Communication Directe -->
-                    <div class="sidebar-group-label" style="margin-top: 0.6rem;">COMMUNICATION DIRECTE</div>
-                    <div class="sidebar-menu-list">
-                        <button class="sidebar-nav-item" id="admTabBtnChat" onclick="switchAdminTab('chat')">
-                            <span class="sidebar-icon">💬</span>
-                            <div class="sidebar-item-content">
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <span class="sidebar-item-title">SMS &amp; Appel Vidéo</span>
-                                    <span id="admChatBadge" class="badge-unread hidden" style="background: #ef4444; color: white; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; padding: 2px 7px; margin-left: 6px;">0</span>
-                                </div>
-                                <span class="sidebar-item-sub">Échanges directs avec les gérants</span>
-                            </div>
-                        </button>
-                    </div>
+
 
                     <!-- Bas de Sidebar : Profil Admin & Déconnexion -->
                     <div class="sidebar-bottom-box">
@@ -1571,93 +1565,7 @@ def get_web_portal():
                 </div>
             </div>
 
-            <!-- SECTION COMMUNICATION ADMIN <-> GÉRANTS (SMS & APPEL VIDÉO) -->
-            <div id="admSectionChat" class="hidden">
-                <div style="background: linear-gradient(135deg, rgba(19, 27, 46, 0.95), rgba(15, 23, 42, 0.95)); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
-                    
-                    <!-- En-tête de section -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
-                        <div>
-                            <h2 style="font-size: 1.4rem; font-weight: 800; color: #fbbf24; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem;">
-                                💬 <span>SMS Instantané &amp; Appel Vidéo WebRTC</span>
-                            </h2>
-                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
-                                Échangez directement, instantanément et sans aucune latence avec vos gérants connectés.
-                            </p>
-                        </div>
-                        <div style="display: flex; gap: 0.6rem; align-items: center;">
-                            <button class="btn btn-secondary" onclick="loadCommunicationContacts()" style="font-size: 0.85rem;">
-                                🔄 Actualiser les Gérants
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Interface 2 Colonnes : Contacts Gérants à gauche, Thread SMS & Vidéo à droite -->
-                    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; min-height: 580px;">
-                        
-                        <!-- Colonne Gauche : Liste des Gérants -->
-                        <div style="background: rgba(11, 15, 25, 0.6); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column;">
-                            <div style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
-                                Gérants du Restaurant (<span id="admChatManagersCount">0</span>)
-                            </div>
-                            <div id="admChatContactsList" style="display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; flex: 1;">
-                                <div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.85rem;">Chargement des gérants...</div>
-                            </div>
-                        </div>
-
-                        <!-- Colonne Droite : Fil de discussion et Commandes Vidéo -->
-                        <div style="background: rgba(11, 15, 25, 0.6); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;">
-                            
-                            <!-- Header de l'interlocuteur sélectionné -->
-                            <div id="admChatHeader" style="background: rgba(19, 27, 46, 0.8); border-bottom: 1px solid var(--border); padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <div id="admChatActiveAvatar" style="width: 40px; height: 40px; border-radius: 50%; background: #1e293b; border: 1.5px solid #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; color: #f59e0b;">
-                                        🧑‍💼
-                                    </div>
-                                    <div>
-                                        <div id="admChatActiveName" style="font-weight: 700; font-size: 1rem; color: var(--text-main);">Sélectionnez un gérant</div>
-                                        <div id="admChatActiveStatus" style="font-size: 0.75rem; color: var(--text-muted);">En attente de sélection</div>
-                                    </div>
-                                </div>
-                                <div id="admChatActionButtons" style="display: flex; gap: 0.6rem;">
-                                    <button class="btn btn-primary" onclick="initiateWebRTCCall('video')" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 700; font-size: 0.85rem; padding: 0.5rem 1rem;">
-                                        🎥 Appel Vidéo
-                                    </button>
-                                    <button class="btn btn-secondary" onclick="initiateWebRTCCall('audio')" style="font-weight: 700; font-size: 0.85rem; padding: 0.5rem 1rem;">
-                                        📞 Appel Audio
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Zone des bulles de messages -->
-                            <div id="admChatMessagesContainer" style="flex: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; max-height: 400px; min-height: 340px; background: rgba(8, 12, 20, 0.4);">
-                                <div style="margin: auto; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
-                                    Sélectionnez un gérant dans la liste pour commencer à échanger ou démarrer un appel vidéo.
-                                </div>
-                            </div>
-
-                            <!-- Raccourcis de messages rapides (Chips) -->
-                            <div style="padding: 0.5rem 1.25rem; background: rgba(19, 27, 46, 0.5); border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 0.5rem; overflow-x: auto;">
-                                <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('adm', 'Bonjour, tout se passe bien en caisse ?')">💬 Bonjour, tout va bien ?</button>
-                                <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('adm', 'Pouvez-vous clôturer la session de caisse ?')">🧾 Clôture caisse</button>
-                                <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('adm', 'Rejoignez-moi en appel vidéo s\'il vous plaît.')">🎥 Appel vidéo demandé</button>
-                                <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('adm', 'Facture validée avec succès.')">✅ Facture validée</button>
-                            </div>
-
-                            <!-- Barre de saisie de message -->
-                            <div style="padding: 0.85rem 1.25rem; background: rgba(19, 27, 46, 0.8); border-top: 1px solid var(--border); display: flex; gap: 0.75rem; align-items: center;">
-                                <input type="text" id="admChatInput" placeholder="Taper votre message SMS instantané..." class="form-control" style="flex: 1; padding: 0.65rem 1rem; font-size: 0.9rem;" onkeydown="handleChatInputKey(event, 'adm')" />
-                                <button class="btn btn-primary" onclick="sendChatMessage('adm')" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: black; font-weight: 800; padding: 0.65rem 1.4rem;">
-                                    Envoyer 📤
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </main>
+            </main>
     </div>
 </div>
 
@@ -1698,10 +1606,7 @@ def get_web_portal():
                 <button class="mgr-tab-btn" id="tabBtnStats" onclick="switchManagerTab('stats')">
                     📊 Statistiques du Service
                 </button>
-                <button class="mgr-tab-btn" id="tabBtnChat" onclick="switchManagerTab('chat')">
-                    💬 SMS &amp; Appel Vidéo (Admin)
-                    <span id="mgrChatBadge" class="badge-unread hidden" style="background: #ef4444; color: white; border-radius: 9999px; font-size: 0.7rem; font-weight: 800; padding: 2px 7px; margin-left: 6px;">0</span>
-                </button>
+
             </div>
 
             <!-- SECTION 1 : POINT DE VENTE (POS) INTÉGRÉ DU GÉRANT (ACTIF PAR DÉFAUT À LA CONNEXION) -->
@@ -1917,78 +1822,7 @@ def get_web_portal():
                 </div>
             </div>
 
-            <!-- SECTION COMMUNICATION GÉRANT <-> ADMIN (SMS & APPEL VIDÉO) -->
-            <div id="mgrSectionChat" class="hidden">
-                <div style="background: linear-gradient(135deg, rgba(19, 27, 46, 0.95), rgba(15, 23, 42, 0.95)); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
-                    
-                    <!-- En-tête de section -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
-                        <div>
-                            <h2 style="font-size: 1.4rem; font-weight: 800; color: #34d399; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem;">
-                                💬 <span>Liaison Directe Administrateur (SMS &amp; Appel Vidéo)</span>
-                            </h2>
-                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
-                                Échangez en temps réel avec l'Administrateur du restaurant, posez vos questions ou lancez un appel vidéo d'assistance.
-                            </p>
-                        </div>
-                        <div style="display: flex; gap: 0.6rem; align-items: center;">
-                            <button class="btn btn-primary" onclick="initiateWebRTCCall('video')" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 700; font-size: 0.85rem; padding: 0.5rem 1.1rem;">
-                                🎥 Appel Vidéo Direct Admin
-                            </button>
-                            <button class="btn btn-secondary" onclick="initiateWebRTCCall('audio')" style="font-weight: 700; font-size: 0.85rem; padding: 0.5rem 1rem;">
-                                📞 Appel Audio
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Fiche statut de l'Administrateur -->
-                    <div style="background: rgba(11, 15, 25, 0.6); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-                        <div style="display: flex; align-items: center; gap: 0.85rem;">
-                            <div style="width: 44px; height: 44px; border-radius: 50%; background: #1e293b; border: 2px solid #fbbf24; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
-                                👑
-                            </div>
-                            <div>
-                                <div style="font-weight: 800; font-size: 1.05rem; color: #fbbf24;" id="mgrChatAdminName">Administrateur Général</div>
-                                <div style="font-size: 0.78rem; color: #34d399; display: flex; align-items: center; gap: 0.35rem;">
-                                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #34d399;"></span>
-                                    Canal sécurisé ouvert &amp; direct
-                                </div>
-                            </div>
-                        </div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">
-                            Notifications instantanées activées ⚡
-                        </div>
-                    </div>
-
-                    <!-- Zone des bulles de messages -->
-                    <div style="background: rgba(11, 15, 25, 0.6); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
-                        
-                        <div id="mgrChatMessagesContainer" style="flex: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; max-height: 420px; min-height: 340px; background: rgba(8, 12, 20, 0.4);">
-                            <div style="margin: auto; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
-                                Chargement des échanges avec l'Administrateur...
-                            </div>
-                        </div>
-
-                        <!-- Raccourcis de messages rapides (Chips) -->
-                        <div style="padding: 0.5rem 1.25rem; background: rgba(19, 27, 46, 0.5); border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 0.5rem; overflow-x: auto;">
-                            <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('mgr', 'Bonjour Monsieur l\'Administrateur, le service est ouvert.')">👋 Service ouvert</button>
-                            <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('mgr', 'J\'ai une question concernant une facture client.')">🧾 Question facture</button>
-                            <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('mgr', 'Pouvez-vous vous connecter en appel vidéo pour une vérification ?')">🎥 Appel vidéo svp</button>
-                            <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 9999px; white-space: nowrap;" onclick="insertQuickMessage('mgr', 'Toutes les tables sont bien gérées, aucune anomalie.')">✅ Tout est en ordre</button>
-                        </div>
-
-                        <!-- Barre de saisie de message -->
-                        <div style="padding: 0.85rem 1.25rem; background: rgba(19, 27, 46, 0.8); border-top: 1px solid var(--border); display: flex; gap: 0.75rem; align-items: center;">
-                            <input type="text" id="mgrChatInput" placeholder="Écrire un message SMS instantané à l'Administrateur..." class="form-control" style="flex: 1; padding: 0.65rem 1rem; font-size: 0.9rem;" onkeydown="handleChatInputKey(event, 'mgr')" />
-                            <button class="btn btn-primary" onclick="sendChatMessage('mgr')" style="background: linear-gradient(135deg, #10b981, #059669); color: white; font-weight: 800; padding: 0.65rem 1.4rem;">
-                                Envoyer 📤
-                            </button>
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
+            
         </div>
     </div>
 
@@ -2587,16 +2421,13 @@ def get_web_portal():
         }
 
         function switchManagerTab(tab) {
-            const tabs = ['pos', 'invoices', 'orders', 'tables', 'stats', 'chat'];
+            const tabs = ['pos', 'invoices', 'orders', 'tables', 'stats'];
             tabs.forEach(t => {
                 const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
                 const sec = document.getElementById('mgrSection' + t.charAt(0).toUpperCase() + t.slice(1));
                 if (btn) btn.classList.toggle('active', t === tab);
                 if (sec) sec.classList.toggle('hidden', t !== tab);
             });
-            if (tab === 'chat') {
-                initCommunicationChat('mgr');
-            }
         }
 
         function reprintOrderReceipt(orderId) {
@@ -3385,7 +3216,7 @@ def get_web_portal():
 
 
         function switchAdminTab(tab) {
-            const tabs = ['overview', 'globalInvoices', 'invoices', 'managers', 'menu', 'config', 'chat'];
+            const tabs = ['overview', 'globalInvoices', 'invoices', 'managers', 'menu', 'config'];
             tabs.forEach(t => {
                 const btn = document.getElementById('admTabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
                 const sec = document.getElementById('admSection' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -3407,8 +3238,6 @@ def get_web_portal():
                 loadAdminDishesData();
             } else if (tab === 'config') {
                 loadRestaurantConfig();
-            } else if (tab === 'chat') {
-                initCommunicationChat('adm');
             }
         }
 
@@ -5434,15 +5263,10 @@ def get_web_portal():
                     const data = await resUnread.json();
                     const count = data.unread_count || 0;
                     
-                    const admBadge = document.getElementById('admChatBadge');
-                    if (admBadge) {
-                        admBadge.innerText = count;
-                        admBadge.classList.toggle('hidden', count === 0);
-                    }
-                    const mgrBadge = document.getElementById('mgrChatBadge');
-                    if (mgrBadge) {
-                        mgrBadge.innerText = count;
-                        mgrBadge.classList.toggle('hidden', count === 0);
+                    const hdrBadge = document.getElementById('headerChatBadge');
+                    if (hdrBadge) {
+                        hdrBadge.innerText = count > 0 ? count : '1';
+                        // Toujours visible avec indicateur de présence
                     }
                 }
 
@@ -5457,15 +5281,7 @@ def get_web_portal():
                     }
                 }
 
-                // C. Si l'onglet Chat est actuellement visible, charger les nouveaux messages
-                const admSec = document.getElementById('admSectionChat');
-                const mgrSec = document.getElementById('mgrSectionChat');
-                const isChatVisible = (admSec && !admSec.classList.contains('hidden')) || (mgrSec && !mgrSec.classList.contains('hidden'));
 
-                if (isChatVisible && commActiveContact) {
-                    await loadChatMessages(commActiveContact.id, false);
-                }
-            } catch (err) {
                 // Silencieux
             }
         }
