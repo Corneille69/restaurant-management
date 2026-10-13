@@ -21,4 +21,36 @@
         <field name="groups" eval="[(4, ref('base.group_system'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
     </record>
+
+    <!-- 3. Gérant : Accès restreint uniquement à ses propres factures Grand Marché -->
+    <record id="grand_marche_rule_gerant_own" model="ir.rule">
+        <field name="name">Gérant Restaurant: voir uniquement ses propres Grands Marchés</field>
+        <field name="model_id" ref="restaurant_core.model_restaurant_grand_marche"/>
+        <field name="groups" eval="[(4, ref('point_of_sale.group_pos_user')), (4, ref('point_of_sale.group_pos_manager'))]"/>
+        <field name="domain_force">[('manager_id', '=', user.id)]</field>
+    </record>
+
+    <!-- 4. Administrateur : Visibilité globale sur tous les Grands Marchés -->
+    <record id="grand_marche_rule_admin_all" model="ir.rule">
+        <field name="name">Admin Restaurant: voir tous les Grands Marchés de tous les gérants</field>
+        <field name="model_id" ref="restaurant_core.model_restaurant_grand_marche"/>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <!-- 5. Gérant : Lignes de Grand Marché restreintes à ses propres marchés -->
+    <record id="grand_marche_line_rule_gerant_own" model="ir.rule">
+        <field name="name">Gérant Restaurant: voir uniquement ses propres lignes de Grand Marché</field>
+        <field name="model_id" ref="restaurant_core.model_restaurant_grand_marche_line"/>
+        <field name="groups" eval="[(4, ref('point_of_sale.group_pos_user')), (4, ref('point_of_sale.group_pos_manager'))]"/>
+        <field name="domain_force">[('marche_id.manager_id', '=', user.id)]</field>
+    </record>
+
+    <!-- 6. Administrateur : Visibilité globale sur toutes les lignes de Grand Marché -->
+    <record id="grand_marche_line_rule_admin_all" model="ir.rule">
+        <field name="name">Admin Restaurant: voir toutes les lignes de Grand Marché</field>
+        <field name="model_id" ref="restaurant_core.model_restaurant_grand_marche_line"/>
+        <field name="groups" eval="[(4, ref('base.group_system'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
 </odoo>
