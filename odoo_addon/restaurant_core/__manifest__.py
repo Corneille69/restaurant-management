@@ -34,13 +34,19 @@
         ],
         "web.assets_backend": [
             "restaurant_core/static/src/css/odoo_backend_sidebar.css",
+            "restaurant_core/static/src/css/composer_voice_send.css",
             "restaurant_core/static/src/js/disable_odoobot.js",
             "restaurant_core/static/src/js/restaurant_navbar.js",
+            "restaurant_core/static/src/js/composer_voice_send_patch.js",
+            "restaurant_core/static/src/xml/composer_voice_send_patch.xml",
         ],
         "web.assets_web": [
             "restaurant_core/static/src/css/odoo_backend_sidebar.css",
+            "restaurant_core/static/src/css/composer_voice_send.css",
             "restaurant_core/static/src/js/disable_odoobot.js",
             "restaurant_core/static/src/js/restaurant_navbar.js",
+            "restaurant_core/static/src/js/composer_voice_send_patch.js",
+            "restaurant_core/static/src/xml/composer_voice_send_patch.xml",
         ],
         "point_of_sale._assets_pos": [
             "restaurant_core/static/src/xml/payment_status_override.xml",

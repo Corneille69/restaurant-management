@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- 1. RENDRE LE BOUTON D'ENVOI TOUJOURS VISIBLE DANS LE COMPOSER (DISCUSS, CHAT, CHATTER) -->
+    <t t-inherit="mail.Composer.sendButton" t-inherit-mode="extension">
+        <xpath expr="//button" position="replace">
+            <button class="o-mail-Composer-send btn btn-primary o-last d-flex align-items-center justify-content-center shadow-sm"
+                t-att-class="{
+                    'opacity-50': isSendButtonDisabled,
+                    'border-start-0 ms-2 me-2': env.inDiscussApp,
+                    'ms-2 me-1 my-1': !env.inDiscussApp,
+                }"
+                t-on-click="sendMessage"
+                t-att-disabled="isSendButtonDisabled"
+                title="Envoyer le message ou le vocal (Entrée)"
+                aria-label="Envoyer"
+            >
+                <i class="fa fa-paper-plane me-1"/>
+                <span style="font-size: 0.85rem; font-weight: 700;">Envoyer</span>
+            </button>
+        </xpath>
+    </t>
+
+    <!-- 2. BOUTON D'ENVOI DIRECT DIRECTEMENT SUR LA BULLE DU VOCAL APRÈS ENREGISTREMENT -->
+    <t t-inherit="mail.AttachmentList" t-inherit-mode="extension">
+        <xpath expr="//VoicePlayer" position="after">
+            <button t-if="env.inComposer and attachment.isVoice and !attachment.uploading"
+                type="button"
+                class="btn btn-sm btn-success ms-2 d-inline-flex align-items-center gap-1 shadow-sm font-weight-bold o-send-voice-btn"
+                t-on-click="onClickSendVoice"
+                title="Envoyer immédiatement cette note vocale"
+                style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: white !important; border-radius: 6px; font-weight: 700; padding: 5px 12px; font-size: 0.82rem; cursor: pointer; white-space: nowrap;">
+                <i class="fa fa-paper-plane"/> Envoyer le vocal
+            </button>
+        </xpath>
+    </t>
+
+</templates>

@@ -1,0 +1,53 @@
+/* Style moderne pour le bouton d'envoi du Composer et des notes vocales */
+.o-mail-Composer-send {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem !important;
+    padding: 6px 14px !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    border: none !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    min-height: 34px !important;
+}
+
+.o-mail-Composer-send:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.5) !important;
+    transform: translateY(-1px);
+}
+
+.o-mail-Composer-send:disabled {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Bouton d'envoi direct sur la bulle audio vocale */
+.o-send-voice-btn {
+    animation: voiceReadyPulse 1.8s infinite !important;
+}
+
+.o-send-voice-btn:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+}
+
+@keyframes voiceReadyPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
