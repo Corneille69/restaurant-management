@@ -384,3 +384,390 @@
     transform: translateY(1px) !important;
     box-shadow: 0 3px 8px rgba(30, 58, 138, 0.2) !important;
 }
+
+/* =========================================================================
+   8. VUE LISTE (TREE) - FACTURATION GÉNÉRALE & CERTIFICATION DGI
+   Palette : Blanc Pur, Bleu Royal/Marine, Typographie Noire Grasse, 
+             Vert Émeraude d'Homologation & Validation, Accents Dorés
+   ========================================================================= */
+
+/* --- TABLE CONTAINER & WRAPPER --- */
+.o_resto_daily_report_tree,
+.o_list_renderer:has(.o_resto_daily_report_tree),
+.o_content:has(.o_resto_daily_report_tree) {
+    background-color: #f8fafc !important;
+}
+
+.o_resto_daily_report_tree.o_list_table,
+.o_list_renderer .o_resto_daily_report_tree {
+    background-color: #ffffff !important;
+    border-radius: 14px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    box-shadow: 0 6px 20px -3px rgba(15, 23, 42, 0.06) !important;
+    overflow: hidden !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+/* --- EN-TÊTE DU TABLEAU (THEAD) --- */
+.o_resto_daily_report_tree thead th,
+.o_list_table:has(.o_resto_daily_report_tree) thead th,
+.o_list_renderer:has(.o_resto_daily_report_tree) table thead th {
+    background: #ffffff !important;
+    color: #0a0f1d !important;
+    font-weight: 800 !important;
+    font-size: 0.84rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    padding: 14px 14px !important;
+    border-top: none !important;
+    border-bottom: 2.5px solid #1e3a8a !important;
+    border-left: none !important;
+    border-right: none !important;
+    vertical-align: middle !important;
+    position: relative !important;
+}
+
+/* Checkbox de sélection */
+.o_resto_daily_report_tree .form-check-input,
+.o_list_renderer:has(.o_resto_daily_report_tree) .form-check-input {
+    border-color: #93c5fd !important;
+    border-radius: 4px !important;
+}
+
+.o_resto_daily_report_tree .form-check-input:checked,
+.o_list_renderer:has(.o_resto_daily_report_tree) .form-check-input:checked {
+    background-color: #2563eb !important;
+    border-color: #1e3a8a !important;
+}
+
+/* --- LIGNES DU TABLEAU (TBODY TR) --- */
+.o_resto_daily_report_tree tbody tr,
+.o_list_renderer:has(.o_resto_daily_report_tree) tbody tr {
+    transition: background-color 0.15s ease, transform 0.15s ease !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    background-color: #ffffff !important;
+}
+
+.o_resto_daily_report_tree tbody tr:hover,
+.o_list_renderer:has(.o_resto_daily_report_tree) tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+/* --- CELLULES DU TABLEAU : TYPOGRAPHIE NOIRE GRASSE BIEN LISIBLE --- */
+.o_resto_daily_report_tree tbody td,
+.o_list_renderer:has(.o_resto_daily_report_tree) tbody td {
+    padding: 13px 14px !important;
+    font-size: 0.90rem !important;
+    vertical-align: middle !important;
+    color: #0a0f1d !important; /* NOIR FRANC LISIBLE */
+    font-weight: 700 !important;
+    border-top: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+/* Override du text-success et text-info générique qui délavait les textes */
+.o_resto_daily_report_tree tr.text-success td,
+.o_resto_daily_report_tree tr.text-info td,
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-success td,
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-info td {
+    color: #0a0f1d !important;
+}
+
+/* N° de facture fiscale : Bleu royal, gras et monospace fiscal */
+.o_resto_daily_report_tree td[name="name"],
+.o_resto_daily_report_tree td[data-name="name"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[name="name"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[data-name="name"] {
+    color: #1e3a8a !important;
+    font-weight: 800 !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    letter-spacing: -0.01em !important;
+}
+
+/* Nom du gérant : Noir franc en gras */
+.o_resto_daily_report_tree td[name="active_manager_name"],
+.o_resto_daily_report_tree td[data-name="active_manager_name"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[name="active_manager_name"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[data-name="active_manager_name"] {
+    color: #0a0f1d !important;
+    font-weight: 800 !important;
+}
+
+/* Date et heure de connexion */
+.o_resto_daily_report_tree td[name="session_opened_at"],
+.o_resto_daily_report_tree td[data-name="session_opened_at"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[name="session_opened_at"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[data-name="session_opened_at"] {
+    color: #334155 !important;
+    font-weight: 700 !important;
+    font-size: 0.86rem !important;
+}
+
+/* Date fiscale */
+.o_resto_daily_report_tree td[name="date"],
+.o_resto_daily_report_tree td[data-name="date"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[name="date"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[data-name="date"] {
+    color: #0a0f1d !important;
+    font-weight: 700 !important;
+}
+
+/* Nombre de ventes */
+.o_resto_daily_report_tree td[name="total_orders"],
+.o_resto_daily_report_tree td[data-name="total_orders"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[name="total_orders"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[data-name="total_orders"] {
+    color: #1e3a8a !important;
+    font-weight: 800 !important;
+}
+
+/* --- 9. LIGNES CERTIFIÉES & VALIDÉES : VERT ÉMERAUDE VALIDE & ACTIF --- */
+.o_resto_daily_report_tree tr.text-success,
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-success {
+    background-color: #fbfdfc !important;
+    border-left: 6px solid #10b981 !important; /* LISERÉ VERT ÉMERAUDE D'HOMOLOGATION */
+}
+
+.o_resto_daily_report_tree tr.text-success:hover,
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-success:hover {
+    background-color: #f0fdf4 !important;
+}
+
+/* Badge Statut Fiscal VERT ÉMERAUDE éclatant pour Validé / Certifié DGI */
+.o_resto_daily_report_tree tr.text-success td[name="state"] .badge,
+.o_resto_daily_report_tree tr.text-success td[data-name="state"] .badge,
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-success td[name="state"] .badge,
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-success td[data-name="state"] .badge,
+.o_resto_daily_report_tree .badge.text-bg-success,
+.o_list_renderer:has(.o_resto_daily_report_tree) .badge.text-bg-success {
+    background: #ecfdf5 !important;
+    color: #065f46 !important;
+    border: 1.5px solid #10b981 !important;
+    font-weight: 800 !important;
+    font-size: 0.80rem !important;
+    padding: 5px 12px !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    letter-spacing: 0.02em !important;
+}
+
+/* Montant Total Brut TTC validé en VERT ÉMERAUDE fort impact */
+.o_resto_daily_report_tree tr.text-success td[name="total_ttc"],
+.o_resto_daily_report_tree tr.text-success td[data-name="total_ttc"],
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-success td[name="total_ttc"],
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-success td[data-name="total_ttc"],
+.o_resto_daily_report_tree tr.text-success .text-success {
+    color: #047857 !important;
+    font-weight: 800 !important;
+    font-size: 0.98rem !important;
+}
+
+/* Réf DGI en vert émeraude officiel */
+.o_resto_daily_report_tree tr.text-success td[name="dgi_reference"],
+.o_resto_daily_report_tree tr.text-success td[data-name="dgi_reference"],
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-success td[name="dgi_reference"],
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-success td[data-name="dgi_reference"] {
+    color: #047857 !important;
+    font-weight: 800 !important;
+    font-family: monospace !important;
+}
+
+/* --- 10. LIGNES BROUILLON / SESSION ACTIVE : BLEU ROYAL & OR --- */
+.o_resto_daily_report_tree tr.text-info,
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-info {
+    background-color: #ffffff !important;
+    border-left: 6px solid #3b82f6 !important; /* LISERÉ BLEU ROYAL */
+}
+
+.o_resto_daily_report_tree tr.text-info:hover,
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-info:hover {
+    background-color: #f8fafc !important;
+}
+
+/* Badge Statut Fiscal pour session en cours / brouillon */
+.o_resto_daily_report_tree tr.text-info td[name="state"] .badge,
+.o_resto_daily_report_tree tr.text-info td[data-name="state"] .badge,
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-info td[name="state"] .badge,
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-info td[data-name="state"] .badge,
+.o_resto_daily_report_tree .badge.text-bg-info,
+.o_resto_daily_report_tree .badge.text-bg-primary,
+.o_list_renderer:has(.o_resto_daily_report_tree) .badge.text-bg-info,
+.o_list_renderer:has(.o_resto_daily_report_tree) .badge.text-bg-primary {
+    background: #eff6ff !important;
+    color: #1e40af !important;
+    border: 1.5px solid #93c5fd !important;
+    font-weight: 800 !important;
+    font-size: 0.80rem !important;
+    padding: 5px 12px !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Montant TTC pour brouillon en noir gras */
+.o_resto_daily_report_tree tr.text-info td[name="total_ttc"],
+.o_resto_daily_report_tree tr.text-info td[data-name="total_ttc"],
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-info td[name="total_ttc"],
+.o_list_renderer:has(.o_resto_daily_report_tree) tr.text-info td[data-name="total_ttc"] {
+    color: #0a0f1d !important;
+    font-weight: 800 !important;
+    font-size: 0.98rem !important;
+}
+
+/* Base HT et TVA en noir gras */
+.o_resto_daily_report_tree td[name="total_ht"],
+.o_resto_daily_report_tree td[data-name="total_ht"],
+.o_resto_daily_report_tree td[name="total_tva"],
+.o_resto_daily_report_tree td[data-name="total_tva"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[name="total_ht"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[data-name="total_ht"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[name="total_tva"],
+.o_list_renderer:has(.o_resto_daily_report_tree) td[data-name="total_tva"] {
+    color: #0a0f1d !important;
+    font-weight: 700 !important;
+}
+
+/* --- 11. VUE FORMULAIRE (SHEET) - FACTURATION GÉNÉRALE & CERTIFICATION DGI --- */
+.o_resto_daily_report_form {
+    background-color: #f8fafc !important;
+}
+
+.o_resto_daily_report_form .o_form_sheet_bg {
+    background: #f1f5f9 !important;
+    padding-top: 1rem !important;
+    padding-bottom: 2.5rem !important;
+}
+
+.resto-report-sheet {
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08) !important;
+    padding: 2rem !important;
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+}
+
+.resto-report-header {
+    background: #ffffff !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding: 0.75rem 1.5rem !important;
+}
+
+/* Bouton Actualiser */
+.btn-resto-calculate {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid #f59e0b !important;
+    border-radius: 8px !important;
+    padding: 8px 18px !important;
+    font-size: 0.92rem !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25) !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-resto-calculate:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%) !important;
+    border-color: #fbbf24 !important;
+    transform: translateY(-1px) !important;
+    color: #ffffff !important;
+}
+
+/* Bouton Certifier DGI : VERT ÉMERAUDE VALIDE & OR */
+.btn-resto-certify-dgi {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid #f59e0b !important;
+    border-radius: 8px !important;
+    padding: 8px 22px !important;
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-resto-certify-dgi:hover {
+    background: linear-gradient(135deg, #047857 0%, #059669 100%) !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45) !important;
+    transform: translateY(-1px) !important;
+    color: #ffffff !important;
+}
+
+/* Boutons secondaires */
+.btn-resto-view-invoice {
+    background: #ffffff !important;
+    color: #1e3a8a !important;
+    border: 1.5px solid #2563eb !important;
+    border-radius: 8px !important;
+    padding: 8px 18px !important;
+    font-size: 0.92rem !important;
+    font-weight: 800 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-resto-view-invoice:hover {
+    background: #eff6ff !important;
+    color: #1e40af !important;
+}
+
+.btn-resto-print-pdf {
+    background: #ffffff !important;
+    color: #0a0f1d !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 8px 18px !important;
+    font-size: 0.92rem !important;
+    font-weight: 800 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-resto-print-pdf:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+}
+
+.btn-resto-reset-draft {
+    background: #fffbeb !important;
+    color: #92400e !important;
+    border: 1.5px solid #f59e0b !important;
+    border-radius: 8px !important;
+    padding: 8px 18px !important;
+    font-size: 0.92rem !important;
+    font-weight: 800 !important;
+}
+
+/* --- ONGLETS (NOTEBOOK) DANS LE RAPPORT JOURNALIER --- */
+.resto-report-notebook .nav-tabs {
+    border-bottom: 2px solid #e2e8f0 !important;
+    gap: 8px !important;
+}
+
+.resto-report-notebook .nav-tabs .nav-link {
+    color: #0a0f1d !important;
+    font-weight: 800 !important;
+    font-size: 0.90rem !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    padding: 10px 18px !important;
+    border-radius: 8px 8px 0 0 !important;
+    transition: all 0.2s ease !important;
+}
+
+.resto-report-notebook .nav-tabs .nav-link.active {
+    color: #1e3a8a !important;
+    background: #ffffff !important;
+    border-bottom: 3px solid #f59e0b !important; /* Liseré OR */
+}
+
+.resto-report-notebook .nav-tabs .nav-link:hover:not(.active) {
+    color: #2563eb !important;
+    background: #eff6ff !important;
+}
+
