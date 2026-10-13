@@ -532,13 +532,15 @@
         <field name="model">pos.session</field>
         <field name="priority">90</field>
         <field name="arch" type="xml">
-            <tree string="Sessions &amp; Prises de Service des Gérants" sample="1" decoration-info="state == 'closed'" decoration-success="state == 'opened'">
+            <tree string="Sessions &amp; Prises de Service des Gérants" sample="1"
+                  class="o_resto_session_tree"
+                  decoration-info="state == 'closed'" decoration-success="state == 'opened'">
                 <field name="name" string="Réf. Session" decoration-bf="1"/>
                 <field name="user_id" string="Gérant en Service" decoration-bf="1"/>
                 <field name="state" string="État" widget="badge" decoration-success="state == 'opened'" decoration-muted="state == 'closed'"/>
                 <field name="start_at" string="Heure de Début du Travail"/>
                 <field name="stop_at" string="Heure de Fin (Clôture)"/>
-                <field name="total_payments_amount" string="Total Encaissé (FCFA)" decoration-bf="1"/>
+                <field name="total_payments_amount" string="Total Encaissé (FCFA)" decoration-bf="1" decoration-success="state == 'opened'"/>
                 <field name="cash_register_difference" string="Écart de Caisse" decoration-danger="cash_register_difference &lt; 0" decoration-success="cash_register_difference &gt;= 0"/>
             </tree>
         </field>
