@@ -27,6 +27,7 @@ class UserResponse(BaseModel):
     odoo_user_id: Optional[int] = None
     created_by_id: Optional[int] = None
     created_at: datetime
+    total_sales_amount: float = 0.0
 
     class Config:
         from_attributes = True

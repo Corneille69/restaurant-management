@@ -33,6 +33,7 @@ class MenuItem(Base):
     description = Column(Text, nullable=True)
     price = Column(Float, nullable=False)
     is_available = Column(Boolean, default=True)
+    available_quantity = Column(Integer, default=0, nullable=True) # Stock / Nombre de produits disponibles (plats, desserts, boissons)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
 
     odoo_product_id = Column(Integer, nullable=True, index=True) # ID dans Odoo (product.product)
@@ -267,9 +268,9 @@ class GlobalInvoice(Base):
     total_taxes = Column(Float, default=0.0) # Somme des taxes DGI en FCFA
     total_ttc = Column(Float, default=0.0) # Somme Toutes Taxes Comprises (TTC) en FCFA
 
-    # Gérant associé à la session / facture
-    manager_name = Column(String(100), nullable=True, index=True) # Nom complet du gérant connecté
-    manager_login = Column(String(50), nullable=True, index=True) # Identifiant (login) du gérant
+    # Gérant(s) associé(s) à la facture du jour
+    manager_name = Column(Text, nullable=True) # Noms complets des gérants en caisse
+    manager_login = Column(Text, nullable=True) # Identifiants (logins) des gérants
     manager_id = Column(Integer, nullable=True, index=True) # ID utilisateur du gérant
     opened_at = Column(DateTime, nullable=True) # Date et heure de connexion / ouverture de service
     

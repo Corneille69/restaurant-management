@@ -106,8 +106,39 @@ def create_order(payload: OrderCreate, db: Session = Depends(get_db)):
         if not menu_item:
             raise HTTPException(status_code=404, detail=f"Plat ID {it.menu_item_id} introuvable.")
         
+        # Vérification et décrémentation du stock disponible (Plats, Desserts, Boissons)
+        current_stock = menu_item.available_quantity if menu_item.available_quantity is not None else 0
+        if current_stock <= 0 or not menu_item.is_available:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Rupture de stock : Il n'y a aucun(e) '{menu_item.name}' disponible actuellement dans le restaurant."
+            )
+        if it.quantity >current_stock:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Stock insuffisant pour '{menu_item.name}' : seulement {current_stock} disponible(s), vous avez demandé {it.quantity}."
+            )
+
+        # Diminution du nombre présent en temps réel
+        menu_item.available_quantity = max(0, current_stock - it.quantity)
+        if menu_item.available_quantity == 0:
+            menu_item.is_available = False
+
+        # Synchroniser la diminution du stock vers Odoo en temps réel
+        try:
+            tmpl_id = menu_item.odoo_template_id
+            if not tmpl_id and menu_item.odoo_product_id:
+                read_p = odoo_service.execute_kw('product.product', 'read', [[menu_item.odoo_product_id]], {'fields': ['product_tmpl_id']})
+                if read_p and read_p[0].get('product_tmpl_id'):
+                    tmpl_id = read_p[0]['product_tmpl_id'][0] if isinstance(read_p[0]['product_tmpl_id'], (list, tuple)) else read_p[0]['product_tmpl_id']
+                    menu_item.odoo_template_id = tmpl_id
+            if tmpl_id:
+                odoo_service.execute_kw('product.template', 'write', [[tmpl_id], {'available_quantity': menu_item.available_quantity}])
+        except Exception:
+            pass
+
         # Le gérant peut ajuster le prix unitaire en FCFA ou conserver le prix du menu
-        unit_price = it.custom_price if (it.custom_price is not None and it.custom_price >= 0) else menu_item.price
+        unit_price = it.custom_price if (it.custom_price is not None and it.custom_price >=0) else menu_item.price
         if it.custom_price is not None and it.custom_price != menu_item.price:
             custom_price_notices.append(f"{menu_item.name} ajusté à {unit_price:,.0f} FCFA (catalogue: {menu_item.price:,.0f} FCFA)")
 
@@ -143,7 +174,7 @@ def create_order(payload: OrderCreate, db: Session = Depends(get_db)):
 
     # Traçabilité intégrale dans le journal d'activité (faits et gestes du gérant)
     item_summary = ", ".join([f"{it['name']} x{it['quantity']}" for it in sync_items])
-    details_str = f"💰 Vente encaissée #{new_order.order_number} : {item_summary} | Total : {new_order.total_amount:,.0f} FCFA via {new_order.payment_method}. Encaissé : {(payload.tendered_amount or new_order.total_amount):,.0f} FCFA, Monnaie : {(payload.change_amount or 0):,.0f} FCFA."
+    details_str = f" Vente encaissée #{new_order.order_number} : {item_summary} | Total : {new_order.total_amount:,.0f} FCFA via {new_order.payment_method}. Encaissé : {(payload.tendered_amount or new_order.total_amount):,.0f} FCFA, Monnaie : {(payload.change_amount or 0):,.0f} FCFA."
     if custom_price_notices:
         details_str += " [Ajustements prix: " + "; ".join(custom_price_notices) + "]"
 
@@ -250,4 +281,3 @@ def cancel_order(
     billing_service.handle_order_cancelled_or_modified(order, db)
 
     return {"status": "success", "message": f"Vente #{order.order_number} annulée et retirée de la facturation globale."}
-

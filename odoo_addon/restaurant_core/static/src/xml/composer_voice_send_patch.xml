@@ -24,7 +24,7 @@
     <!-- 2. BOUTON D'ENVOI DIRECT DIRECTEMENT SUR LA BULLE DU VOCAL APRÈS ENREGISTREMENT -->
     <t t-inherit="mail.AttachmentList" t-inherit-mode="extension">
         <xpath expr="//VoicePlayer" position="after">
-            <button t-if="env.inComposer and attachment.isVoice and !attachment.uploading"
+            <button t-if="env.inComposer &amp;&amp; attachment.isVoice &amp;&amp; !attachment.uploading"
                 type="button"
                 class="btn btn-sm btn-success ms-2 d-inline-flex align-items-center gap-1 shadow-sm font-weight-bold o-send-voice-btn"
                 t-on-click="onClickSendVoice"

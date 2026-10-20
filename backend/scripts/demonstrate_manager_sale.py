@@ -48,9 +48,9 @@ sale_data = {
 }
 print(f"\n=== 2. LE GÉRANT 'Dam_as' ENCAISSE UNE VENTE DE {sale_amount:,.0f} FCFA ===")
 order = post('http://127.0.0.1:8000/api/v1/orders/', sale_data, mgr_tok)
-print(f"-> Vente #{order['order_number']} validée par le Gérant à la caisse.")
-print(f"-> Montant: {order['total_amount']:,.0f} FCFA")
-print(f"-> Rattachée à la facture globale ID: {order['global_invoice_id']}")
+print(f"->Vente #{order['order_number']} validée par le Gérant à la caisse.")
+print(f"->Montant: {order['total_amount']:,.0f} FCFA")
+print(f"->Rattachée à la facture globale ID: {order['global_invoice_id']}")
 
 # 4. Check admin invoice immediately
 inv_id_used = order['global_invoice_id']
@@ -79,4 +79,4 @@ if matching_lines:
 mgr_summary = json.loads(inv_after['manager_summary'] or '[]')
 print(f"\n=== 5. RÉCAPITULATIF PAR GÉRANT MIS À JOUR AUTOMATIQUEMENT ===")
 for m in mgr_summary:
-    print(f"👤 {m['manager_name']}: {m['sales_count']} vente(s) | HT: {m['total_ht']:,.0f} FCFA | Taxes: {m['total_tax']:,.0f} FCFA | TTC: {m['total_ttc']:,.0f} FCFA")
+    print(f" {m['manager_name']}: {m['sales_count']} vente(s) | HT: {m['total_ht']:,.0f} FCFA | Taxes: {m['total_tax']:,.0f} FCFA | TTC: {m['total_ttc']:,.0f} FCFA")

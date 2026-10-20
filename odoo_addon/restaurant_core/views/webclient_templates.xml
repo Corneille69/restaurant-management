@@ -1,19 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- ================================================================= -->
-    <!-- 1. STYLE PERSONNALISÉ DE LA PAGE D'AUTHENTIFICATION ODOO         -->
-    <!-- Modèle Sombre JustGo Navy & Or (Bon retour !)                     -->
+    <!-- 1. STYLE PERSONNALISÉ DE LA PAGE D'AUTHENTIFICATION ODOO -->
+    <!-- Modèle Sombre JustGo Navy & Or (Bon retour !) -->
+    <!-- ================================================================= -->
+    <!-- ================================================================= -->
+    <!-- 1. STYLE & STRUCTURE PERSONNALISÉS DE LA PAGE D'AUTHENTIFICATION ODOO -->
+    <!-- Modèle Exécutif Blanc Pur, Jaune Or & Bleu Marine avec Avatar & Badges -->
     <!-- ================================================================= -->
     <template id="custom_login_style_inherit" inherit_id="web.login_layout" name="Restaurant Core Login Style">
         <xpath expr="//div[hasclass('container')]" position="before">
-            <link rel="stylesheet" type="text/css" href="/restaurant_core/static/src/css/odoo_login_style.css?v=5.0"/>
+            <link rel="stylesheet" type="text/css" href="/restaurant_core/static/src/css/odoo_login_style.css?v=7.0"/>
+        </xpath>
+        <xpath expr="//div[hasclass('card-body')]/div[img]" position="replace">
+            <div class="resto-login-header d-flex align-items-center justify-content-center mb-4">
+                <div class="resto-header-line"></div>
+                <div class="resto-header-avatar d-flex align-items-center justify-content-center">
+                    <svg viewBox="0 0 24 24" class="resto-avatar-svg" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="resto-header-line"></div>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('border-top')]" position="replace">
+            <div class="resto-login-footer mt-4 pt-3 d-flex align-items-center justify-content-center gap-3 border-top" t-if="not disable_footer">
+                <t t-if="not disable_database_manager">
+                    <a href="/web/database/manager" class="resto-footer-link d-flex align-items-center gap-2">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#07224e">
+                            <path d="M12 2C6.48 2 2 3.34 2 5v3c0 1.66 4.48 3 10 3s10-1.34 10-3V5c0-1.66-4.48-3-10-3zm0 7c-5.52 0-10-1.34-10-3v3c0 1.66 4.48 3 10 3s10-1.34 10-3V9c0 1.66-4.48 3-10 3zm0 6c-5.52 0-10-1.34-10-3v3c0 1.66 4.48 3 10 3s10-1.34 10-3v-3c0 1.66-4.48 3-10 3z"/>
+                        </svg>
+                        <span>Gérer les bases de données</span>
+                    </a>
+                    <span class="resto-footer-divider"></span>
+                </t>
+                <a href="https://www.odoo.com?utm_source=db&amp;utm_medium=auth" target="_blank" class="resto-footer-link d-flex align-items-center gap-2">
+                    <svg viewBox="0 0 28 20" width="22" height="18" fill="none">
+                        <circle cx="9" cy="10" r="5.5" stroke="#07224e" stroke-width="2.8" fill="none"/>
+                        <circle cx="17" cy="10" r="5.5" stroke="#f59e0b" stroke-width="2.8" fill="none"/>
+                    </svg>
+                    <span>Propulsé par Odoo</span>
+                </a>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="custom_login_form_inherit" inherit_id="web.login" name="Restaurant Core Login Form Model">
+        <xpath expr="//form" position="replace">
+            <form class="oe_login_form" role="form" t-attf-action="/web/login" method="post" onsubmit="this.action = '/web/login' + location.hash">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                <div class="mb-3" t-if="databases and len(databases) &gt; 1">
+                    <label for="db" class="col-form-label">Database</label>
+                    <div t-attf-class="input-group {{'input-group-sm' if form_small else ''}}">
+                        <input type="text" name="db" t-att-value="request.db" id="db" t-attf-class="form-control #{'form-control-sm' if form_small else ''}" required="required" readonly="readonly"/>
+                        <a role="button" href="/web/database/selector" class="btn btn-secondary">Select <i class="fa fa-database" role="img" aria-label="Database" title="Database"/></a>
+                    </div>
+                </div>
+
+                <div class="mb-3 field-login">
+                    <label for="login" class="form-label d-flex align-items-center gap-2 mb-2 resto-label">
+                        <span class="resto-label-icon">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="#07224e">
+                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                            </svg>
+                        </span>
+                        <span>Adresse e-mail</span>
+                    </label>
+                    <div class="resto-input-group resto-input-email">
+                        <div class="resto-input-icon-box">
+                            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                            </svg>
+                        </div>
+                        <input type="text" placeholder="Votre adresse e-mail" name="login" t-att-value="login" id="login" class="form-control resto-input-control" required="required" autocomplete="username" autofocus="autofocus" autocapitalize="off"/>
+                    </div>
+                </div>
+
+                <div class="mb-3 field-password">
+                    <label for="password" class="form-label d-flex align-items-center gap-2 mb-2 resto-label">
+                        <span class="resto-label-icon">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="#07224e">
+                                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                            </svg>
+                        </span>
+                        <span>Mot de passe</span>
+                    </label>
+                    <div class="resto-input-group resto-input-pass">
+                        <div class="resto-input-icon-box">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <input type="password" placeholder="Votre mot de passe" name="password" id="password" class="form-control resto-input-control" required="required" autocomplete="current-password" t-att-autofocus="'autofocus' if login else None" maxlength="4096"/>
+                    </div>
+                </div>
+
+                <p class="alert alert-danger" t-if="error" role="alert">
+                    <t t-esc="error"/>
+                </p>
+                <p class="alert alert-success" t-if="message" role="status">
+                    <t t-esc="message"/>
+                </p>
+
+                <div class="clearfix oe_login_buttons text-center d-grid mb-1 pt-2">
+                    <button type="submit" class="btn btn-primary resto-btn-submit d-flex align-items-center justify-content-center gap-2">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        <span>Se connecter</span>
+                    </button>
+                    <t t-if="debug">
+                        <button type="submit" name="redirect" value="/web/become" class="btn btn-link btn-sm mt-1 text-muted">Log in as superuser</button>
+                    </t>
+                    <div class="resto-reset-wrapper text-start mt-3">
+                        <a href="/web/reset_password?" class="resto-reset-link d-inline-flex align-items-center gap-2">
+                            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#f59e0b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                            </svg>
+                            <span>Réinitialiser le mot de passe</span>
+                        </a>
+                    </div>
+                    <div class="o_login_auth"/>
+                </div>
+
+                <input type="hidden" name="redirect" t-att-value="redirect"/>
+            </form>
         </xpath>
     </template>
 
     <!-- ================================================================= -->
-    <!-- 2. GESTION DES CADRES DIFFÉRENCIÉS BACKEND ODOO                  -->
-    <!-- ADMIN  : Sidebar Verticale Sombre Prune à gauche                 -->
-    <!-- GÉRANT : Horizon Supérieur Moderne Bleu Marine & Or Plein Écran  -->
+    <!-- 2. GESTION DES CADRES DIFFÉRENCIÉS BACKEND ODOO -->
+    <!-- ADMIN : Sidebar Verticale Sombre Prune à gauche -->
+    <!-- GÉRANT : Horizon Supérieur Moderne Bleu Marine & Or Plein Écran -->
     <!-- ================================================================= -->
     <template id="custom_backend_sidebar_inherit" inherit_id="web.webclient_bootstrap" name="Restaurant Core Backend Layout">
         <xpath expr="//t[@t-call='web.layout']" position="inside">
@@ -79,11 +203,11 @@
                         if (isGerant) {
                             brand.innerHTML = [
                                 '&lt;div class="o_restaurant_logo_card"&gt;',
-                                '    &lt;img src="' + logoUrl + '" alt="Logo" class="o_restaurant_logo_img"/&gt;',
+                                ' &lt;img src="' + logoUrl + '" alt="Logo" class="o_restaurant_logo_img"/&gt;',
                                 '&lt;/div&gt;',
                                 '&lt;div class="o_restaurant_brand_text_block"&gt;',
-                                '    &lt;div class="o_restaurant_brand_name"&gt;' + rName + '&lt;/div&gt;',
-                                '    &lt;div class="o_restaurant_brand_badge"&gt;✦ ESPACE GÉRANT ✦&lt;/div&gt;',
+                                ' &lt;div class="o_restaurant_brand_name"&gt;' + rName + '&lt;/div&gt;',
+                                ' &lt;div class="o_restaurant_brand_badge"&gt; ESPACE GÉRANT &lt;/div&gt;',
                                 '&lt;/div&gt;'
                             ].join('');
                             brand.onclick = function() {
@@ -96,8 +220,8 @@
                             if (!existingBtn) {
                                 var quickBtn = document.createElement('a');
                                 quickBtn.className = 'o_gerant_quick_pos_btn';
-                                quickBtn.href = '/pos/ui?config_id=2';
-                                quickBtn.innerHTML = '⚡ Ouvrir la Caisse ➔';
+                                quickBtn.href = '/pos/ui?config_id='+ (data &amp;&amp; data.pos_config_id ? data.pos_config_id : 2);
+                                quickBtn.innerHTML = ' Ouvrir la Caisse ';
                                 if (systray) {
                                     navbar.insertBefore(quickBtn, systray);
                                 } else {
@@ -107,7 +231,7 @@
                         } else {
                             brand.innerHTML = [
                                 '&lt;div class="o_restaurant_logo_card"&gt;',
-                                '    &lt;img src="' + logoUrl + '" alt="Logo" class="o_restaurant_logo_img"/&gt;',
+                                ' &lt;img src="' + logoUrl + '" alt="Logo" class="o_restaurant_logo_img"/&gt;',
                                 '&lt;/div&gt;',
                                 '&lt;div class="o_restaurant_brand_name"&gt;' + rName + '&lt;/div&gt;',
                                 '&lt;div class="o_restaurant_brand_subtitle"&gt;' + rSub + '&lt;/div&gt;'
@@ -151,15 +275,32 @@
                     window.addEventListener('focus', syncBrandFromAPI);
                     window.addEventListener('hashchange', syncBrandFromAPI);
 
-                    // Capture globale de sécurité pour garantir l'action immédiate au clic sur Mes Ventes
+                    // Gestion sécurisée des clics sur les menus spécifiques
                     document.addEventListener('click', function(ev) {
-                        var target = ev.target &amp;&amp; ev.target.closest &amp;&amp; ev.target.closest('.o_nav_entry, a[data-menu-xmlid="restaurant_core.menu_restaurant_gerant_orders"]');
-                        if (target &amp;&amp; (target.innerText.indexOf('Ventes') !== -1 || (target.dataset &amp;&amp; target.dataset.menuXmlid === 'restaurant_core.menu_restaurant_gerant_orders'))) {
+                        var target = ev.target &amp;&amp; ev.target.closest &amp;&amp; ev.target.closest('.o_nav_entry, a[data-menu-xmlid]');
+                        if (!target) return;
+
+                        // 1. Menu ADMIN : Commandes &amp; Ventes Encaissées -> Ouvrir l'action de supervision globale
+                        if ((target.dataset &amp;&amp; target.dataset.menuXmlid === 'restaurant_core.menu_restaurant_orders') ||
+                            (target.innerText &amp;&amp; target.innerText.trim() === 'Commandes &amp; Ventes Encaissées')) {
+                            if (window.odoo &amp;&amp; window.odoo.__WOWL_DEBUG__ &amp;&amp; window.odoo.__WOWL_DEBUG__.root &amp;&amp; window.odoo.__WOWL_DEBUG__.root.env &amp;&amp; window.odoo.__WOWL_DEBUG__.root.env.services &amp;&amp; window.odoo.__WOWL_DEBUG__.root.env.services.action) {
+                                ev.preventDefault();
+                                ev.stopPropagation();
+                                window.odoo.__WOWL_DEBUG__.root.env.services.action.doAction("restaurant_core.action_restaurant_sales_monitoring", { clearBreadcrumbs: true });
+                            }
+                            return;
+                        }
+
+                        // 2. Menu GÉRANT : Mes Ventes &amp; Reçus Caisse -> Ouvrir ses propres ventes uniquement si c'est un gérant
+                        var isG = localStorage.getItem('resto_is_gerant') === 'true' || document.body.classList.contains('o_resto_gerant_mode');
+                        if (isG &amp;&amp; ((target.dataset &amp;&amp; target.dataset.menuXmlid === 'restaurant_core.menu_restaurant_gerant_orders') ||
+                            (target.innerText &amp;&amp; (target.innerText.indexOf('Mes Ventes') !== -1 || target.innerText.indexOf('Reçus Caisse') !== -1)))) {
                             if (window.odoo &amp;&amp; window.odoo.__WOWL_DEBUG__ &amp;&amp; window.odoo.__WOWL_DEBUG__.root &amp;&amp; window.odoo.__WOWL_DEBUG__.root.env &amp;&amp; window.odoo.__WOWL_DEBUG__.root.env.services &amp;&amp; window.odoo.__WOWL_DEBUG__.root.env.services.action) {
                                 ev.preventDefault();
                                 ev.stopPropagation();
                                 window.odoo.__WOWL_DEBUG__.root.env.services.action.doAction("restaurant_core.action_restaurant_gerant_own_orders", { clearBreadcrumbs: true });
                             }
+                            return;
                         }
                     }, true);
                 })();

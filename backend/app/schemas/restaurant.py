@@ -50,10 +50,14 @@ class MenuItemBase(BaseModel):
     description: Optional[str] = Field(None, example="Tomate, mozzarella, basilic frais")
     price: float = Field(..., ge=0, example=12.50)
     is_available: bool = True
+    available_quantity: Optional[int] = Field(default=0, ge=0, example=20)
     category_id: Optional[int] = None
 
 class MenuItemCreate(MenuItemBase):
     pass
+
+class MenuItemStockUpdate(BaseModel):
+    available_quantity: int = Field(..., ge=0, example=20)
 
 class MenuItemResponse(MenuItemBase):
     id: int

@@ -117,8 +117,28 @@ def list_managers(
     db: Session = Depends(get_db),
     admin: User = Depends(require_admin)
 ):
-    """Liste tous les comptes gérants créés par l'administrateur."""
-    return db.query(User).filter(User.role == UserRole.MANAGER.value).all()
+    """Liste tous les comptes gérants créés par l'administrateur avec le cumul des ventes en FCFA."""
+    managers = db.query(User).filter(User.role == UserRole.MANAGER.value).all()
+    results = []
+    for m in managers:
+        sales_sum = db.query(func.sum(Order.total_amount)).filter(Order.server_id == m.id).scalar() or 0.0
+        m_dict = {
+            "id": m.id,
+            "username": m.username,
+            "email": m.email,
+            "full_name": m.full_name,
+            "role": m.role,
+            "is_active": m.is_active,
+            "is_online": m.is_online,
+            "last_login_at": m.last_login_at,
+            "last_logout_at": m.last_logout_at,
+            "odoo_user_id": m.odoo_user_id,
+            "created_by_id": m.created_by_id,
+            "created_at": m.created_at,
+            "total_sales_amount": float(sales_sum),
+        }
+        results.append(m_dict)
+    return results
 
 @router.patch("/managers/{manager_id}/toggle-status", response_model=UserResponse)
 def toggle_manager_status(

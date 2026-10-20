@@ -256,89 +256,102 @@ class BillingService:
 
     def create_invoice_for_manager_session(self, user: User, db: Session) -> GlobalInvoice:
         """
-        Crée automatiquement une facture globale dédiée au gérant dès sa connexion :
-        - Pré-remplie avec son nom complet, identifiant, date et heure exacte de prise de service.
+        Crée ou initialise la Facture du Jour dès la connexion d'un gérant :
+        - Pré-remplie avec la date du jour, l'heure exacte de prise de service et le(s) nom(s) du/des gérant(s).
+        - Porte le type 'daily' (Facture Journalière du Restaurant) pour regrouper toutes les ventes de la journée.
         - Montants initiaux à 0 FCFA (TTC, HT, TVA) prêts à accumuler les ventes dès qu'il commence.
-        - Synchronisée immédiatement dans Odoo (Facturation Générale & Facture Client) pour l'administrateur.
+        - Synchronisée dans Odoo (Facture Générale Journalière).
         """
         now = datetime.datetime.utcnow()
-        clean_mgr = "".join(c for c in (user.full_name or user.username) if c.isalnum() or c in "-_")
-        date_str = now.strftime("%Y%m%d")
-        time_str = now.strftime("%H%M")
+        today = now.date()
+        start_dt = datetime.datetime.combine(today, datetime.time.min)
+        end_dt = datetime.datetime.combine(today, datetime.time.max)
+        period_label = f"Journée du {now.strftime('%d/%m/%Y')}"
 
-        # Vérifier si une facture ouverte pour ce gérant existe déjà pour aujourd'hui
-        existing = db.query(GlobalInvoice).filter(
-            GlobalInvoice.manager_id == user.id,
-            GlobalInvoice.is_certified == False,
-            GlobalInvoice.status.in_(["in_progress", "draft"])
+        # Rechercher si la Facture du Jour ouverte existe déjà pour aujourd'hui
+        daily_invoice = db.query(GlobalInvoice).filter(
+            GlobalInvoice.period_type == "daily",
+            GlobalInvoice.period_start == start_dt,
+            GlobalInvoice.period_end == end_dt,
+            GlobalInvoice.is_certified == False
         ).order_by(GlobalInvoice.id.desc()).first()
 
-        if existing and existing.created_at.date() == now.date():
-            existing.opened_at = existing.opened_at or now
-            existing.manager_name = user.full_name
-            existing.manager_login = user.username
+        mgr_display = user.full_name or user.username or "Gérant"
+        mgr_login = user.username or "gerant"
+
+        if daily_invoice:
+            # Ajouter le gérant à la liste s'il n'y figure pas encore
+            existing_mgrs = [m.strip() for m in (daily_invoice.manager_name or "").split(",") if m.strip()]
+            if mgr_display not in existing_mgrs:
+                existing_mgrs.append(mgr_display)
+                daily_invoice.manager_name = ", ".join(existing_mgrs)
+
+            existing_logins = [l.strip() for l in (daily_invoice.manager_login or "").split(",") if l.strip()]
+            if mgr_login not in existing_logins:
+                existing_logins.append(mgr_login)
+                daily_invoice.manager_login = ", ".join(existing_logins)
+
+            if not daily_invoice.opened_at:
+                daily_invoice.opened_at = now
+            if not daily_invoice.manager_id:
+                daily_invoice.manager_id = user.id
+
             db.commit()
-            return existing
+            db.refresh(daily_invoice)
+            invoice = daily_invoice
+        else:
+            # Créer la Facture du Jour
+            inv_number = self.generate_invoice_number("daily", start_dt, db)
+            cfg = db.query(RestaurantConfig).first()
+            invoice = GlobalInvoice(
+                invoice_number=inv_number,
+                period_type="daily",
+                period_start=start_dt,
+                period_end=end_dt,
+                period_label=period_label,
+                manager_id=user.id,
+                manager_name=mgr_display,
+                manager_login=mgr_login,
+                opened_at=now,
+                status="in_progress",
+                total_sales_count=0,
+                total_ht=0.0,
+                total_taxes=0.0,
+                total_ttc=0.0,
+                is_certified=False,
+                dgi_nif=cfg.nif if cfg else "000123456789A",
+                dgi_nim=cfg.nim if cfg else "RESTO-DGI-MCF-01",
+                manager_summary=json.dumps([{
+                    "manager_id": user.id,
+                    "name": mgr_display,
+                    "login": mgr_login,
+                    "sales_count": 0,
+                    "total_ttc": 0.0,
+                    "total_ht": 0.0,
+                    "total_taxes": 0.0,
+                    "opened_at": now.strftime("%H:%M:%S")
+                }])
+            )
+            db.add(invoice)
+            db.flush()
 
-        inv_number = f"FACT-MGR-{date_str}-{clean_mgr[:10].upper()}-{time_str}"
-        dup = db.query(GlobalInvoice).filter(GlobalInvoice.invoice_number == inv_number).first()
-        if dup:
-            inv_number = f"FACT-MGR-{date_str}-{clean_mgr[:8].upper()}-{time_str}-{now.second:02d}"
+            log = GlobalInvoiceAuditLog(
+                global_invoice_id=invoice.id,
+                action_type="CREATED",
+                description=f"Ouverture automatique de la Facture du Jour à la connexion de {mgr_display} ({mgr_login}) à {now.strftime('%H:%M:%S')}.",
+                user_name="Système Connexion Gérant",
+                details_json=json.dumps({"manager": mgr_display, "login_at": now.isoformat()})
+            )
+            db.add(log)
+            db.commit()
+            db.refresh(invoice)
 
-        start_dt = datetime.datetime.combine(now.date(), datetime.time.min)
-        end_dt = datetime.datetime.combine(now.date(), datetime.time.max)
-        period_label = f"Session {user.full_name} ({now.strftime('%d/%m/%Y à %H:%M')})"
-
-        cfg = db.query(RestaurantConfig).first()
-        invoice = GlobalInvoice(
-            invoice_number=inv_number,
-            period_type="session",
-            period_start=start_dt,
-            period_end=end_dt,
-            period_label=period_label,
-            manager_id=user.id,
-            manager_name=user.full_name,
-            manager_login=user.username,
-            opened_at=now,
-            status="in_progress",
-            total_sales_count=0,
-            total_ht=0.0,
-            total_taxes=0.0,
-            total_ttc=0.0,
-            is_certified=False,
-            dgi_nif=cfg.nif if cfg else "000123456789A",
-            dgi_nim=cfg.nim if cfg else "RESTO-DGI-MCF-01",
-            manager_summary=json.dumps([{
-                "manager_id": user.id,
-                "name": user.full_name,
-                "login": user.username,
-                "sales_count": 0,
-                "total_ttc": 0.0,
-                "total_ht": 0.0,
-                "total_taxes": 0.0,
-                "opened_at": now.strftime("%H:%M:%S")
-            }])
-        )
-        db.add(invoice)
-        db.flush()
-
-        log = GlobalInvoiceAuditLog(
-            global_invoice_id=invoice.id,
-            action_type="CREATED",
-            description=f"Création automatique à la connexion du gérant {user.full_name} ({user.username}) à {now.strftime('%H:%M:%S')}.",
-            user_name="Système Connexion Gérant",
-            details_json=json.dumps({"manager": user.full_name, "login_at": now.isoformat()})
-        )
-        db.add(log)
-        db.commit()
-        db.refresh(invoice)
-
-        # Synchronisation dans Odoo ERP (Facturation Générale & Facture Client)
+        # Synchronisation dans Odoo ERP (Facture Générale Journalière & Facture Client)
         try:
             from app.services.odoo_service import odoo_service
             odoo_service.sync_manager_session_invoice(
-                invoice_number=inv_number,
-                manager_name=user.full_name,
+                invoice_number=invoice.invoice_number,
+                manager_name=mgr_display,
                 manager_id=user.odoo_user_id or 1,
                 date_str=now.strftime("%Y-%m-%d"),
                 time_str=now.strftime("%H:%M:%S")
@@ -350,74 +363,92 @@ class BillingService:
 
     def get_or_create_global_invoice_for_order(self, order: Order, db: Session) -> GlobalInvoice:
         """
-        Identifie ou crée la facture globale correspondant à la vente du gérant.
-        Se base sur la session active du gérant ou la configuration de période.
+        Identifie ou crée la Facture du Jour correspondant à la vente du ou des gérants.
+        Regroupe et additionne toutes les ventes de la journée avec la date, l'heure et les noms des gérants.
         """
-        # 1. Si la commande émane d'un gérant ayant une facture de session ouverte aujourd'hui
-        mgr_login = getattr(order, 'manager_login', None)
-        mgr_name = getattr(order, 'manager_name', None)
-        if mgr_login or mgr_name:
-            filters = []
-            if mgr_login:
-                filters.append(func.lower(GlobalInvoice.manager_login) == mgr_login.lower())
-            if mgr_name:
-                filters.append(GlobalInvoice.manager_name == mgr_name)
-            
-            mgr_invoice = db.query(GlobalInvoice).filter(
-                or_(*filters),
-                GlobalInvoice.is_certified == False,
-                GlobalInvoice.status.in_(["in_progress", "draft"])
-            ).order_by(GlobalInvoice.id.desc()).first()
-            if mgr_invoice:
-                return mgr_invoice
-
-        # 2. Sinon, rechercher selon la fréquence configurée
-        cfg = db.query(RestaurantConfig).first()
-        frequency = cfg.billing_frequency if cfg and cfg.billing_frequency else "daily"
-
         order_dt = order.created_at or datetime.datetime.utcnow()
-        start_dt, end_dt, period_label = self.get_period_bounds(frequency, order_dt)
+        target_date = order_dt.date()
+        start_dt = datetime.datetime.combine(target_date, datetime.time.min)
+        end_dt = datetime.datetime.combine(target_date, datetime.time.max)
+        period_label = f"Journée du {target_date.strftime('%d/%m/%Y')}"
 
-        # Rechercher une facture globale existante non certifiée (ouverte) pour cette période
-        invoice = db.query(GlobalInvoice).filter(
-            GlobalInvoice.period_type == frequency,
+        # 1. Rechercher en priorité la Facture du Jour ouverte (non certifiée) pour cette date
+        daily_invoice = db.query(GlobalInvoice).filter(
+            GlobalInvoice.period_type == "daily",
             GlobalInvoice.period_start == start_dt,
             GlobalInvoice.period_end == end_dt,
             GlobalInvoice.is_certified == False
         ).order_by(GlobalInvoice.id.desc()).first()
 
-        # Si aucune facture n'existe, on la crée automatiquement en statut 'in_progress' ou 'draft'
-        if not invoice:
-            inv_number = self.generate_invoice_number(frequency, start_dt, db)
-            invoice = GlobalInvoice(
-                invoice_number=inv_number,
-                period_type=frequency,
-                period_start=start_dt,
-                period_end=end_dt,
-                period_label=period_label,
-                status="in_progress",
-                total_sales_count=0,
-                total_ht=0.0,
-                total_taxes=0.0,
-                total_ttc=0.0,
-                is_certified=False,
-                dgi_nif=cfg.nif if cfg else "000123456789A",
-                dgi_nim=cfg.nim if cfg else "RESTO-DGI-MCF-01"
-            )
-            db.add(invoice)
-            db.flush()
+        mgr_name = getattr(order, 'manager_name', None) or "Gérant"
+        mgr_login = getattr(order, 'manager_login', None) or "caisse"
 
-            # Enregistrer dans le journal d'audit
-            log = GlobalInvoiceAuditLog(
-                global_invoice_id=invoice.id,
-                action_type="CREATED",
-                description=f"Création automatique de la facture globale #{inv_number} ({period_label}). Fréquence : {frequency}.",
-                user_name="Système Automatique",
-                details_json=json.dumps({"period": period_label, "frequency": frequency})
-            )
-            db.add(log)
+        if daily_invoice:
+            # Mettre à jour la liste des gérants sur la facture si nouveau gérant
+            existing_mgrs = [m.strip() for m in (daily_invoice.manager_name or "").split(",") if m.strip()]
+            if mgr_name and mgr_name not in existing_mgrs:
+                existing_mgrs.append(mgr_name)
+                daily_invoice.manager_name = ", ".join(existing_mgrs)
+
+            existing_logins = [l.strip() for l in (daily_invoice.manager_login or "").split(",") if l.strip()]
+            if mgr_login and mgr_login not in existing_logins:
+                existing_logins.append(mgr_login)
+                daily_invoice.manager_login = ", ".join(existing_logins)
+
+            if not daily_invoice.opened_at:
+                daily_invoice.opened_at = order_dt
+
             db.commit()
-            db.refresh(invoice)
+            return daily_invoice
+
+        # 2. Si aucune facture ouverte pour aujourd'hui, vérifier si une facture de session ouverte existe
+        session_invoice = db.query(GlobalInvoice).filter(
+            GlobalInvoice.is_certified == False,
+            GlobalInvoice.status.in_(["in_progress", "draft"]),
+            or_(
+                and_(GlobalInvoice.period_start <= order_dt, GlobalInvoice.period_end >= order_dt),
+                func.date(GlobalInvoice.created_at) == target_date
+            )
+        ).order_by(GlobalInvoice.id.desc()).first()
+
+        if session_invoice:
+            # Convertir ou rattacher à la facture du jour
+            return session_invoice
+
+        # 3. Créer automatiquement la Facture du Jour
+        cfg = db.query(RestaurantConfig).first()
+        inv_number = self.generate_invoice_number("daily", start_dt, db)
+        invoice = GlobalInvoice(
+            invoice_number=inv_number,
+            period_type="daily",
+            period_start=start_dt,
+            period_end=end_dt,
+            period_label=period_label,
+            status="in_progress",
+            manager_name=mgr_name,
+            manager_login=mgr_login,
+            opened_at=order_dt,
+            total_sales_count=0,
+            total_ht=0.0,
+            total_taxes=0.0,
+            total_ttc=0.0,
+            is_certified=False,
+            dgi_nif=cfg.nif if cfg else "000123456789A",
+            dgi_nim=cfg.nim if cfg else "RESTO-DGI-MCF-01"
+        )
+        db.add(invoice)
+        db.flush()
+
+        log = GlobalInvoiceAuditLog(
+            global_invoice_id=invoice.id,
+            action_type="CREATED",
+            description=f"Création automatique de la Facture du Jour #{inv_number} ({period_label}) pour les ventes du gérant {mgr_name}.",
+            user_name=mgr_name,
+            details_json=json.dumps({"period": period_label, "first_order": order.order_number})
+        )
+        db.add(log)
+        db.commit()
+        db.refresh(invoice)
 
         return invoice
 
@@ -454,18 +485,44 @@ class BillingService:
         prices_include_tax = cfg.menu_prices_include_tax if cfg else True
         tax_regime = cfg.default_tax_regime if cfg else "REEL_NORMAL"
 
-        # 1. Sélectionner toutes les commandes dans l'intervalle temporel de la période
-        order_query = db.query(Order).filter(
-            Order.created_at >= invoice.period_start,
-            Order.created_at <= invoice.period_end
-        )
-        if invoice.manager_login or invoice.manager_name:
+        # 1. Sélectionner toutes les commandes dans l'intervalle temporel de la période ou explicitement rattachées à la facture
+        if invoice.period_type == "daily":
+            # Pour la Facture du Jour, regrouper toutes les ventes de la journée réalisées par tous les gérants
+            order_query = db.query(Order).filter(
+                or_(
+                    Order.global_invoice_id == invoice.id,
+                    and_(
+                        Order.created_at >= invoice.period_start,
+                        Order.created_at <= invoice.period_end
+                    )
+                )
+            )
+        elif invoice.manager_login or invoice.manager_name:
             mgr_filters = []
             if invoice.manager_login:
                 mgr_filters.append(func.lower(Order.manager_login) == invoice.manager_login.lower())
             if invoice.manager_name:
                 mgr_filters.append(Order.manager_name == invoice.manager_name)
-            order_query = order_query.filter(or_(*mgr_filters))
+            order_query = db.query(Order).filter(
+                or_(
+                    Order.global_invoice_id == invoice.id,
+                    and_(
+                        Order.created_at >= invoice.period_start,
+                        Order.created_at <= invoice.period_end,
+                        or_(*mgr_filters)
+                    )
+                )
+            )
+        else:
+            order_query = db.query(Order).filter(
+                or_(
+                    Order.global_invoice_id == invoice.id,
+                    and_(
+                        Order.created_at >= invoice.period_start,
+                        Order.created_at <= invoice.period_end
+                    )
+                )
+            )
 
         all_period_orders = order_query.order_by(Order.created_at.asc()).all()
 
@@ -476,17 +533,15 @@ class BillingService:
                 other_inv = db.query(GlobalInvoice).filter(GlobalInvoice.id == o.global_invoice_id).first()
                 if other_inv and other_inv.is_certified:
                     continue
+            if not o.global_invoice_id:
+                o.global_invoice_id = invoice.id
+                o.is_invoiced = True
+                o.invoiced_at = o.created_at or datetime.datetime.utcnow()
             orders.append(o)
 
         # 2. Détection des anomalies (Exigence 15)
+        self.ensure_default_tax_rules(db)
         anomalies = []
-        tax_rules_count = db.query(TaxRule).filter(TaxRule.is_active == True).count()
-        if tax_rules_count == 0:
-            anomalies.append({
-                "type": "TAX_RULE_MISSING",
-                "severity": "CRITICAL",
-                "message": "Aucune règle fiscale DGI active n'est configurée dans le système."
-            })
 
         seen_order_numbers = set()
         seen_canonical_numbers = set()
@@ -539,13 +594,13 @@ class BillingService:
                     "message": f"Vente n° {o.order_number} enregistrée avec un montant nul (0 FCFA)."
                 })
 
-            # Vérification cohérence de période
-            if o.created_at < invoice.period_start or o.created_at > invoice.period_end:
+            # Information de période (non bloquante)
+            if o.created_at and (o.created_at < invoice.period_start or o.created_at > invoice.period_end):
                 anomalies.append({
-                    "type": "PERIOD_MISMATCH",
-                    "severity": "CRITICAL",
+                    "type": "PERIOD_INFO",
+                    "severity": "INFO",
                     "order_number": o.order_number,
-                    "message": f"Vente n° {o.order_number} hors de la période de facturation."
+                    "message": f"Vente n° {o.order_number} rattachée à la facture de la journée."
                 })
 
             active_orders.append(o)
@@ -662,6 +717,24 @@ class BillingService:
         invoice.anomalies = json.dumps(anomalies)
         invoice.has_anomalies = (len(anomalies) > 0)
 
+        # Collecter et consolider les noms des gérants actifs de la journée
+        mgr_names = [o.manager_name for o in active_orders if o.manager_name and o.manager_name != "Gérant Inconnu"]
+        distinct_mgrs = list(dict.fromkeys(mgr_names))
+        if distinct_mgrs:
+            invoice.manager_name = ", ".join(distinct_mgrs)
+        elif not invoice.manager_name:
+            invoice.manager_name = "Gérant(s) en caisse"
+
+        mgr_logins = [o.manager_login for o in active_orders if o.manager_login and o.manager_login != "N/A"]
+        distinct_logins = list(dict.fromkeys(mgr_logins))
+        if distinct_logins:
+            invoice.manager_login = ", ".join(distinct_logins)
+
+        if active_orders:
+            earliest_dt = min((o.created_at for o in active_orders if o.created_at), default=None)
+            if earliest_dt and (not invoice.opened_at or earliest_dt < invoice.opened_at):
+                invoice.opened_at = earliest_dt
+
         # Détermination du statut :
         # - Brouillon : 0 vente
         # - En cours : des ventes existent mais anomalies bloquantes ou période non terminée
@@ -714,6 +787,11 @@ class BillingService:
                 return existing_inv
 
         invoice = self.get_or_create_global_invoice_for_order(order, db)
+        if order.global_invoice_id != invoice.id:
+            order.global_invoice_id = invoice.id
+            order.is_invoiced = True
+            order.invoiced_at = order.created_at or datetime.datetime.utcnow()
+            db.commit()
         
         # Recalculer immédiatement la facture globale
         mgr_name = order.manager_name or "Gérant"
@@ -850,6 +928,57 @@ class BillingService:
         db.add(audit)
         db.commit()
         db.refresh(invoice)
+
+        # 9. Synchronisation avec le modèle DailyInvoice (Bilan Journalier)
+        try:
+            from app.models.restaurant import DailyInvoice
+            target_date = invoice.period_start.date()
+            daily_inv = db.query(DailyInvoice).filter(DailyInvoice.invoice_date == target_date).first()
+            if not daily_inv:
+                daily_inv = DailyInvoice(
+                    invoice_date=target_date,
+                    invoice_number=f"FACT-GEN-{target_date.strftime('%Y%m%d')}-01"
+                )
+                db.add(daily_inv)
+            daily_inv.total_ttc = invoice.total_ttc
+            daily_inv.total_ht = invoice.total_ht
+            daily_inv.total_tva = invoice.total_taxes
+            daily_inv.total_orders = invoice.total_sales_count
+            daily_inv.is_certified_dgi = True
+            daily_inv.dgi_reference = fiscal_ref
+            daily_inv.dgi_security_code = sig_hash
+            daily_inv.dgi_qr_code_data = qr_code_str
+            daily_inv.dgi_certified_at = now
+            daily_inv.certified_by = invoice.certified_by
+            db.commit()
+        except Exception as e:
+            print(f"Erreur synchro DailyInvoice: {e}")
+
+        # 10. Synchronisation Odoo restaurant.daily.report (si accessible)
+        try:
+            from app.services.odoo_service import odoo_service
+            target_date_str = invoice.period_start.strftime("%Y-%m-%d")
+            odoo_reports = odoo_service.execute_kw(
+                'restaurant.daily.report',
+                'search_read',
+                [[('date', '=', target_date_str)]],
+                {'fields': ['id', 'state', 'is_certified_dgi'], 'limit': 5}
+            )
+            if odoo_reports:
+                for rep in odoo_reports:
+                    odoo_service.execute_kw(
+                        'restaurant.daily.report',
+                        'write',
+                        [[rep['id']], {
+                            'is_certified_dgi': True,
+                            'dgi_reference': fiscal_ref,
+                            'dgi_security_code': sig_hash,
+                            'state': 'certified',
+                            'certified_by': invoice.certified_by
+                        }]
+                    )
+        except Exception as e:
+            print(f"Erreur synchro certification Odoo: {e}")
 
         return invoice
 

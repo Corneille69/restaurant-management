@@ -12,8 +12,8 @@ ENV/
 # Temporary test profiles and logs
 temp_*
 *.log
-scratch/*.pdf
-scratch/*.png
+*.db
+scratch/
 
 # IDE & OS
 .vscode/

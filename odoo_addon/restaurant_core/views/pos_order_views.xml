@@ -11,7 +11,7 @@
                 <field name="backend_sync_status" readonly="1" widget="badge"/>
             </xpath>
             <xpath expr="//sheet" position="inside">
-                <group string="💵 Détails Encaissement Gérant &amp; Monnaie (Sans Monnaie)">
+                <group string="Détails Encaissement Gérant &amp; Monnaie (Sans Monnaie)">
                     <group>
                         <field name="net_paid_amount" string="Net Encaissé sans Monnaie (FCFA)" decoration-bf="1" readonly="1"/>
                         <field name="tendered_amount" string="Montant Versé Client (FCFA)" readonly="1"/>
@@ -41,7 +41,7 @@
                 <field name="change_amount" optional="show" string="Monnaie Rendue"/>
             </xpath>
             <xpath expr="//field[@name='amount_total']" position="attributes">
-                <attribute name="string">Net Encaissé (Sans Monnaie)</attribute>
+                <attribute name="string">NetEncaissé (Sans Monnaie)</attribute>
                 <attribute name="decoration-bf">1</attribute>
             </xpath>
         </field>

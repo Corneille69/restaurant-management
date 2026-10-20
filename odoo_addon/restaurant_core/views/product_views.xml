@@ -14,33 +14,35 @@
                 <field name="available_in_pos"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click text-center p-3 m-2"
-                             style="width: 210px; height: 210px; border-radius: 18px; border: 2px solid #e2e8f0; background: #ffffff; box-shadow: 0 8px 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; align-items: center; transition: all 0.25s ease;">
+                        <div class="oe_kanban_global_click text-center p-2 m-1 resto-dish-card"
+                             style="width: 180px; height: 110px; min-width: 180px; min-height: 110px; max-width: 180px; max-height: 110px; border-radius: 14px; border: 2px solid #f59e0b; background: #ffffff; box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08); display: flex; flex-direction: column; justify-content: space-between; align-items: center; position: relative; overflow: hidden; padding: 7px 10px; transition: all 0.2s ease-in-out; margin: 6px auto !important;">
                             
-                            <!-- Haut de la carte : Badge Catégorie & Statut -->
-                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-                                <span class="badge rounded-pill" style="font-size: 11px; font-weight: 600; padding: 5px 10px; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
+                            <!-- Haut de la carte : Badge Catégorie & Statut Stock -->
+                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 4px;">
+                                <span class="badge rounded-pill" style="font-size: 9px; font-weight: 700; padding: 2px 7px; background-color: #1e3a8a; color: #ffffff; border: 1px solid #172554; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 95px;">
                                     <field name="restaurant_category_id"/>
                                 </span>
-                                <span class="badge rounded-pill" style="font-size: 10px; font-weight: bold; padding: 4px 8px; background-color: #dcfce7; color: #15803d;">
-                                    ● En Caisse
+                                <span t-if="record.available_quantity.raw_value &gt; 0" class="badge rounded-pill" style="font-size: 9px; font-weight: 800; padding: 2px 6px; background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; white-space: nowrap;">
+                                    ● <field name="available_quantity"/>Dispo
+                                </span>
+                                <span t-else="" class="badge rounded-pill" style="font-size: 9px; font-weight: 800; padding: 2px 5px; background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; white-space: nowrap;">
+                                    0 Dispo
                                 </span>
                             </div>
 
-                            <!-- Milieu de la carte : Nom du plat -->
-                            <div style="margin: auto 0; padding: 10px 4px; width: 100%;">
-                                <div style="font-size: 16px; font-weight: 800; color: #1e293b; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                            <!-- Milieu de la carte : Nom du plat (Très lisible, gras et contrasté) -->
+                            <div style="margin: auto 0; padding: 2px 0; width: 100%; text-align: center;">
+                                <div style="font-size: 13px; font-weight: 900; color: #0a0f1d; line-height: 1.25; text-transform: uppercase; letter-spacing: -0.2px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                                     <field name="name"/>
                                 </div>
                             </div>
 
-                            <!-- Bas de la carte : Prix en Grand et Stylé -->
-                            <div style="width: 100%; padding-top: 8px; border-top: 1px dashed #e2e8f0;">
-                                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 16px; font-weight: 800; padding: 6px 14px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);">
-                                    <field name="list_price"/> FCFA
+                            <!-- Bas de la carte : Prix en Or & Blanc Pur -->
+                            <div style="width: 100%; padding-top: 3px; border-top: 1px dashed #e2e8f0; display: flex; justify-content: center;">
+                                <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; font-size: 11.5px; font-weight: 900; padding: 2.5px 10px; border-radius: 7px; display: inline-block; box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3); border: 1px solid #fbbf24; letter-spacing: 0.2px; white-space: nowrap;">
+                                    <field name="list_price"/>FCFA
                                 </div>
                             </div>
-
                         </div>
                     </t>
                 </templates>
@@ -54,62 +56,164 @@
         <field name="model">product.template</field>
         <field name="priority">90</field>
         <field name="arch" type="xml">
-            <tree string="Carte du Restaurant" sample="1">
+            <tree string="Carte du Restaurant" sample="1" decoration-danger="available_quantity &lt;= 0" decoration-warning="available_quantity &gt; 0 and available_quantity &lt;= 3" decoration-success="available_quantity &gt; 3">
                 <field name="name" string="Nom du Plat / Boisson"/>
                 <field name="restaurant_category_id" string="Catégorie"/>
+                <field name="available_quantity" string="Nombre Présent (Stock)" widget="badge" decoration-danger="available_quantity &lt;= 0" decoration-warning="available_quantity &gt; 0 and available_quantity &lt;= 3" decoration-success="available_quantity &gt; 3"/>
                 <field name="list_price" string="Prix (FCFA)"/>
                 <field name="available_in_pos" string="Disponible en Caisse" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>
 
-    <!-- 3. Vue Formulaire Ultra-Simplifiée avec Catégorie, Nom et Prix -->
+    <!-- 3. Vue Formulaire Ultra-Stylée (Blanc Pur, Bleu Marine, Jaune Or, Bleu) -->
     <record id="view_restaurant_dish_form" model="ir.ui.view">
         <field name="name">product.template.restaurant.dish.form</field>
         <field name="model">product.template</field>
         <field name="priority">90</field>
         <field name="arch" type="xml">
-            <form string="Plat du Restaurant">
-                <header>
+            <form string="Plat ou Boisson du Restaurant" class="o_resto_config_form">
+                <header class="resto-config-header" style="background: #ffffff !important; border-bottom: 2px solid #e2e8f0 !important; padding: 0.75rem 1.5rem !important;">
                     <button name="action_confirm_dish"
-                            string="✅ Valider et Enregistrer le Plat"
+                            string="Valider et Enregistrer le Plat"
                             type="object"
-                            class="btn-primary"
-                            groups="base.group_system"
-                            style="font-size: 15px; font-weight: bold; padding: 8px 16px;"/>
+                            class="btn-resto-config-save"
+                            style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important; color: #ffffff !important; border: 2px solid #f59e0b !important; border-radius: 8px !important; padding: 9px 22px !important; font-size: 0.95rem !important; font-weight: 800 !important; box-shadow: 0 4px 14px rgba(30, 58, 138, 0.3) !important;"/>
                     <button name="action_delete_dish"
-                            string="🗑️ Retirer de la Carte"
+                            string="Retirer de la Carte"
                             type="object"
-                            class="btn-danger"
-                            groups="base.group_system"
+                            style="background: #fef2f2 !important; color: #b91c1c !important; border: 1.5px solid #fca5a5 !important; border-radius: 8px !important; padding: 9px 20px !important; font-size: 0.92rem !important; font-weight: 800 !important;"
                             confirm="Êtes-vous sûr de vouloir retirer ce plat du menu du restaurant ?"
                             invisible="not id"/>
                 </header>
-                <sheet>
-                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
+                <sheet class="resto-config-sheet" style="background: #ffffff !important; border-radius: 16px !important; border: 1.5px solid #e2e8f0 !important; box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08) !important; padding: 2rem !important;">
                     
-                    <div class="oe_title" style="margin-bottom: 25px;">
-                        <label for="name" string="Nom du Plat ou de la Boisson" style="font-size: 16px; font-weight: bold; color: #1e293b;"/>
-                        <h1>
-                            <field name="name" placeholder="ex: Babeda, Poulet Braisé, Coca-Cola..." required="1"/>
-                        </h1>
+                    <!-- BANNIÈRE EXÉCUTIVE DU MENU RESTAURANT -->
+                    <div class="resto-config-banner mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3"
+                         style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 60%, #fffbeb 100%) !important; border: 1.5px solid #bfdbfe !important; border-left: 6px solid #1e3a8a !important; border-radius: 14px !important; padding: 1.25rem 1.6rem !important; margin-bottom: 1.75rem;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.3rem; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.25);">
+                                <i class="fa fa-cutlery" style="color: #fbbf24; font-size: 1.3rem;"/>
+                            </div>
+                            <div>
+                                <h3 class="resto-config-title mb-1" style="color: #07224e; font-weight: 900; font-size: 1.3rem; letter-spacing: -0.02em; margin: 0;">Fiche Plat &amp; Boisson • Carte du Restaurant</h3>
+                                <p class="resto-config-subtitle mb-0" style="color: #334155; font-weight: 600; font-size: 0.88rem; margin: 0;">
+                                    Définition du nom, tarification FCFA, gestion de la catégorie et disponibilité immédiate en caisse.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="resto-config-status-badge" style="background: #ffffff; border: 1.5px solid #f59e0b; padding: 6px 14px; border-radius: 9999px; box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15); display: inline-flex; align-items: center; gap: 8px;">
+                            <span class="resto-gold-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 6px #f59e0b; display: inline-block;"/>
+                            <span class="resto-gold-text" style="color: #92400e; font-weight: 800; font-size: 0.78rem; letter-spacing: 0.02em; text-transform: uppercase;">Article Carte En Vente</span>
+                        </div>
                     </div>
 
-                    <group>
-                        <group string="Classification &amp; Tarif">
-                            <field name="restaurant_category_id" string="Catégorie" required="1" options="{'no_create': True, 'no_open': True}"/>
-                            <field name="list_price" string="Prix (FCFA)" placeholder="ex: 2500" required="1" style="font-size: 18px; font-weight: bold; color: #047857;"/>
-                        </group>
-                        <group string="Service &amp; Présentation">
-                            <field name="available_in_pos" string="Disponible en Caisse" widget="boolean_toggle"/>
-                            <field name="description_sale" string="Description du Plat" placeholder="ex: Servi avec frites et sauce pimentée..."/>
-                        </group>
-                        <group invisible="1">
-                            <field name="pos_categ_ids"/>
-                            <field name="detailed_type"/>
-                            <field name="is_restaurant_dish"/>
-                            <field name="sale_ok"/>
-                        </group>
+                    <!-- BLOC PRINCIPAL AVEC PHOTO ET NOM DU PLAT -->
+                    <div class="row g-4 mb-4 align-items-start">
+                        <div class="col-12 col-md-9">
+                            <!-- CADRE NOM DU PLAT -->
+                            <div class="resto-field-box mb-3" style="background: #fffdfa; border: 1.5px solid #fcd34d; border-left: 5px solid #f59e0b; border-radius: 12px; padding: 1.25rem;">
+                                <label for="name" class="resto-label-bold" style="color: #07224e; font-weight: 900; font-size: 1rem; display: block; margin-bottom: 6px;">
+                                    Nom du Plat ou de la Boisson (Titre Officiel en Caisse) *
+                                </label>
+                                <h1>
+                                    <field name="name" placeholder="ex: Babeda, Poulet Braisé, Coca-Cola..." required="1" class="form-control resto-input resto-input-lg" style="background-color: #ffffff !important; border: 1.5px solid #93c5fd !important; border-radius: 10px !important; color: #07224e !important; font-weight: 800 !important; font-size: 1.25rem !important; padding: 10px 16px !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;"/>
+                                </h1>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-3 text-center">
+                            <!-- CADRE PHOTO DU PLAT -->
+                            <div style="background: #ffffff; border: 2px dashed #93c5fd; border-radius: 14px; padding: 10px; display: inline-block; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);">
+                                <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}" style="width: 130px; height: 130px; border-radius: 10px; object-fit: cover;"/>
+                                <small style="display: block; color: #1e3a8a; font-weight: 700; font-size: 0.75rem; margin-top: 6px;">Photo du Plat / Boisson</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARTE 1 : CLASSIFICATION & TARIFICATION (BLEU MARINE & JAUNE OR) -->
+                    <div class="resto-config-card mb-4" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05); margin-bottom: 1.75rem;">
+                        <div class="resto-card-top-stripe-blue" style="height: 4px; background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 60%, #f59e0b 100%);"/>
+                        <div class="resto-card-header d-flex align-items-center justify-content-between p-3 border-bottom" style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0; padding: 0.9rem 1.25rem;">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="resto-badge-icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #eff6ff; border: 1px solid #bfdbfe; font-size: 0.95rem;">
+                                    <i class="fa fa-tag" style="color: #1e3a8a;"/>
+                                </span>
+                                <h4 class="resto-card-title mb-0" style="color: #07224e; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; margin: 0;">Classification &amp; Tarification Commerciale</h4>
+                            </div>
+                            <span class="resto-section-pill resto-pill-blue" style="background: #eff6ff; color: #1e40af; border: 1.5px solid #bfdbfe; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; border-radius: 9999px; padding: 4px 12px; letter-spacing: 0.03em;">Section 01 • Catégorie &amp; Tarif</span>
+                        </div>
+                        <div class="p-4" style="padding: 1.5rem !important;">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4">
+                                    <label for="restaurant_category_id" class="resto-label-bold" style="color: #07224e; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Catégorie dans le Menu *</label>
+                                    <field name="restaurant_category_id" required="1" options="{'no_create': True, 'no_open': True}" class="form-control resto-input resto-input-lg" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #07224e !important; font-weight: 800 !important; font-size: 0.95rem !important; padding: 9px 13px !important;"/>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="resto-field-box" style="background: #fffbeb; border: 1.5px solid #fde68a; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 0.9rem 1.15rem;">
+                                        <label for="available_quantity" class="resto-label-bold" style="color: #92400e; font-weight: 800; font-size: 0.85rem; display: block; margin-bottom: 4px;">Nombre Présent (Stock) *</label>
+                                        <field name="available_quantity" placeholder="ex: 20" required="1" class="form-control resto-input" style="background-color: #ffffff !important; border: 1.5px solid #f59e0b !important; border-radius: 8px !important; color: #b45309 !important; font-weight: 900 !important; font-size: 1.25rem !important; padding: 6px 12px !important;"/>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="resto-field-box" style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-left: 4px solid #1e3a8a; border-radius: 10px; padding: 0.9rem 1.15rem;">
+                                        <label for="list_price" class="resto-label-bold" style="color: #1e3a8a; font-weight: 800; font-size: 0.85rem; display: block; margin-bottom: 4px;">Prix de Vente (FCFA) *</label>
+                                        <field name="list_price" placeholder="ex: 2500" required="1" class="form-control resto-input" style="background-color: #ffffff !important; border: 1.5px solid #2563eb !important; border-radius: 8px !important; color: #1e3a8a !important; font-weight: 900 !important; font-size: 1.35rem !important; padding: 6px 12px !important;"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARTE 2 : SERVICE, CAISSE & PRÉSENTATION -->
+                    <div class="resto-config-card mb-4" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05); margin-bottom: 1.75rem;">
+                        <div class="resto-card-top-stripe-gold" style="height: 4px; background: linear-gradient(90deg, #f59e0b 0%, #d97706 40%, #1e3a8a 100%);"/>
+                        <div class="resto-card-header d-flex align-items-center justify-content-between p-3 border-bottom" style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0; padding: 0.9rem 1.25rem;">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="resto-badge-icon" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #fef3c7; border: 1px solid #fde68a; font-size: 0.95rem;">
+                                    <i class="fa fa-desktop" style="color: #d97706;"/>
+                                </span>
+                                <h4 class="resto-card-title mb-0" style="color: #07224e; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; margin: 0;">Disponibilité en Caisse &amp; Description</h4>
+                            </div>
+                            <span class="resto-section-pill resto-pill-gold" style="background: #fef3c7; color: #92400e; border: 1.5px solid #fcd34d; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; border-radius: 9999px; padding: 4px 12px; letter-spacing: 0.03em;">Section 02 • Caisse &amp; Détails</span>
+                        </div>
+                        <div class="p-4" style="padding: 1.5rem !important;">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4">
+                                    <div class="p-3 rounded-3 border" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                                        <label for="available_in_pos" class="resto-label-bold" style="color: #07224e; font-weight: 800; font-size: 0.92rem; display: block; margin-bottom: 8px;">Disponible en Caisse Directe</label>
+                                        <div style="padding-top: 4px;">
+                                            <field name="available_in_pos" widget="boolean_toggle"/>
+                                        </div>
+                                        <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 6px;">Le plat apparaîtra immédiatement sur l'écran tactile de caisse.</small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-8">
+                                    <label for="description_sale" class="resto-label-bold" style="color: #07224e; font-weight: 800; font-size: 0.88rem; display: block; margin-bottom: 6px;">Description &amp; Composition du Plat</label>
+                                    <field name="description_sale" placeholder="ex: Servi avec frites fraîches, sauce pimentée et crudités..." class="form-control resto-input" style="background-color: #ffffff !important; border: 1.5px solid #cbd5e1 !important; border-radius: 8px !important; color: #07224e !important; font-weight: 600 !important; font-size: 0.92rem !important; padding: 9px 13px !important; min-height: 80px;"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FOOTER EXÉCUTIF AVEC RAPPEL ET BOUTON DE VALIDATION -->
+                    <div class="resto-config-footer d-flex justify-content-between align-items-center flex-wrap gap-3 p-3"
+                         style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa fa-check-circle" style="color: #1e3a8a; font-size: 1.25rem;"/>
+                            <span style="color: #1e3a8a; font-weight: 700; font-size: 0.88rem;">Les plats enregistrés sont automatiquement synchronisés en caisse et prêts à la vente.</span>
+                        </div>
+                        <button name="action_confirm_dish"
+                                string="Valider et Enregistrer le Plat"
+                                type="object"
+                                class="btn-resto-config-save"
+                                style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 70%, #d97706 100%) !important; color: #ffffff !important; border: 2px solid #fbbf24 !important; border-radius: 10px !important; padding: 10px 24px !important; font-size: 0.95rem !important; font-weight: 800 !important; box-shadow: 0 6px 18px rgba(30, 58, 138, 0.3) !important;"/>
+                    </div>
+
+                    <group invisible="1">
+                        <field name="pos_categ_ids"/>
+                        <field name="detailed_type"/>
+                        <field name="is_restaurant_dish"/>
+                        <field name="sale_ok"/>
                     </group>
                 </sheet>
             </form>
@@ -124,10 +228,10 @@
             <search string="Recherche dans la Carte">
                 <field name="name" string="Nom du Plat / Boisson"/>
                 <field name="restaurant_category_id" string="Catégorie"/>
-                <filter string="🍛 Plats Principaux" name="filter_main" domain="[('restaurant_category_id.name', '=', 'Plats Principaux')]"/>
-                <filter string="🥤 Boissons" name="filter_drinks" domain="[('restaurant_category_id.name', '=', 'Boissons')]"/>
-                <filter string="🍰 Desserts" name="filter_desserts" domain="[('restaurant_category_id.name', '=', 'Desserts')]"/>
-                <filter string="🥗 Entrées" name="filter_starters" domain="[('restaurant_category_id.name', '=', 'Entrées')]"/>
+                <filter string="Plats Principaux" name="filter_main" domain="[('restaurant_category_id.name', '=', 'Plats Principaux')]"/>
+                <filter string="Boissons" name="filter_drinks" domain="[('restaurant_category_id.name', '=', 'Boissons')]"/>
+                <filter string="Desserts" name="filter_desserts" domain="[('restaurant_category_id.name', '=', 'Desserts')]"/>
+                <filter string="Entrées" name="filter_starters" domain="[('restaurant_category_id.name', '=', 'Entrées')]"/>
                 <group expand="0" string="Regrouper par">
                     <filter string="Catégorie" name="group_by_category" context="{'group_by': 'restaurant_category_id'}"/>
                 </group>
@@ -137,7 +241,7 @@
 
     <!-- 5. Action : Toute la Carte (Cartes carrées par défaut, groupées par Catégorie) -->
     <record id="action_restaurant_dishes" model="ir.actions.act_window">
-        <field name="name">🍽️ Menus &amp; Plats</field>
+        <field name="name">Menus &amp; Plats</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="search_view_id" ref="view_restaurant_dish_search"/>
@@ -145,13 +249,13 @@
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban')}),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form')})]"/>
-        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True)]</field>
-        <field name="context">{'default_available_in_pos': True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'search_default_group_by_category': 1}</field>
+        <field name="domain">[('available_in_pos', '=',True), ('is_restaurant_dish', '=', True)]</field>
+        <field name="context">{'default_available_in_pos':True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'search_default_group_by_category': 1}</field>
     </record>
 
     <!-- 6. Action : Plats Principaux (Cartes carrées uniquement pour Plats Principaux) -->
     <record id="action_restaurant_main_dishes" model="ir.actions.act_window">
-        <field name="name">🍛 Plats Principaux</field>
+        <field name="name">Plats Principaux</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="search_view_id" ref="view_restaurant_dish_search"/>
@@ -159,13 +263,13 @@
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban')}),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form')})]"/>
-        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Plats Principaux')]</field>
+        <field name="domain">[('available_in_pos', '=',True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Plats Principaux')]</field>
         <field name="context" eval="{'default_available_in_pos': True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'default_restaurant_category_id': ref('restaurant_core.pos_categ_main_dish'), 'search_default_filter_main': 1}"/>
     </record>
 
     <!-- 7. Action : Boissons (Cartes carrées uniquement pour Boissons) -->
     <record id="action_restaurant_drinks" model="ir.actions.act_window">
-        <field name="name">🥤 Boissons</field>
+        <field name="name">Boissons</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="search_view_id" ref="view_restaurant_dish_search"/>
@@ -173,13 +277,13 @@
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban')}),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form')})]"/>
-        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Boissons')]</field>
+        <field name="domain">[('available_in_pos', '=',True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Boissons')]</field>
         <field name="context" eval="{'default_available_in_pos': True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'default_restaurant_category_id': ref('restaurant_core.pos_categ_drinks'), 'search_default_filter_drinks': 1}"/>
     </record>
 
     <!-- 8. Action : Desserts (Cartes carrées uniquement pour Desserts) -->
     <record id="action_restaurant_desserts" model="ir.actions.act_window">
-        <field name="name">🍰 Desserts</field>
+        <field name="name">Desserts</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="search_view_id" ref="view_restaurant_dish_search"/>
@@ -187,13 +291,13 @@
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban')}),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form')})]"/>
-        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Desserts')]</field>
+        <field name="domain">[('available_in_pos', '=',True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Desserts')]</field>
         <field name="context" eval="{'default_available_in_pos': True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'default_restaurant_category_id': ref('restaurant_core.pos_categ_desserts'), 'search_default_filter_desserts': 1}"/>
     </record>
 
     <!-- 9. Action : Entrées (Cartes carrées uniquement pour Entrées) -->
     <record id="action_restaurant_starters" model="ir.actions.act_window">
-        <field name="name">🥗 Entrées</field>
+        <field name="name">Entrées</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="search_view_id" ref="view_restaurant_dish_search"/>
@@ -201,7 +305,7 @@
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban')}),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form')})]"/>
-        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Entrées')]</field>
+        <field name="domain">[('available_in_pos', '=',True), ('is_restaurant_dish', '=', True), ('restaurant_category_id.name', '=', 'Entrées')]</field>
         <field name="context" eval="{'default_available_in_pos': True, 'default_is_restaurant_dish': True, 'default_detailed_type': 'consu', 'default_sale_ok': True, 'default_restaurant_category_id': ref('restaurant_core.pos_categ_starters'), 'search_default_filter_starters': 1}"/>
     </record>
     <!-- 10. Vues Consultation Seule pour Gérants (Aucun Ajout, Aucune Modification, Aucune Suppression) -->
@@ -216,32 +320,36 @@
                 <field name="list_price"/>
                 <field name="restaurant_category_id"/>
                 <field name="available_in_pos"/>
+                <field name="available_quantity"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click text-center p-3 m-2"
-                             style="width: 210px; height: 210px; border-radius: 18px; border: 2px solid #e2e8f0; background: #ffffff; box-shadow: 0 8px 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; align-items: center; transition: all 0.25s ease;">
+                        <div class="oe_kanban_global_click text-center p-2 m-1 resto-dish-card"
+                             style="width: 135px; height: 110px; min-width: 135px; min-height: 110px; max-width: 135px; max-height: 110px; border-radius: 14px; border: 2px solid #f59e0b; background: #ffffff; box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08); display: flex; flex-direction: column; justify-content: space-between; align-items: center; position: relative; overflow: hidden; padding: 7px 8px; transition: all 0.2s ease-in-out;">
                             
                             <!-- Haut de la carte : Badge Catégorie & Statut -->
-                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-                                <span class="badge rounded-pill" style="font-size: 11px; font-weight: 600; padding: 5px 10px; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
+                            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 4px;">
+                                <span class="badge rounded-pill" style="font-size: 8.5px; font-weight: 700; padding: 2px 6px; background-color: #1e3a8a; color: #ffffff; border: 1px solid #172554; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65px;">
                                     <field name="restaurant_category_id" options="{'no_create': True, 'no_open': True}"/>
                                 </span>
-                                <span class="badge rounded-pill" style="font-size: 10px; font-weight: bold; padding: 4px 8px; background-color: #dcfce7; color: #15803d;">
-                                    ● En Caisse
+                                <span t-if="record.available_quantity.raw_value &gt; 0" class="badge rounded-pill" style="font-size: 8.5px; font-weight: 800; padding: 2px 6px; background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; white-space: nowrap;">
+                                    ● <field name="available_quantity"/>Dispo
+                                </span>
+                                <span t-else="" class="badge rounded-pill" style="font-size: 8.5px; font-weight: 800; padding: 2px 5px; background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; white-space: nowrap;">
+                                     0 Dispo
                                 </span>
                             </div>
 
-                            <!-- Milieu de la carte : Nom du plat -->
-                            <div style="margin: auto 0; padding: 10px 4px; width: 100%;">
-                                <div style="font-size: 16px; font-weight: 800; color: #1e293b; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                            <!-- Milieu de la carte : Nom du plat (Très lisible, gras et contrasté) -->
+                            <div style="margin: auto 0; padding: 2px 0; width: 100%; text-align: center;">
+                                <div style="font-size: 12px; font-weight: 900; color: #0a0f1d; line-height: 1.2; text-transform: uppercase; letter-spacing: -0.2px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                                     <field name="name"/>
                                 </div>
                             </div>
 
-                            <!-- Bas de la carte : Prix en Grand et Stylé -->
-                            <div style="width: 100%; padding-top: 8px; border-top: 1px dashed #e2e8f0;">
-                                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 16px; font-weight: 800; padding: 6px 14px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);">
-                                    <field name="list_price"/> FCFA
+                            <!-- Bas de la carte : Prix en Or & Blanc Pur -->
+                            <div style="width: 100%; padding-top: 4px; border-top: 1px dashed #e2e8f0; display: flex; justify-content: center;">
+                                <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; font-size: 11px; font-weight: 800; padding: 2.5px 8px; border-radius: 8px; display: inline-block; box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3); border: 1px solid #fbbf24; letter-spacing: 0.2px; white-space: nowrap;">
+                                    <field name="list_price"/>FCFA
                                 </div>
                             </div>
 
@@ -298,7 +406,7 @@
     </record>
 
     <record id="action_restaurant_dishes_gerant" model="ir.actions.act_window">
-        <field name="name">🍽️ Menus &amp; Plats (Consultation)</field>
+        <field name="name">Menus &amp; Plats (Consultation)</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="search_view_id" ref="view_restaurant_dish_search"/>
@@ -306,7 +414,7 @@
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_restaurant_dish_kanban_readonly')}),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_dish_tree_readonly')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_dish_form_readonly')})]"/>
-        <field name="domain">[('available_in_pos', '=', True), ('is_restaurant_dish', '=', True)]</field>
-        <field name="context">{'search_default_group_by_category': 1}</field>
+        <field name="domain">[('available_in_pos', '=',True), ('is_restaurant_dish', '=', True)]</field>
+        <field name="context">{'search_default_group_by_category':1}</field>
     </record>
 </odoo>

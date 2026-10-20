@@ -1,9 +1,11 @@
 /* =========================================================================
    STYLE PERSONNALISÉ ÉCRAN DE CAISSE POINT DE VENTE (ODOO 17 POS)
-   - Thème Haute Gastronomie : Blanc Pur, Vert Forêt / Émeraude & Or Doré Noble
-   - Haute Densité : Cases et écritures compactes pour accueillir des centaines de menus
-   - Saisie ultra-rapide sans erreur avec raccourci instantané
-   - Ticket de caisse client petit format imprimable avec tout centré
+   Palette Demandée :
+   - Blanc Pur : #ffffff
+   - Jaune Or : #f59e0b / #fbbf24 / #d97706
+   - Bleu Marine : #0b192c / #0f172a / #1e3a8a / #172554
+   - Bleu : #2563eb / #3b82f6 / #eff6ff
+   - Vert pour la partie Valider : #059669 / #10b981 / #047857
    ========================================================================= */
 
 /* -------------------------------------------------------------------------
@@ -14,19 +16,19 @@
 .product-screen {
     background-color: #f8fafc !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    color: #064e3b !important;
+    color: #0f172a !important;
 }
 
 /* -------------------------------------------------------------------------
-   2. BARRE SUPÉRIEURE (HEADER) : VERT PROFOND ET LISERÉ OR DORÉ
+   2. BARRE SUPÉRIEURE (HEADER) : BLEU MARINE ET LISERÉ JAUNE OR
    ------------------------------------------------------------------------- */
 .pos-topheader {
-    background: linear-gradient(135deg, #064e3b 0%, #043a2d 100%) !important;
-    border-bottom: 3px solid #d4af37 !important; /* Liseré Or Doré */
+    background: linear-gradient(135deg, #0b192c 0%, #1e3a8a 100%) !important;
+    border-bottom: 3.5px solid #f59e0b !important; /* Liseré Jaune Or */
     color: #ffffff !important;
     padding: 0 1rem !important;
     height: 48px !important;
-    box-shadow: 0 3px 12px rgba(6, 78, 59, 0.35) !important;
+    box-shadow: 0 4px 15px rgba(11, 25, 44, 0.45) !important;
 }
 
 .pos-topheader .pos-branding .pos-logo {
@@ -42,7 +44,7 @@
     transition: all 0.2s ease !important;
 }
 
-/* BOUTON ULTRA-PROFESSIONNEL ACCUEIL (TAILLE ET FORME DES AUTRES CASES) */
+/* BOUTON ULTRA-PROFESSIONNEL ACCUEIL (BLANC PUR & BORDURE JAUNE OR) */
 .pos-home-sales-wrapper {
     height: 100% !important;
 }
@@ -52,11 +54,11 @@
     height: 38px !important;
     min-height: 38px !important;
     max-height: 38px !important;
-    background: linear-gradient(135deg, #ffffff 0%, #fdfbf7 100%) !important;
-    color: #064e3b !important;
-    border: 2px solid #d4af37 !important; /* Liseré Or Noble */
-    border-radius: 8px !important; /* Taille et forme identique aux autres cases */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+    background: #ffffff !important; /* Blanc Pur */
+    color: #1e3a8a !important; /* Bleu Marine */
+    border: 2px solid #f59e0b !important; /* Liseré Jaune Or */
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
     padding: 0 16px !important;
     font-size: 13.5px !important;
     font-weight: 900 !important;
@@ -74,10 +76,10 @@
 
 .pos .pos-topheader .pos-sales-nav-btn:hover,
 .pos .pos-topheader .pos-home-nav-btn:hover {
-    background: #ffffff !important;
-    color: #047857 !important;
-    border-color: #f59e0b !important;
-    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.5) !important;
+    background: #eff6ff !important;
+    color: #2563eb !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.5) !important;
     transform: translateY(-1px) scale(1.02) !important;
 }
 
@@ -90,30 +92,24 @@
 .pos .pos-topheader .pos-home-nav-btn .sales-btn-icon {
     font-size: 16px !important;
     line-height: 1 !important;
+    color: #d97706 !important;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15)) !important;
 }
 
 .pos .pos-topheader .pos-sales-nav-btn .sales-btn-text,
 .pos .pos-topheader .pos-home-nav-btn .sales-btn-text {
     font-weight: 900 !important;
-    color: #064e3b !important;
+    color: #1e3a8a !important;
     letter-spacing: 0.4px !important;
 }
 
-/* MASQUAGE TOTAL DU PLAN DE SALLE / FLOOR SCREEN & BOUTONS ASSOCIÉS */
-.floor-screen,
-.pos .floor-screen,
-.pos-restaurant-floor-screen,
-.pos .floor-map,
-.pos-topheader button.table-button,
+/* BADGES DANS L'EN-TÊTE (TABLE, CAISSIER) */
 .pos-topheader .table-button,
-.pos-topheader .floor-button,
-.pos-topheader button.back-button,
-.pos-topheader .table-name-button {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
+.pos-topheader .table-name-button,
+.pos-topheader .order-button {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1.5px solid #f59e0b !important;
+    color: #ffffff !important;
 }
 
 .pos-topheader .status-buttons .oe_status {
@@ -122,16 +118,16 @@
 }
 
 /* -------------------------------------------------------------------------
-   3. BARRE DE RECHERCHE ULTRA-RAPIDE PAR NOM
+   3. BARRE DE RECHERCHE : BLANC PUR & BLEU AVEC ACCENT OR
    ------------------------------------------------------------------------- */
 .pos .search-box,
 .pos .search-bar,
 .pos .input-container {
     background: #ffffff !important;
-    border: 2px solid #059669 !important; /* Vert émeraude */
+    border: 2px solid #2563eb !important; /* Bleu Royal */
     border-radius: 20px !important;
     padding: 4px 12px !important;
-    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.1) !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12) !important;
     transition: all 0.2s ease !important;
     min-width: 270px !important;
     height: 38px !important;
@@ -140,15 +136,15 @@
 .pos .search-box:focus-within,
 .pos .search-bar:focus-within,
 .pos .input-container:focus-within {
-    border-color: #d4af37 !important; /* Halo Or Doré */
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3) !important;
+    border-color: #f59e0b !important; /* Halo Jaune Or */
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35) !important;
 }
 
 .pos .search-bar input,
 .pos .input-container input {
     font-size: 0.88rem !important;
     font-weight: 800 !important;
-    color: #064e3b !important;
+    color: #0f172a !important; /* Bleu Marine Sombre */
     background: transparent !important;
     border: none !important;
     outline: none !important;
@@ -164,106 +160,183 @@
 
 .pos .input-container i,
 .pos .search-bar i {
-    color: #059669 !important;
+    color: #2563eb !important; /* Bleu */
     font-size: 0.95rem !important;
     font-weight: 900 !important;
 }
 
 /* -------------------------------------------------------------------------
-   4. BARRE DES CATÉGORIES (ONGLETS DU MENU)
+   4. BARRE DES CATÉGORIES (ONGLETS DU MENU) : BLANC PUR, BLEU & JAUNE OR
    ------------------------------------------------------------------------- */
+.products-widget-control,
 .pos-rightheader {
     background: #ffffff !important;
-    border-bottom: 2px solid #e2e8f0 !important;
-    padding: 4px 10px !important;
-}
-
-.pos-rightheader .category-list,
-.pos-rightheader .category-selector,
-.pos-rightheader .pos-category-list {
+    border-bottom: 2.5px solid #cbd5e1 !important;
+    padding: 6px 12px !important;
+    min-height: 52px !important;
     display: flex !important;
     align-items: center !important;
-    gap: 0.35rem !important;
-    padding: 2px 0 !important;
+    justify-content: space-between !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+}
+
+/* Conteneur de la liste des catégories */
+.products-widget-control .CategorySelector,
+.CategorySelector,
+.category-list,
+.pos-category-list {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
     overflow-x: auto !important;
+    padding: 2px 0 !important;
 }
 
-.pos-rightheader .category-button,
-.pos-rightheader .category-simple-button,
-.pos-rightheader button.btn-secondary {
-    background: #ffffff !important;
-    border: 1.5px solid #059669 !important;
-    border-radius: 14px !important;
-    padding: 4px 12px !important;
+/* Boutons individuels de catégories (Plats Principaux, Boissons, Desserts, Entrées) */
+.products-widget-control button.category-button,
+.products-widget-control .category-item,
+.CategorySelector button,
+button.category-button,
+.category-button {
+    background: #ffffff !important; /* Blanc Pur */
+    border: 2px solid #3b82f6 !important; /* Bleu Royal */
+    border-radius: 10px !important;
+    padding: 6px 14px !important;
     font-weight: 800 !important;
-    font-size: 0.80rem !important;
-    color: #064e3b !important;
+    font-size: 0.88rem !important;
+    color: #1e3a8a !important; /* Bleu Marine */
     white-space: nowrap !important;
-    transition: all 0.15s ease !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.10) !important;
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    min-height: 38px !important;
+    max-height: 42px !important;
+    cursor: pointer !important;
 }
 
-.pos-rightheader .category-button:hover,
-.pos-rightheader button.btn-secondary:hover {
-    border-color: #d4af37 !important;
-    color: #b45309 !important;
-    background: #f0fdf4 !important;
+.products-widget-control button.category-button:hover,
+.CategorySelector button:hover,
+button.category-button:hover {
+    border-color: #f59e0b !important; /* Jaune Or */
+    color: #2563eb !important;
+    background: #eff6ff !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
 }
 
-.pos-rightheader .category-button.active,
-.pos-rightheader .category-button.selected,
-.pos-rightheader button.btn-secondary.active {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-    color: #ffffff !important;
-    border-color: #d4af37 !important; /* Liseré Or */
-    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3) !important;
+/* Catégorie active / sélectionnée */
+.products-widget-control button.category-button.active,
+.products-widget-control button.category-button.selected,
+.CategorySelector button.active,
+.CategorySelector button.selected {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important; /* Bleu Marine -> Bleu */
+    color: #ffffff !important; /* Blanc Pur */
+    border: 2px solid #f59e0b !important; /* Liseré Jaune Or */
+    box-shadow: 0 4px 14px rgba(30, 58, 138, 0.4) !important;
+}
+
+/* Icône Accueil / Home dans la barre de catégories */
+.products-widget-control button.category-button i.fa-home,
+.CategorySelector i.fa-home,
+button.category-button i.fa-home {
+    color: #d97706 !important; /* Jaune Or */
+    font-size: 1.25rem !important;
+}
+
+.products-widget-control button.category-button span,
+.CategorySelector button span {
+    font-size: 0.86rem !important;
+    font-weight: 800 !important;
+    color: inherit !important;
+    line-height: 1 !important;
+}
+
+/* Flèche de séparation entre catégories parentes */
+.products-widget-control .fa-caret-right,
+.CategorySelector .fa-caret-right {
+    color: #f59e0b !important; /* Jaune Or */
+    font-size: 1rem !important;
+    margin: 0 4px !important;
 }
 
 /* -------------------------------------------------------------------------
-   5. GRILLE DE PLATS HAUTE DENSITÉ (POUR CONTENIR DES CENTAINES DE MENUS)
+   5. GRILLE DE PLATS & CARTES PRODUITS (BLANC PUR, BLEU MARINE & JAUNE OR)
    ------------------------------------------------------------------------- */
-.product-list {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)) !important;
-    gap: 6px !important;
-    padding: 8px !important;
-    background-color: #f8fafc !important;
+.products-widget .product-list-container,
+.product-list-container {
+    background-color: #f1f5f9 !important;
+    padding: 10px !important;
 }
 
-/* Carte individuelle compacte */
-.pos article.product {
-    background: #ffffff !important;
-    border: 1.5px solid #059669 !important; /* Vert émeraude */
-    border-radius: 8px !important;
-    padding: 6px 8px !important;
-    min-height: 64px !important;
-    max-height: 76px !important;
+.products-widget .product-list,
+.product-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 10px !important;
+    padding: 6px !important;
+    background-color: transparent !important;
+}
+
+/* Carte individuelle de produit */
+.pos article.product,
+.products-widget article.product,
+article.product,
+.product-card {
+    background: #ffffff !important; /* Blanc Pur */
+    border: 2px solid #93c5fd !important; /* Bordure Bleu raffinée */
+    border-radius: 12px !important;
+    padding: 10px 12px !important;
+    min-height: 84px !important;
+    max-height: 98px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
     align-items: stretch !important;
-    box-shadow: 0 1px 4px rgba(6, 78, 59, 0.08) !important;
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     cursor: pointer !important;
     overflow: hidden !important;
     position: relative !important;
 }
 
-.pos article.product:hover {
-    border-color: #d4af37 !important; /* Liseré Or Doré au survol */
-    transform: translateY(-1.5px) !important;
-    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3) !important;
+.pos article.product:hover,
+.products-widget article.product:hover,
+article.product:hover,
+.product-card:hover {
+    border-color: #f59e0b !important; /* Bordure Jaune Or au survol */
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3) !important;
+    background: #ffffff !important;
 }
 
-.pos article.product:active {
-    transform: scale(0.97) !important;
+.pos article.product:active,
+article.product:active {
+    transform: scale(0.98) !important;
 }
 
-/* Masquage total de l'icône disgracieuse d'info en coin */
+/* Carte en rupture de stock */
+.pos article.product.product-out-of-stock,
+article.product.product-out-of-stock {
+    border-color: #ef4444 !important;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%) !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25) !important;
+}
+
+.pos article.product.product-out-of-stock:hover,
+article.product.product-out-of-stock:hover {
+    border-color: #dc2626 !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4) !important;
+}
+
+/* Masquage de l'icône disgracieuse d'info */
 .product-information-tag,
 .product-information-tag-logo,
-.pos article.product .product-information-tag,
-.pos article.product .product-information-tag-logo {
+article.product .product-information-tag,
+article.product .product-information-tag-logo {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
@@ -272,17 +345,27 @@
     border: none !important;
 }
 
-/* Nom du plat / boisson compact et bien gras */
-.pos article.product .product-name,
+/* Contenu intérieur de la carte produit */
 .pos article.product .product-content,
-.pos article.product .text-start,
-.pos article.product > span:first-child,
-.pos article.product > div:first-child {
-    font-size: 0.82rem !important;
+article.product .product-content {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+
+/* Nom du plat / boisson : Bleu Marine Sombre & Bien Gras */
+.pos article.product .product-name,
+article.product .product-name,
+.product-name {
+    font-size: 0.94rem !important;
     font-weight: 800 !important;
-    color: #064e3b !important; /* Vert forêt profond */
-    line-height: 1.15 !important;
-    margin-bottom: 2px !important;
+    color: #0b192c !important; /* Bleu Marine Sombre */
+    line-height: 1.25 !important;
+    margin-bottom: 6px !important;
     word-break: break-word !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
@@ -291,32 +374,83 @@
     text-align: left !important;
 }
 
-/* Badge de prix : Or Doré bien doré éclatant */
-.pos article.product .price-tag,
-.pos article.product .price,
-.pos article.product .product-price {
-    display: inline-flex !important;
+.pos article.product.product-out-of-stock .product-name,
+article.product.product-out-of-stock .product-name {
+    color: #991b1b !important;
+}
+
+/* Ligne inférieure de la carte : Prix à gauche + Stock à droite */
+.pos article.product .product-bottom-row,
+article.product .product-bottom-row {
+    display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
-    background: linear-gradient(135deg, #d4af37 0%, #b45309 100%) !important; /* Or Doré Riche */
-    color: #ffffff !important;
-    font-weight: 900 !important;
-    font-size: 0.76rem !important;
-    letter-spacing: 0.2px !important;
-    padding: 2px 7px !important;
-    border-radius: 5px !important;
-    width: fit-content !important;
-    box-shadow: 0 1px 3px rgba(180, 83, 9, 0.25) !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 6px !important;
     margin-top: auto !important;
 }
 
+/* BADGE DE PRIX : JAUNE OR CHAUD ÉCLATANT */
+.pos article.product .price-tag,
+article.product .price-tag,
+.price-tag {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%) !important; /* Jaune Or Brillant */
+    color: #ffffff !important; /* Blanc Pur */
+    font-weight: 900 !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.2px !important;
+    padding: 3px 8px !important;
+    border-radius: 6px !important;
+    width: fit-content !important;
+    box-shadow: 0 2px 5px rgba(217, 119, 6, 0.35) !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+}
+
+/* BADGE DE STOCK DYNAMIQUE : BLEU ROYAL AVEC CHIFFRE NET */
+.pos article.product .stock-badge,
+article.product .stock-badge,
+.stock-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 900 !important;
+    font-size: 0.82rem !important;
+    min-width: 28px !important;
+    height: 24px !important;
+    padding: 2px 7px !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+    letter-spacing: 0.3px !important;
+}
+
+.pos article.product .stock-badge.stock-available,
+article.product .stock-badge.stock-available {
+    background: #eff6ff !important;
+    border: 1.5px solid #2563eb !important; /* Bleu Royal */
+    color: #1e3a8a !important; /* Bleu Marine */
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2) !important;
+}
+
+.pos article.product .stock-badge.stock-rupture,
+article.product .stock-badge.stock-rupture {
+    background: #fef2f2 !important;
+    border: 1.5px solid #ef4444 !important; /* Rouge Rupture */
+    color: #b91c1c !important;
+    box-shadow: 0 1px 4px rgba(239, 68, 68, 0.2) !important;
+}
+
 /* -------------------------------------------------------------------------
-   6. PANIER ET LIGNES DE COMMANDE (GAUCHE)
+   6. PANIER ET LIGNES DE COMMANDE (GAUCHE) : BLANC PUR & BLEU MARINE
    ------------------------------------------------------------------------- */
 .order-container,
 .order-widget,
 .pos .leftpane {
-    background: #ffffff !important;
+    background: #ffffff !important; /* Blanc Pur */
     border-right: 2px solid #cbd5e1 !important;
 }
 
@@ -336,22 +470,23 @@
     transition: background 0.15s ease !important;
 }
 
+/* Ligne sélectionnée : Bleu Doux & Bordure Bleu Royal */
 .pos .orderline.selected {
-    background: #f0fdf4 !important; /* Léger fond menthe */
-    border-left: 4px solid #059669 !important; /* Vert émeraude */
+    background: #eff6ff !important; /* Bleu très doux */
+    border-left: 5px solid #2563eb !important; /* Bleu Royal */
 }
 
 .pos .orderline .product-name {
     font-size: 0.95rem !important;
     font-weight: 800 !important;
-    color: #064e3b !important;
+    color: #0f172a !important; /* Bleu Marine Sombre */
     line-height: 1.2 !important;
 }
 
 .pos .orderline .price {
     font-size: 0.98rem !important;
     font-weight: 900 !important;
-    color: #b45309 !important; /* Or / Ambré noble */
+    color: #d97706 !important; /* Jaune Or Chaud */
 }
 
 .pos .orderline .info-list {
@@ -363,26 +498,26 @@
 .pos .orderline .info-list em {
     font-style: normal !important;
     font-weight: 800 !important;
-    color: #064e3b !important;
+    color: #1e3a8a !important; /* Bleu Marine */
 }
 
 /* -------------------------------------------------------------------------
-   7. TOTAUX ET CALCULS AUTOMATIQUES INSTANTANÉS
+   7. TOTAUX ET CALCULS AUTOMATIQUES : BLEU MARINE & JAUNE OR
    ------------------------------------------------------------------------- */
 .pos .order-summary,
 .pos .order-total,
 .pos .summary {
-    background: #ffffff !important;
-    border-top: 3px solid #059669 !important; /* Liseré vert */
+    background: #ffffff !important; /* Blanc Pur */
+    border-top: 3px solid #1e3a8a !important; /* Liseré Bleu Marine */
     padding: 10px 14px !important;
-    box-shadow: 0 -3px 12px rgba(5, 150, 105, 0.08) !important;
+    box-shadow: 0 -3px 12px rgba(30, 58, 138, 0.08) !important;
 }
 
 .pos .order-summary .label,
 .pos .summary .label {
     font-size: 1.10rem !important;
     font-weight: 900 !important;
-    color: #064e3b !important;
+    color: #0f172a !important; /* Bleu Marine */
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
 }
@@ -390,10 +525,10 @@
 .pos .order-summary .value,
 .pos .summary .value,
 .pos .order-total .value {
-    font-size: 1.55rem !important;
+    font-size: 1.60rem !important;
     font-weight: 900 !important;
-    color: #b45309 !important; /* Or Doré Chaud */
-    text-shadow: 0 1px 2px rgba(180, 83, 9, 0.15) !important;
+    color: #d97706 !important; /* Jaune Or Chaud */
+    text-shadow: 0 1px 2px rgba(217, 119, 6, 0.15) !important;
     letter-spacing: 0.5px !important;
 }
 
@@ -405,7 +540,7 @@
 }
 
 /* -------------------------------------------------------------------------
-   8. BOUTONS DE CONTRÔLE RAPIDE (Remboursement, Client, etc.)
+   8. BOUTONS DE CONTRÔLE RAPIDE (Remboursement, Client, Note, Transfert...) : BLEU & BLANC PUR
    ------------------------------------------------------------------------- */
 .control-buttons {
     background: #f8fafc !important;
@@ -419,31 +554,32 @@
 .control-buttons .control-button,
 .control-buttons button,
 .control-buttons .btn {
-    background: #ffffff !important;
-    border: 1.5px solid #059669 !important;
+    background: #ffffff !important; /* Blanc Pur */
+    border: 1.5px solid #2563eb !important; /* Bordure Bleu */
     border-radius: 6px !important;
-    color: #064e3b !important;
+    color: #1e3a8a !important; /* Bleu Marine */
     font-weight: 800 !important;
     font-size: 0.78rem !important;
-    padding: 4px 8px !important;
+    padding: 5px 9px !important;
     transition: all 0.15s ease !important;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08) !important;
 }
 
 .control-buttons .control-button:hover,
 .control-buttons button:hover {
-    border-color: #d4af37 !important;
-    background: #f0fdf4 !important;
-    color: #b45309 !important;
+    border-color: #f59e0b !important; /* Jaune Or */
+    background: #eff6ff !important;
+    color: #d97706 !important;
 }
 
 .control-buttons .control-button-number {
-    background: #d4af37 !important;
-    color: #042f24 !important;
+    background: #f59e0b !important; /* Jaune Or */
+    color: #0b192c !important; /* Bleu Marine */
     font-weight: 900 !important;
 }
 
 /* -------------------------------------------------------------------------
-   9. SOUS-PANNEAU PAIEMENT & PAVÉ NUMÉRIQUE
+   9. SOUS-PANNEAU PAIEMENT & VALIDER : VERT ÉCLATANT DEMANDÉ !
    ------------------------------------------------------------------------- */
 .subpads {
     display: flex !important;
@@ -465,13 +601,15 @@
     background: #ffffff !important;
 }
 
-/* Bouton Paiement : Dégradé Vert Émeraude & Bordure Or Doré */
+/* BOUTON PAIEMENT : VERT ÉCLATANT & BORDURE JAUNE OR (PARTIE VALIDER) */
 .actionpad .pay-order-button,
 .actionpad button.pay-order-button,
-.subpads .actionpad button.button.pay-order-button {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-    color: #ffffff !important;
-    border: 2.5px solid #d4af37 !important; /* Bordure Or Doré */
+.subpads .actionpad button.button.pay-order-button,
+.actionpad .pay-button,
+.actionpad button.pay-button {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important; /* VERT ÉCLATANT */
+    color: #ffffff !important; /* Blanc Pur */
+    border: 2.5px solid #f59e0b !important; /* Bordure Jaune Or */
     border-radius: 8px !important;
     font-weight: 900 !important;
     font-size: 1.02rem !important;
@@ -480,7 +618,7 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: 0 4px 12px rgba(4, 120, 87, 0.35) !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45) !important;
     transition: all 0.2s ease !important;
     min-height: 56px !important;
     width: 100% !important;
@@ -490,19 +628,21 @@
 }
 
 .actionpad .pay-order-button:hover,
-.actionpad button.pay-order-button:hover {
-    background: linear-gradient(135deg, #047857 0%, #064e3b 100%) !important;
-    border-color: #f59e0b !important;
+.actionpad button.pay-order-button:hover,
+.actionpad .pay-button:hover {
+    background: linear-gradient(135deg, #047857 0%, #059669 100%) !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.6) !important;
     transform: translateY(-1px) !important;
 }
 
-/* Bouton Ordre (Envoi en cuisine) */
+/* BOUTON COMMANDER / VALIDER : VERT POUR VALIDATION */
 .actionpad .submit-order,
 .actionpad button.submit-order,
 .subpads .actionpad button.submit-order {
-    background: #064e3b !important;
+    background: linear-gradient(135deg, #047857 0%, #059669 100%) !important; /* VERT */
     color: #ffffff !important;
-    border: 2px solid #d4af37 !important; /* Liseré Or */
+    border: 2px solid #f59e0b !important; /* Liseré Jaune Or */
     border-radius: 8px !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -515,32 +655,32 @@
     align-items: center !important;
     justify-content: center !important;
     flex-grow: 1 !important;
-    box-shadow: 0 2px 6px rgba(6, 78, 59, 0.2) !important;
+    box-shadow: 0 3px 8px rgba(4, 120, 87, 0.35) !important;
     transition: all 0.2s ease !important;
 }
 
 .actionpad .submit-order:hover,
 .actionpad button.submit-order:hover {
-    background: #042f24 !important;
-    border-color: #f59e0b !important;
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+    border-color: #fbbf24 !important;
 }
 
 .actionpad .submit-order i {
     font-size: 1.2rem !important;
     margin-bottom: 3px !important;
-    color: #d4af37 !important;
+    color: #fbbf24 !important; /* Icône Jaune Or */
 }
 
 .actionpad .submit-order .badge,
 .actionpad .submit-order > span {
-    background: #d4af37 !important;
-    color: #042f24 !important;
+    background: #f59e0b !important;
+    color: #0b192c !important;
     font-weight: 900 !important;
     border-radius: 6px !important;
 }
 
 /* -------------------------------------------------------------------------
-   10. PAVÉ NUMÉRIQUE (NUMPAD) EN 4 COLONNES PARFAITES
+   10. PAVÉ NUMÉRIQUE (NUMPAD) : BLANC PUR & BLEU MARINE
    ------------------------------------------------------------------------- */
 .subpads .numpad {
     display: grid !important;
@@ -550,7 +690,7 @@
     flex: 1 1 auto !important;
     width: calc(100% - 135px) !important;
     margin: 0 !important;
-    background: #ffffff !important;
+    background: #ffffff !important; /* Blanc Pur */
 }
 
 /* Boutons individuels du pavé */
@@ -558,9 +698,9 @@
 .numpad .col,
 .numpad .input-button,
 .numpad .mode-button {
-    background: #ffffff !important;
+    background: #ffffff !important; /* Blanc Pur */
     border: 1.5px solid #cbd5e1 !important;
-    color: #064e3b !important;
+    color: #0f172a !important; /* Bleu Marine Sombre */
     font-size: 1.2rem !important;
     font-weight: 800 !important;
     border-radius: 7px !important;
@@ -580,36 +720,40 @@
 
 .numpad button:hover,
 .numpad .col:hover {
-    background: #f0fdf4 !important;
-    border-color: #059669 !important;
+    background: #eff6ff !important;
+    border-color: #2563eb !important; /* Bleu */
+    color: #1e3a8a !important;
 }
 
 .numpad button:active,
 .numpad .col:active {
-    background: #dcfce7 !important;
+    background: #dbeafe !important;
     transform: scale(0.97) !important;
 }
 
-/* Touches de mode spéciales (Qté, % Rem., Prix) */
+/* TOUCHES DE MODE ACTIVES (Qté, % Rem., Prix) : VERT ÉCLATANT VALIDÉ */
 .numpad button.active,
 .numpad button.border-primary,
-.numpad .mode-button.active {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-    color: #ffffff !important;
-    border: 1.5px solid #d4af37 !important;
-    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3) !important;
+.numpad .mode-button.active,
+.numpad .mode-button.selected-mode {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important; /* VERT POUR VALIDATION */
+    color: #ffffff !important; /* Blanc Pur */
+    border: 2px solid #f59e0b !important; /* Liseré Jaune Or */
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4) !important;
+    font-weight: 900 !important;
 }
 
-/* Touche Effacer (Backspace ⌫) */
+/* Touche Effacer (Backspace) */
 .numpad button:last-child {
     font-size: 1.15rem !important;
-    background: #f8fafc !important;
-    color: #b45309 !important;
+    background: #fffbeb !important;
+    color: #d97706 !important; /* Jaune Or */
+    border-color: #fde68a !important;
     font-weight: 900 !important;
 }
 
 /* -------------------------------------------------------------------------
-   11. BOUTONS DIVERS & POPUPS
+   11. BOUTONS DIVERS & POPUPS : BLEU MARINE & JAUNE OR
    ------------------------------------------------------------------------- */
 .pos .btn-primary,
 .pos button.btn-primary,
@@ -619,12 +763,12 @@
 .pos .search-more-button .btn-primary,
 .search-more-button button,
 .search-more-button .btn {
-    background: #064e3b !important;
-    border: 2px solid #d4af37 !important;
-    color: #ffffff !important;
+    background: linear-gradient(135deg, #0b192c 0%, #1e3a8a 100%) !important; /* Bleu Marine */
+    border: 2px solid #f59e0b !important; /* Jaune Or */
+    color: #ffffff !important; /* Blanc Pur */
     font-weight: 800 !important;
     border-radius: 8px !important;
-    box-shadow: 0 2px 6px rgba(6, 78, 59, 0.2) !important;
+    box-shadow: 0 2px 6px rgba(11, 25, 44, 0.25) !important;
     transition: all 0.2s ease !important;
 }
 
@@ -632,13 +776,13 @@
 .pos button.book-table:hover,
 .pos .search-more-button button:hover,
 .search-more-button button:hover {
-    background: #042f24 !important;
-    border-color: #f59e0b !important;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    border-color: #fbbf24 !important;
     color: #ffffff !important;
 }
 
 /* -------------------------------------------------------------------------
-   12. ÉCRAN DE PAIEMENT : ESPÈCES DIRECTES & GRAND CHAMP VISIBLE
+   12. ÉCRAN DE PAIEMENT : VERT ÉCLATANT POUR VALIDER, BLANC PUR & BLEU MARINE
    ------------------------------------------------------------------------- */
 .payment-screen {
     background: #f8fafc !important;
@@ -674,9 +818,9 @@
 
 .payment-screen .center-content .numpad button,
 .payment-screen .center-content .numpad .col {
-    background: #ffffff !important;
+    background: #ffffff !important; /* Blanc Pur */
     border: 2px solid #cbd5e1 !important;
-    color: #064e3b !important;
+    color: #0f172a !important; /* Bleu Marine */
     font-size: 1.45rem !important;
     font-weight: 800 !important;
     border-radius: 8px !important;
@@ -695,12 +839,13 @@
 }
 
 .payment-screen .center-content .numpad button:hover {
-    background: #f0fdf4 !important;
-    border-color: #059669 !important;
+    background: #eff6ff !important;
+    border-color: #2563eb !important;
+    color: #1e3a8a !important;
 }
 
 .payment-screen .center-content .numpad button:active {
-    background: #dcfce7 !important;
+    background: #dbeafe !important;
     transform: scale(0.97) !important;
 }
 
@@ -708,19 +853,19 @@
 .payment-screen .center-content .numpad button:nth-child(4),
 .payment-screen .center-content .numpad button:nth-child(8),
 .payment-screen .center-content .numpad button:nth-child(12) {
-    background: #f0fdf4 !important;
-    border: 2px solid #059669 !important;
-    color: #064e3b !important;
+    background: #eff6ff !important;
+    border: 2px solid #3b82f6 !important;
+    color: #1e3a8a !important;
     font-weight: 900 !important;
 }
 
-/* Touche Effacer (⌫) */
+/* Touche Effacer (Backspace) */
 .payment-screen .center-content .numpad button:last-child {
-    color: #b45309 !important;
+    color: #d97706 !important;
     font-weight: 900 !important;
     font-size: 1.4rem !important;
-    background: #fef2f2 !important;
-    border-color: #fca5a5 !important;
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
 }
 
 /* Panneau de gauche (Méthodes et validation) */
@@ -734,39 +879,51 @@
 }
 
 .payment-screen .paymentmethods-container .paymentmethod {
-    background: #f0fdf4 !important;
-    border: 2.5px solid #059669 !important;
+    background: #ffffff !important; /* Blanc Pur */
+    border: 2px solid #2563eb !important; /* Bleu Royal */
     border-radius: 12px !important;
     font-weight: 800 !important;
     font-size: 1.05rem !important;
-    color: #064e3b !important;
+    color: #1e3a8a !important; /* Bleu Marine */
     padding: 12px 14px !important;
     margin: 8px 4px !important;
-    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.12) !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12) !important;
+    transition: all 0.2s ease !important;
+}
+
+.payment-screen .paymentmethods-container .paymentmethod:hover {
+    border-color: #f59e0b !important;
+    background: #eff6ff !important;
 }
 
 .payment-screen .paymentlines .paymentline {
     background: #ffffff !important;
-    border: 2px solid #059669 !important;
+    border: 2px solid #2563eb !important;
     border-radius: 10px !important;
     font-weight: 800 !important;
-    color: #064e3b !important;
+    color: #0f172a !important;
     margin: 6px 4px !important;
+}
+
+.payment-screen .paymentlines .paymentline.selected {
+    background: #eff6ff !important;
+    border: 2.5px solid #f59e0b !important; /* Jaune Or */
 }
 
 .payment-screen .paymentlines .payment-amount {
     font-size: 1.4rem !important;
     font-weight: 900 !important;
-    color: #b45309 !important;
+    color: #d97706 !important; /* Jaune Or */
 }
 
-/* Bouton Valider l'encaissement */
+/* BOUTON VALIDER L'ENCAISSEMENT : VERT ÉCLATANT DEMANDÉ ! */
 .payment-screen .button.next,
 .payment-screen .validation,
+.payment-screen .button.next.highlight,
 .payment-screen .btn-primary {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-    color: #ffffff !important;
-    border: 2.5px solid #d4af37 !important;
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important; /* VERT ÉCLATANT */
+    color: #ffffff !important; /* Blanc Pur */
+    border: 3px solid #f59e0b !important; /* Bordure Jaune Or */
     font-weight: 900 !important;
     font-size: 1.25rem !important;
     text-transform: uppercase !important;
@@ -774,44 +931,46 @@
     border-radius: 12px !important;
     min-height: 75px !important;
     margin: 8px 4px !important;
-    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
-    transition: all 0.2s ease !important;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
 }
 
 .payment-screen .button.next:hover,
-.payment-screen .validation:hover {
-    background: linear-gradient(135deg, #047857 0%, #064e3b 100%) !important;
-    border-color: #f59e0b !important;
-    transform: translateY(-1px) !important;
+.payment-screen .validation:hover,
+.payment-screen .button.next.highlight:hover {
+    background: linear-gradient(135deg, #047857 0%, #059669 100%) !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.65) !important;
+    transform: translateY(-2px) !important;
 }
 
 /* CHAMP À CÔTÉ DU MONTANT À PAYER */
 .payment-screen .total-to-pay-box {
     background: #f1f5f9 !important;
-    border: 2.5px solid #064e3b !important;
+    border: 2.5px solid #1e3a8a !important; /* Bleu Marine */
     border-radius: 12px !important;
-    box-shadow: 0 2px 8px rgba(6, 78, 59, 0.1) !important;
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.12) !important;
 }
 
 /* CHAMP GÉANT DU MONTANT REÇU (ESPÈCES) */
 .payment-screen .cash-entered-box {
-    background: #ffffff !important;
-    border: 3px solid #d4af37 !important;
+    background: #ffffff !important; /* Blanc Pur */
+    border: 3px solid #f59e0b !important; /* Jaune Or */
     border-radius: 12px !important;
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.22) !important;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25) !important;
     padding: 10px !important;
 }
 
 .payment-screen .entered-amount-display {
     font-size: 2.8rem !important;
     font-weight: 900 !important;
-    color: #b45309 !important;
+    color: #d97706 !important; /* Jaune Or Chaud */
     line-height: 1.1 !important;
     letter-spacing: 1px !important;
-    text-shadow: 0 1px 2px rgba(180, 83, 9, 0.15) !important;
+    text-shadow: 0 1px 2px rgba(217, 119, 6, 0.15) !important;
 }
-
-
 
 /* -------------------------------------------------------------------------
    13. TICKET DE CAISSE CLIENT : PETIT FORMAT IMPRIMABLE & ÉCRITURES CENTRÉES
@@ -826,7 +985,6 @@
     overflow-y: auto !important;
 }
 
-/* Le ticket physique à l'écran (Format Petit Ticket 58mm / 80mm) */
 .pos-receipt,
 .styled-receipt,
 .pos-receipt-print {
@@ -835,7 +993,7 @@
     min-width: 275px !important;
     margin: 0 auto !important;
     padding: 16px 12px !important;
-    background: #ffffff !important;
+    background: #ffffff !important; /* Blanc Pur */
     color: #000000 !important;
     font-family: "Courier New", Courier, monospace, sans-serif !important;
     font-size: 12px !important;
@@ -843,10 +1001,9 @@
     border: 1px dashed #94a3b8 !important;
     border-radius: 6px !important;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1) !important;
-    text-align: center !important; /* CENTRAGE GLOBAL */
+    text-align: center !important;
 }
 
-/* Tous les enfants et textes du ticket parfaitement centrés */
 .pos-receipt *,
 .pos-receipt div,
 .pos-receipt p,
@@ -856,7 +1013,6 @@
     text-align: center !important;
 }
 
-/* Logo du restaurant centré */
 .pos-receipt .pos-receipt-logo {
     display: block !important;
     margin: 0 auto 8px auto !important;
@@ -864,7 +1020,6 @@
     height: auto !important;
 }
 
-/* En-tête coordonnées / contact centré */
 .pos-receipt .pos-receipt-contact {
     text-align: center !important;
     font-size: 11px !important;
@@ -872,7 +1027,6 @@
     margin-bottom: 8px !important;
 }
 
-/* Nom du serveur / caissier centré */
 .pos-receipt .cashier {
     text-align: center !important;
     margin: 6px auto !important;
@@ -880,7 +1034,6 @@
     font-size: 11px !important;
 }
 
-/* Lignes d'articles commandés : Bloc centré propre */
 .pos-receipt .orderlines {
     text-align: center !important;
     margin: 10px auto !important;
@@ -918,7 +1071,6 @@
     color: #222222 !important;
 }
 
-/* Bloc TOTAL sur le ticket : Encadré en pointillés et très visible au centre */
 .pos-receipt .pos-receipt-amount {
     text-align: center !important;
     padding: 8px 0 !important;
@@ -942,7 +1094,6 @@
     color: #000000 !important;
 }
 
-/* Mode de paiement et Rendu Monnaie centrés */
 .pos-receipt .paymentlines,
 .pos-receipt .receipt-change {
     text-align: center !important;
@@ -960,7 +1111,6 @@
     font-weight: 900 !important;
 }
 
-/* Taxes et détails centrés */
 .pos-receipt .pos-receipt-taxes {
     justify-items: center !important;
     text-align: center !important;
@@ -968,7 +1118,6 @@
     font-size: 10.5px !important;
 }
 
-/* Pied de page et date centrés */
 .pos-receipt .pos-receipt-center-align,
 .pos-receipt .pos-receipt-order-data,
 .pos-receipt .before-footer,
@@ -986,7 +1135,7 @@
 }
 
 /* -------------------------------------------------------------------------
-   14. RÈGLES D'IMPRESSION (@media print) : PETIT FORMAT CENTRÉ POUR IMPRIMANTE
+   14. RÈGLES D'IMPRESSION (@media print)
    ------------------------------------------------------------------------- */
 @media print {
     @page {
@@ -1039,32 +1188,599 @@
 .receipt-screen .button.print,
 .receipt-screen .btn.print,
 .receipt-screen button.print {
-    background: #064e3b !important;
+    background: linear-gradient(135deg, #0b192c 0%, #1e3a8a 100%) !important; /* Bleu Marine */
     color: #ffffff !important;
-    border: 2px solid #d4af37 !important;
+    border: 2px solid #f59e0b !important; /* Jaune Or */
     font-weight: 800 !important;
     font-size: 1.05rem !important;
     border-radius: 8px !important;
-    box-shadow: 0 4px 10px rgba(6, 78, 59, 0.25) !important;
+    box-shadow: 0 4px 10px rgba(11, 25, 44, 0.25) !important;
     transition: all 0.2s ease !important;
 }
 
 .receipt-screen .button.print:hover,
 .receipt-screen .btn.print:hover {
-    background: #042f24 !important;
-    border-color: #f59e0b !important;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    border-color: #fbbf24 !important;
 }
 
 .receipt-screen .button.next,
 .receipt-screen .btn.next,
 .receipt-screen .validation,
 .receipt-screen .btn-primary {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important; /* VERT POUR VALIDER */
     color: #ffffff !important;
-    border: 2.5px solid #d4af37 !important;
+    border: 2.5px solid #f59e0b !important; /* Jaune Or */
     font-weight: 900 !important;
     font-size: 1.15rem !important;
     border-radius: 10px !important;
-    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45) !important;
 }
+
+/* -------------------------------------------------------------------------
+   16. BARRE DE NAVIGATION DES CATÉGORIES (BLANC PUR, JAUNE OR, BLEU MARINE & BLEU ROYAL)
+   ------------------------------------------------------------------------- */
+.pos .products-widget-control,
+.products-widget-control {
+    background: #ffffff !important;
+    border-bottom: 2.5px solid #e2e8f0 !important;
+    padding: 6px 16px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    box-shadow: 0 2px 8px rgba(11, 25, 44, 0.05) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.pos .products-widget-control .bg-view,
+.products-widget-control .bg-view {
+    background: transparent !important;
+}
+
+/* Container du sélecteur de catégories avec défilement fluide */
+.pos .products-widget-control .CategorySelector,
+.CategorySelector {
+    padding: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+}
+
+.pos .CategorySelector > div,
+.CategorySelector > div {
+    gap: 8px !important;
+    align-items: center !important;
+    height: 100% !important;
+    flex-wrap: nowrap !important;
+}
+
+/* Boutons de Catégorie individuels (Pills modernes ultra-élégants) */
+.pos .CategorySelector .category-button,
+.pos .products-widget-control .category-button,
+.CategorySelector .category-button,
+.products-widget-control .category-button,
+button.category-button {
+    --bs-btn-bg: #ffffff !important;
+    --bs-btn-border-color: #3b82f6 !important;
+    --bs-btn-hover-bg: #eff6ff !important;
+    --bs-btn-hover-border-color: #f59e0b !important;
+    background: #ffffff !important;
+    color: #0b192c !important; /* Bleu Marine */
+    border: 2px solid #3b82f6 !important; /* Bordure Bleu Royal */
+    border-radius: 20px !important; /* Forme Pill */
+    padding: 0 16px !important;
+    margin: 0 3px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    max-width: none !important; /* Pas de coupure de nom */
+    flex-shrink: 0 !important;
+    box-shadow: 0 2px 5px rgba(11, 25, 44, 0.06) !important;
+    font-weight: 800 !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+}
+
+/* Bouton Catégorie au Survol (Hover) */
+.pos .CategorySelector .category-button:hover,
+.pos .products-widget-control .category-button:hover,
+.CategorySelector .category-button:hover,
+.products-widget-control .category-button:hover,
+button.category-button:hover {
+    background: #eff6ff !important; /* Bleu très doux */
+    color: #1e3a8a !important; /* Bleu Marine intense */
+    border-color: #f59e0b !important; /* Liseré Jaune Or */
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Bouton Catégorie Actif / Sélectionné */
+.pos .CategorySelector .category-button.active,
+.pos .CategorySelector .category-button:active,
+.pos .products-widget-control .category-button.active,
+.CategorySelector .category-button.active,
+.CategorySelector .category-button:active,
+.products-widget-control .category-button.active,
+button.category-button.active {
+    background: linear-gradient(135deg, #0b192c 0%, #1e3a8a 100%) !important; /* Dégradé Bleu Marine */
+    color: #ffffff !important; /* Blanc Pur */
+    border: 2px solid #f59e0b !important; /* Jaune Or */
+    box-shadow: 0 4px 14px rgba(11, 25, 44, 0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+.pos .CategorySelector .category-button.active span,
+.CategorySelector .category-button.active span,
+button.category-button.active span {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+}
+
+/* Bouton Accueil / Home (Icône Or) */
+.pos .CategorySelector .category-button i.fa-home,
+.CategorySelector .category-button i.fa-home,
+button.category-button i.fa-home {
+    color: #d97706 !important; /* Jaune Or */
+    font-size: 17px !important;
+    filter: drop-shadow(0 1px 2px rgba(217, 119, 6, 0.3)) !important;
+}
+
+.pos .CategorySelector .category-button:hover i.fa-home,
+.CategorySelector .category-button:hover i.fa-home,
+button.category-button:hover i.fa-home {
+    color: #f59e0b !important;
+    transform: scale(1.15) !important;
+    transition: transform 0.2s ease !important;
+}
+
+/* Texte de la catégorie */
+.pos .CategorySelector .category-button span,
+.CategorySelector .category-button span,
+button.category-button span {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.2px !important;
+    color: #0b192c !important;
+    line-height: 1 !important;
+}
+
+/* Séparateur entre catégories */
+.pos .CategorySelector .fa-caret-right,
+.pos .CategorySelector .fa-chevron-right,
+.CategorySelector .fa-caret-right,
+.CategorySelector .fa-chevron-right {
+    color: #f59e0b !important; /* Flèche Jaune Or */
+    font-size: 13px !important;
+    margin: 0 4px !important;
+    opacity: 0.85 !important;
+}
+
+/* Barre de recherche de produits */
+.pos .products-widget-control input,
+.pos .products-widget-control .form-control,
+.products-widget-control input,
+.products-widget-control .form-control {
+    background: #ffffff !important;
+    border: 2px solid #3b82f6 !important; /* Bleu Royal */
+    border-radius: 20px !important;
+    color: #0b192c !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    height: 36px !important;
+    padding: 6px 16px !important;
+    box-shadow: 0 2px 6px rgba(11, 25, 44, 0.05) !important;
+    transition: all 0.2s ease !important;
+    flex: 0 0 220px !important;
+    width: 220px !important;
+    min-width: 200px !important;
+    max-width: 240px !important;
+}
+
+.pos .products-widget-control input:focus,
+.pos .products-widget-control .form-control:focus,
+.products-widget-control input:focus,
+.products-widget-control .form-control:focus {
+    border-color: #f59e0b !important; /* Jaune Or au focus */
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
+    outline: none !important;
+}
+
+/* -------------------------------------------------------------------------
+   17. CARTES PRODUITS (GRILLE, BLANC PUR, BORDURE BLEUE, PRIX OR & BADGE STOCK)
+   =========================================================================
+   >>> GUIDE POUR MODIFIER LA TAILLE DES CARTES (AUGMENTER OU DIMINUER) <<<
+   - Pour la LARGEUR des cartes : modifier minmax(140px, 1fr) dans .product-list
+   - Pour la HAUTEUR des cartes : modifier min-height: 80px dans article.product
+   - Pour la TAILLE DU TEXTE : modifier font-size dans .product-name, .price-tag et .stock-badge
+   ========================================================================= */
+.pos .products-widget,
+.products-widget {
+    background-color: #f8fafc !important;
+}
+
+.pos .product-list-container,
+.product-list-container {
+    background-color: #f8fafc !important;
+    padding: 8px !important;
+}
+
+/* =========================================================================
+   [1] GRILLE DE PRODUITS : RÉGLAGE DE LA LARGEUR DES CARTES
+   Modifier minmax(140px, 1fr) ci-dessous pour rendre les cartes plus étroites (ex: 120px) ou plus larges (ex: 180px)
+   ========================================================================= */
+.pos .product-list,
+.pos .product-list.grid,
+.product-screen .product-list,
+.products-widget .product-list,
+.product-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; /* LARGEUR CARTE */
+    gap: 8px !important; /* Espacement entre cartes */
+    padding: 6px !important;
+}
+
+/* =========================================================================
+   [2] CARTE PRODUIT : RÉGLAGE DE LA HAUTEUR ET DU PADDING
+   Modifier min-height: 82px ci-dessous pour régler la hauteur (plus petite ou plus grande)
+   ========================================================================= */
+.pos article.product,
+.pos .product,
+.product-list article.product,
+article.product {
+    --bs-btn-bg: #ffffff !important;
+    --bs-btn-border-color: #bfdbfe !important;
+    --bs-btn-hover-bg: #ffffff !important;
+    --bs-btn-hover-border-color: #f59e0b !important;
+    background: #ffffff !important; /* Blanc Pur */
+    border: 2px solid #bfdbfe !important; /* Bleu clair raffiné */
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(11, 25, 44, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    min-height: 82px !important; /* HAUTEUR MINIMALE DE LA CARTE */
+    min-width: 130px !important; /* LARGEUR MINIMALE DE LA CARTE */
+    padding: 8px 10px !important; /* REMBOURRAGE INTERNE */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Survol de la Carte Produit */
+.pos article.product:hover,
+.product-list article.product:hover,
+article.product:hover {
+    background: #ffffff !important;
+    border-color: #f59e0b !important; /* Jaune Or éclatant */
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.25), 0 2px 6px rgba(11, 25, 44, 0.08) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* Clic sur la Carte Produit */
+.pos article.product:active,
+.product-list article.product:active,
+article.product:active {
+    transform: translateY(0) scale(0.97) !important;
+    box-shadow: 0 1px 4px rgba(11, 25, 44, 0.15) !important;
+}
+
+/* =========================================================================
+   [3] NOM DU PRODUIT : RÉGLAGE DE LA TAILLE DE POLICE DU TITRE
+   Modifier font-size: 13px ci-dessous pour agrandir ou réduire le titre
+   ========================================================================= */
+.pos article.product .product-name,
+article.product .product-name,
+article.product .product-content .product-name {
+    color: #0b192c !important; /* Bleu Marine */
+    font-size: 13px !important; /* TAILLE DU NOM DU PRODUIT */
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.2px !important;
+    margin-bottom: 4px !important;
+    word-break: break-word !important;
+}
+
+/* Ligne Basse de la Carte (Prix + Stock) */
+.pos article.product .product-bottom-row,
+article.product .product-bottom-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    margin-top: auto !important;
+    padding-top: 5px !important;
+    border-top: 1px dashed #e2e8f0 !important;
+    gap: 3px !important;
+}
+
+/* =========================================================================
+   [4] BADGE PRIX JAUNE OR : RÉGLAGE DE LA TAILLE DU PRIX
+   Modifier font-size: 11.5px ci-dessous pour agrandir ou réduire le prix
+   ========================================================================= */
+.pos article.product .price-tag,
+article.product .price-tag,
+article.product .product-bottom-row .price-tag {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+    color: #92400e !important; /* Ambre doré riche */
+    border: 1.2px solid #f59e0b !important; /* Jaune Or */
+    border-radius: 5px !important;
+    padding: 2px 5px !important;
+    font-size: 11.5px !important; /* TAILLE D'ÉCRITURE DU PRIX */
+    font-weight: 900 !important;
+    letter-spacing: 0.1px !important;
+    box-shadow: 0 1px 2px rgba(245, 158, 11, 0.2) !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+}
+
+/* =========================================================================
+   [5] BADGE STOCK : RÉGLAGE DE LA TAILLE DES QUANTITÉS EN STOCK
+   Modifier font-size: 10.5px ci-dessous pour agrandir ou réduire la quantité
+   ========================================================================= */
+.pos article.product .stock-badge.stock-available,
+article.product .stock-badge.stock-available,
+article.product .stock-available {
+    background: #eff6ff !important; /* Fond Bleu très clair */
+    color: #1e3a8a !important; /* Texte Bleu Marine */
+    border: 1.2px solid #3b82f6 !important; /* Bordure Bleu Royal */
+    border-radius: 10px !important;
+    padding: 1.5px 5px !important;
+    font-size: 10.5px !important; /* TAILLE DU NOMBRE DE STOCK */
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.12) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+}
+
+article.product .stock-badge.stock-available::before {
+    content: "Qté " !important;
+    font-size: 8.5px !important;
+    font-weight: 700 !important;
+    color: #2563eb !important;
+    text-transform: uppercase !important;
+}
+
+/* Badge Stock Épuisé (Rouge Alerte) */
+.pos article.product .stock-badge.stock-rupture,
+article.product .stock-badge.stock-rupture,
+article.product .stock-rupture {
+    background: #fef2f2 !important;
+    color: #dc2626 !important;
+    border: 1.2px solid #ef4444 !important;
+    border-radius: 10px !important;
+    padding: 1.5px 5px !important;
+    font-size: 10.5px !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+    box-shadow: 0 1px 2px rgba(239, 68, 68, 0.12) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+}
+
+article.product .stock-badge.stock-rupture::before {
+    content: "Rupture " !important;
+    font-size: 8px !important;
+    font-weight: 800 !important;
+    color: #dc2626 !important;
+    text-transform: uppercase !important;
+}
+
+/* Produit Épuisé (Atténué) */
+article.product.product-out-of-stock {
+    opacity: 0.6 !important;
+    background: #f8fafc !important;
+    border: 1.5px dashed #fca5a5 !important;
+}
+
+article.product.product-out-of-stock:hover {
+    border-color: #ef4444 !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Icône Info Produit */
+article.product .product-information-tag {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 50% !important;
+    color: #2563eb !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+article.product .product-information-tag:hover {
+    background: #2563eb !important;
+    color: #ffffff !important;
+}
+
+/* =========================================================================
+   POPUP D'ALERTE RUPTURE & MANQUE DE STOCK (DESIGN EXÉCUTIF PREMIUM)
+   Palette Demandée : Blanc Pur, Jaune Or, Bleu Marine, Bleu Royal
+   ========================================================================= */
+
+/* 1. Conteneur principal de la Popup (Toutes Popups d'Erreur & Alerte Stock) */
+.pos .modal-dialog .popup.popup-error,
+.pos .modal-dialog .popup.resto-popup-stock-alert,
+.pos .popup.popup-error,
+.pos .popup.resto-popup-stock-alert {
+    background: #ffffff !important;
+    border: 3px solid #f59e0b !important; /* Bordure d'Or Exécutif */
+    border-radius: 22px !important;
+    box-shadow: 0 25px 60px -10px rgba(11, 25, 44, 0.5), 0 0 0 1px rgba(245, 158, 11, 0.35) !important;
+    max-width: 520px !important;
+    width: 92% !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    text-align: center !important;
+    animation: restoPopupFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes restoPopupFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.92) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* 2. En-tête de la Popup : Bannière Dégradée & Badge Icône */
+.pos .popup.popup-error .modal-header,
+.pos .resto-stock-modal-header {
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #fffbeb 100%) !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    border-left: 6px solid #1e3a8a !important; /* Liseré Bleu Marine */
+    padding: 22px 20px 16px 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+}
+
+/* Badge Circulaire Icône Alerte Or */
+.pos .resto-stock-icon-wrapper {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+    border: 2.5px solid #f59e0b !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35) !important;
+    margin-bottom: 8px !important;
+}
+
+.pos .resto-stock-icon {
+    font-size: 26px !important;
+    color: #d97706 !important;
+    filter: drop-shadow(0 1px 2px rgba(217, 119, 6, 0.3)) !important;
+}
+
+.pos .resto-stock-modal-title,
+.pos .popup.popup-error .modal-header .modal-title {
+    color: #0a0f1d !important;
+    font-size: 1.35rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.02em !important;
+    margin: 4px 0 !important;
+    text-transform: none !important;
+}
+
+/* Badge Pilule de Statut */
+.pos .resto-stock-status-pill {
+    display: inline-block !important;
+    background: #fef2f2 !important;
+    color: #dc2626 !important;
+    border: 1px solid #fca5a5 !important;
+    border-radius: 9999px !important;
+    padding: 3px 14px !important;
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    margin-top: 4px !important;
+    box-shadow: 0 1px 4px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* 3. Corps du Message : Carte d'Information Soignée & Épurée */
+.pos .popup.popup-error .modal-body,
+.pos .resto-stock-modal-body {
+    padding: 22px 24px !important;
+    background: #ffffff !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.pos .resto-stock-card-message,
+.pos .popup.popup-error .modal-body {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-left: 5px solid #f59e0b !important; /* Liseré Or Ambré */
+    border-radius: 14px !important;
+    padding: 18px 20px !important;
+    color: #1e293b !important;
+    font-size: 0.98rem !important;
+    font-weight: 600 !important;
+    line-height: 1.65 !important;
+    white-space: pre-wrap !important;
+    text-align: center !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    width: 100% !important;
+}
+
+/* 4. Pied de Page : Centré avec Grand Bouton Exécutif */
+.pos .popup.popup-error .modal-footer,
+.pos .resto-stock-modal-footer {
+    background: #ffffff !important;
+    border-top: 1.5px solid #e2e8f0 !important;
+    padding: 16px 24px 22px 24px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Bouton de Confirmation Exécutif (Bleu Marine & Or) */
+.pos .popup.popup-error .modal-footer .button.cancel,
+.pos .popup.popup-error .modal-footer .button.btn,
+.pos .resto-stock-btn-confirm {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    border: 2px solid #f59e0b !important;
+    border-radius: 10px !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 1.02rem !important;
+    letter-spacing: 0.3px !important;
+    padding: 11px 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 14px rgba(30, 58, 138, 0.35) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    margin: 0 auto !important;
+    min-width: 170px !important;
+}
+
+.pos .popup.popup-error .modal-footer .button.cancel:hover,
+.pos .popup.popup-error .modal-footer .button.btn:hover,
+.pos .resto-stock-btn-confirm:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%) !important;
+    border-color: #fbbf24 !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45) !important;
+    color: #ffffff !important;
+}
+
+.pos .popup.popup-error .modal-footer .button.cancel:active,
+.pos .popup.popup-error .modal-footer .button.btn:active,
+.pos .resto-stock-btn-confirm:active {
+    transform: scale(0.98) !important;
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.25) !important;
+}
+
 

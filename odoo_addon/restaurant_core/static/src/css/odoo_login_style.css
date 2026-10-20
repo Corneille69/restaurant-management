@@ -1,19 +1,70 @@
 /* =========================================================================
    STYLE PERSONNALISÉ DE LA PAGE D'AUTHENTIFICATION ODOO
-   MODÈLE EXACT PREMIUM BLEU MARINE SOMBRE & JAUNE OR AMBRÉ (JUSTGO / BON RETOUR !)
-   Élimine complètement le cadre blanc pour un design sombre 100% épuré et fidèle.
+   MODÈLE STRICTEMENT IDENTIQUE À LA CHARTE DEMANDÉE :
+   - Fond : Bleu Marine profond avec accents géométriques Jaune Or & Bleu Royal aux coins
+   - Carte : Blanc Pur avec bordure Jaune Or épaisse et coins arrondis (26px)
+   - En-tête : Avatar profil circulaire au centre entouré d'un cercle Or et liserés horizontaux Or
+   - Champs : Blocs icônes Bleu Marine/Royal intégrés (Enveloppe pour Email, Cadenas pour MDP)
+   - Bouton : « Se connecter » Dégradé Bleu Marine profond avec icône flèche blanche
+   - Liens : « Réinitialiser le mot de passe » avec icône circulaire Or
+   - Pied : « Gérer les bases de données » | « Propulsé par Odoo » avec icônes
    ========================================================================= */
 
-/* 1. FOND GÉNÉRAL DE LA PAGE : BLEU MARINE SOMBRE */
+/* -------------------------------------------------------------------------
+   1. FOND GÉNÉRAL DE LA PAGE & ACCENTS ANGULAIRES DANS LES COINS
+   ------------------------------------------------------------------------- */
 html,
 body,
 body.bg-100 {
-    background: #0c1424 !important;
-    background-color: #0c1424 !important;
-    color: #ffffff !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    background: #061838 !important;
+    background-color: #061838 !important;
+    color: #07224e !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     overflow-x: hidden !important;
-    min-height: 100% !important;
+    min-height: 100vh !important;
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Coin Supérieur Gauche : Bandes Géométriques Or et Bleu */
+body::before,
+#wrapwrap::before {
+    content: "" !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 380px !important;
+    height: 380px !important;
+    background: linear-gradient(135deg, 
+        transparent 0%, transparent 18%, 
+        #f59e0b 18%, #f59e0b 26%, 
+        transparent 26%, transparent 31%, 
+        #093b82 31%, #093b82 44%, 
+        transparent 44%
+    ) !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+}
+
+/* Coin Inférieur Droit : Bandes Géométriques Bleu et Or */
+body::after,
+#wrapwrap::after {
+    content: "" !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    width: 380px !important;
+    height: 380px !important;
+    background: linear-gradient(135deg, 
+        transparent 56%, 
+        #093b82 56%, #093b82 69%, 
+        transparent 69%, transparent 74%, 
+        #f59e0b 74%, #f59e0b 82%, 
+        transparent 82%
+    ) !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
 }
 
 #wrapwrap {
@@ -21,11 +72,11 @@ body.bg-100 {
     align-items: center !important;
     justify-content: center !important;
     min-height: 100vh !important;
-    background: #0c1424 !important;
-    background-color: #0c1424 !important;
-    background-image: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
     position: relative !important;
-    padding: 2.5rem 1rem !important;
+    padding: 2rem 1rem !important;
+    z-index: 1 !important;
 }
 
 #wrapwrap > main {
@@ -33,30 +84,35 @@ body.bg-100 {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    position: relative !important;
+    z-index: 2 !important;
 }
 
 #wrapwrap .container {
-    max-width: 440px !important;
-    padding: 1.5rem 1rem !important;
-    position: relative !important;
+    max-width: 460px !important;
+    width: 100% !important;
+    padding: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    position: relative !important;
 }
 
-/* 2. CARTE CENTRALE ODOO : AUCUN FOND BLANC, FOND 100% TRANSPARENT */
+/* -------------------------------------------------------------------------
+   2. CARTE BLANCHE CENTRALE AVEC BORDURE JAUNE OR
+   ------------------------------------------------------------------------- */
 .card,
 .card.bg-100,
 .card.o_database_list,
 .o_database_list {
-    max-width: 420px !important;
+    max-width: 440px !important;
     width: 100% !important;
-    padding: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 3.5px solid #f59e0b !important; /* Liseré Jaune Or Éclatant */
+    border-radius: 26px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(245, 158, 11, 0.2) !important;
+    padding: 30px 28px 22px 28px !important;
     margin: 0 auto !important;
     position: relative !important;
     backdrop-filter: none !important;
@@ -69,79 +125,65 @@ body.bg-100 {
     background-color: transparent !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: center !important;
+    align-items: stretch !important;
     width: 100% !important;
 }
 
-/* 3. LOGO AU SOMMET & TITRE "Bon retour !" */
+/* Masquer les bordures résiduelles natives */
 .card.o_database_list .border-bottom,
 .text-center.border-bottom {
     border-bottom: none !important;
     padding-bottom: 0 !important;
-    margin-bottom: 0.8rem !important;
+    margin-bottom: 0 !important;
+}
+
+/* -------------------------------------------------------------------------
+   3. EN-TÊTE AVEC AVATAR ROND ET LIGNES DORÉES
+   ------------------------------------------------------------------------- */
+.resto-login-header {
     display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
     align-items: center !important;
+    justify-content: center !important;
+    gap: 18px !important;
+    margin-bottom: 26px !important;
     width: 100% !important;
 }
 
-.card.o_database_list img {
-    width: 110px !important;
-    height: 110px !important;
-    max-height: 110px !important;
-    background: #17243a !important;
-    border: 1.5px solid #23354e !important;
-    border-radius: 24px !important;
-    padding: 12px !important;
-    object-fit: contain !important;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45) !important;
-    transition: transform 0.2s ease !important;
-}
-.card.o_database_list img:hover {
-    transform: scale(1.03) !important;
+.resto-header-line {
+    height: 4px !important;
+    background: #f59e0b !important;
+    border-radius: 4px !important;
+    width: 74px !important;
+    flex: 0 0 74px !important;
 }
 
-/* Titre "Bon retour !" */
-.card.o_database_list .border-bottom::after {
-    content: "Bon retour !" !important;
-    display: block !important;
-    color: #e58b00 !important;
-    font-size: 1.85rem !important;
-    font-weight: 800 !important;
-    text-align: center !important;
-    letter-spacing: -0.01em !important;
-    margin-top: 1.35rem !important;
-    margin-bottom: 0 !important;
-    font-family: inherit !important;
+.resto-header-avatar {
+    width: 76px !important;
+    height: 76px !important;
+    min-width: 76px !important;
+    min-height: 76px !important;
+    border-radius: 50% !important;
+    border: 4px solid #f59e0b !important; /* Anneau Or */
+    background: #07224e !important; /* Cercle Bleu Marine */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 6px 18px rgba(7, 34, 78, 0.35) !important;
 }
 
-/* 4. SOUS-TITRE */
+.resto-avatar-svg {
+    width: 40px !important;
+    height: 40px !important;
+    stroke: #ffffff !important;
+}
+
+/* -------------------------------------------------------------------------
+   4. FORMULAIRE, LABELS ET CHAMPS AVEC BLOC ICÔNE BLEU
+   ------------------------------------------------------------------------- */
 .oe_login_form {
     width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-}
-
-.oe_login_form::before {
-    content: "Heureux de vous retrouver, veuillez vous connecter." !important;
-    display: block !important;
-    color: #94a3b8 !important;
-    font-size: 0.88rem !important;
-    font-weight: 400 !important;
-    text-align: center !important;
-    margin-bottom: 1.8rem !important;
-    line-height: 1.4 !important;
-    font-family: inherit !important;
-}
-
-/* 5. FORMULAIRE ET CHAMPS EN PILLULE SOMBRE */
-.oe_login_form .form-label,
-.oe_login_form label[for="db"],
-.oe_login_form .col-form-label,
-.oe_login_form label[for="login"],
-.oe_login_form label[for="password"] {
-    display: none !important;
 }
 
 .oe_login_form .field-login,
@@ -149,235 +191,205 @@ body.bg-100 {
 .oe_login_form .mb-3 {
     margin-bottom: 1.15rem !important;
     width: 100% !important;
-    position: relative !important;
 }
 
-.oe_login_form input.form-control {
-    border-radius: 50px !important;
-    background-color: #1b293e !important;
-    border: 1.5px solid #273852 !important;
-    height: 52px !important;
-    padding: 0.85rem 1.4rem !important;
-    font-size: 0.98rem !important;
-    color: #ffffff !important;
-    font-weight: 500 !important;
-    transition: all 0.25s ease !important;
-    box-shadow: none !important;
-    width: 100% !important;
+/* Labels en Bleu Marine gras avec icône */
+.resto-label {
+    color: #07224e !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.2px !important;
+    margin-bottom: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
 }
 
-/* Champ Identifiant avec Icône Utilisateur Or */
-.oe_login_form input#login {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23e58b00'%3E%3Cpath d='M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z'/%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: 18px center !important;
-    background-size: 20px 20px !important;
-    padding-left: 52px !important;
-    padding-right: 20px !important;
+.resto-label-icon svg {
+    stroke: #07224e !important;
+    vertical-align: middle !important;
 }
 
-/* Champ Mot de passe avec Icône Cadenas Or et Oeil */
-.oe_login_form input#password {
-    background-image: 
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23e58b00'%3E%3Cpath d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z'/%3E%3C/svg%3E"),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'%3E%3C/path%3E%3Ccircle cx='12' cy='12' r='3'%3E%3C/circle%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat, no-repeat !important;
-    background-position: 18px center, calc(100% - 18px) center !important;
-    background-size: 20px 20px, 20px 20px !important;
-    padding-left: 52px !important;
-    padding-right: 50px !important;
-}
-
-.oe_login_form input.form-control::placeholder {
-    color: #64748b !important;
-    font-weight: 400 !important;
-}
-
-.oe_login_form input.form-control:focus {
-    background-color: #203149 !important;
-    border-color: #e58b00 !important;
-    box-shadow: 0 0 18px rgba(229, 139, 0, 0.35) !important;
-    color: #ffffff !important;
-    outline: none !important;
-}
-
-/* Sélecteur de Database Pillule Sombre */
-.oe_login_form .input-group {
-    background: #1b293e !important;
-    border: 1.5px solid #273852 !important;
-    border-radius: 50px !important;
-    padding: 4px 6px !important;
+/* Boîte du Champ de Saisie */
+.resto-input-group {
+    display: flex !important;
+    align-items: stretch !important;
+    height: 50px !important;
+    border-radius: 12px !important;
     overflow: hidden !important;
-    transition: all 0.25s ease !important;
-    margin-bottom: 1.15rem !important;
-    width: 100% !important;
-}
-
-.oe_login_form .input-group:focus-within {
-    border-color: #e58b00 !important;
-    box-shadow: 0 0 18px rgba(229, 139, 0, 0.35) !important;
-    background: #203149 !important;
-}
-
-.oe_login_form .input-group input.form-control {
-    background: transparent !important;
-    border: none !important;
-    color: #ffffff !important;
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    box-shadow: none !important;
-    padding: 0.6rem 1rem !important;
-    height: auto !important;
-}
-
-.oe_login_form .input-group .btn-secondary {
-    background: #273852 !important;
-    border: none !important;
-    color: #e58b00 !important;
-    font-size: 0.82rem !important;
-    font-weight: 700 !important;
-    border-radius: 50px !important;
-    padding: 0.4rem 1rem !important;
-    margin-right: 2px !important;
-    transition: background 0.2s !important;
-}
-.oe_login_form .input-group .btn-secondary:hover {
-    background: #e58b00 !important;
-    color: #0c1424 !important;
-}
-
-/* 6. BOUTON SE CONNECTER EN JAUNE OR AMBRÉ */
-.oe_login_buttons {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    width: 100% !important;
-    margin-top: 0.5rem !important;
-    padding-top: 0 !important;
-}
-
-.oe_login_buttons .btn-primary {
-    background: #e58b00 !important;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-    border: none !important;
-    color: #0c1424 !important;
-    font-weight: 800 !important;
-    font-size: 0 !important; /* Masque "Log in" */
-    letter-spacing: 0.02em !important;
-    text-transform: none !important;
-    height: 52px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 50px !important;
-    box-shadow: 0 8px 24px rgba(229, 139, 0, 0.4) !important;
-    transition: all 0.25s ease !important;
-    width: 100% !important;
-    margin: 0.4rem 0 1rem 0 !important;
-    cursor: pointer !important;
-    text-align: center !important;
-}
-
-.oe_login_buttons .btn-primary::after {
-    content: "Se connecter" !important;
-    font-size: 1.08rem !important;
-    font-weight: 800 !important;
-    color: #0c1424 !important;
-    display: inline-block !important;
-}
-
-.oe_login_buttons .btn-primary:hover,
-.oe_login_buttons .btn-primary:focus {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 12px 28px rgba(229, 139, 0, 0.6) !important;
-    background: linear-gradient(135deg, #fbbf24 0%, #e58b00 100%) !important;
-    color: #0c1424 !important;
-}
-
-.oe_login_buttons .btn-primary:active {
-    transform: translateY(1px) !important;
-}
-
-/* 7. SE SOUVENIR DE MOI & LIENS SECONDAIRES */
-.oe_login_buttons .justify-content-between {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    width: 100% !important;
-    margin-top: 0.25rem !important;
-}
-
-/* Case à cocher "Se souvenir de moi" */
-.oe_login_buttons .justify-content-between::before {
-    content: "☑  Se souvenir de moi" !important;
-    display: block !important;
-    color: #94a3b8 !important;
-    font-size: 0.88rem !important;
-    text-align: center !important;
-    margin-bottom: 1.15rem !important;
-    font-weight: 500 !important;
-}
-
-/* Lien Reset Password transformé en "Code SMS non reçu ou inscription incomplète ?" */
-.oe_login_buttons .justify-content-between a {
-    color: #e58b00 !important;
-    font-size: 0 !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
-    text-align: center !important;
-    line-height: 1.5 !important;
-    transition: color 0.2s ease !important;
-}
-
-.oe_login_buttons .justify-content-between a::after {
-    content: "Code SMS non reçu ou inscription incomplète ?" !important;
-    font-size: 0.85rem !important;
-    color: #e58b00 !important;
-    display: block !important;
-}
-
-.oe_login_buttons .justify-content-between a:hover::after {
-    color: #fbbf24 !important;
-    text-decoration: underline !important;
-}
-
-/* Textes footer additionnels : S'inscrire & Conditions générales */
-.oe_login_buttons .justify-content-between::after {
-    content: "Vous n'avez pas de compte ? S'inscrire\A\AConditions générales" !important;
-    white-space: pre-wrap !important;
-    display: block !important;
-    color: #94a3b8 !important;
-    font-size: 0.84rem !important;
-    text-align: center !important;
-    margin-top: 1rem !important;
-    line-height: 1.7 !important;
-}
-
-/* Liens pied de page Odoo */
-.card.o_database_list a {
-    color: #e58b00 !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
-    font-size: 0.84rem !important;
+    background: #ffffff !important;
     transition: all 0.2s ease !important;
 }
 
-.card.o_database_list a:hover {
-    color: #fbbf24 !important;
+/* Email avec bordure Jaune Or */
+.resto-input-email {
+    border: 2.2px solid #f59e0b !important;
+}
+
+/* Mot de passe avec bordure Bleu doux */
+.resto-input-pass {
+    border: 2px solid #93c5fd !important;
+}
+
+.resto-input-group:focus-within {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 3.5px rgba(245, 158, 11, 0.25) !important;
+}
+
+/* Bloc d'icône carré Bleu Marine/Royal à gauche */
+.resto-input-icon-box {
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 100% !important;
+    background: #072e6c !important; /* Bleu Marine / Royal */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.resto-input-icon-box svg {
+    stroke: #ffffff !important;
+}
+
+/* Champ de texte de saisie */
+.resto-input-control {
+    flex: 1 1 auto !important;
+    border: none !important;
+    outline: none !important;
+    background: #ffffff !important;
+    color: #07224e !important;
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    padding: 0 14px !important;
+    height: 100% !important;
+    box-shadow: none !important;
+}
+
+.resto-input-control::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+}
+
+.resto-input-control:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* -------------------------------------------------------------------------
+   5. BOUTON « SE CONNECTER » DÉGRADÉ BLEU MARINE & BLANC
+   ------------------------------------------------------------------------- */
+.oe_login_buttons {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    margin-top: 0.35rem !important;
+    padding-top: 0 !important;
+}
+
+.resto-btn-submit {
+    width: 100% !important;
+    height: 52px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #072559 0%, #0a3d8c 100%) !important; /* Dégradé Bleu Marine */
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.2px !important;
+    box-shadow: 0 6px 18px rgba(7, 37, 89, 0.45) !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    margin-top: 6px !important;
+}
+
+.resto-btn-submit:hover {
+    background: linear-gradient(135deg, #093478 0%, #0d4fae 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 24px rgba(7, 37, 89, 0.55) !important;
+    color: #ffffff !important;
+}
+
+.resto-btn-submit:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+/* -------------------------------------------------------------------------
+   6. LIEN « RÉINITIALISER LE MOT DE PASSE » AVEC ICÔNE OR
+   ------------------------------------------------------------------------- */
+.resto-reset-wrapper {
+    margin-top: 14px !important;
+    text-align: left !important;
+}
+
+.resto-reset-link {
+    color: #072e6c !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+.resto-reset-link:hover {
+    color: #f59e0b !important;
     text-decoration: underline !important;
 }
 
-.card.o_database_list .border-top {
-    border-top: 1px solid #1c2d47 !important;
-    color: #94a3b8 !important;
-    padding-top: 1.25rem !important;
-    margin-top: 1.75rem !important;
+/* -------------------------------------------------------------------------
+   7. PIED DE PAGE : GÉRER LES BASES DE DONNÉES | PROPULSÉ PAR ODOO
+   ------------------------------------------------------------------------- */
+.card.o_database_list .border-top,
+.resto-login-footer {
+    border-top: 1.5px solid #e2e8f0 !important;
+    margin-top: 22px !important;
+    padding-top: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
     width: 100% !important;
-    text-align: center !important;
-    font-size: 0.82rem !important;
 }
 
-.card.o_database_list .border-top span {
-    color: #e58b00 !important;
+.resto-footer-link {
+    color: #07224e !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+.resto-footer-link:hover {
+    color: #f59e0b !important;
+    text-decoration: underline !important;
+}
+
+.resto-footer-divider {
+    display: inline-block !important;
+    width: 2.2px !important;
+    height: 18px !important;
+    background: #f59e0b !important;
+    border-radius: 2px !important;
+    margin: 0 4px !important;
+    user-select: none !important;
+}
+
+/* Alertes d'erreurs ou messages */
+.oe_login_form .alert {
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    padding: 10px 14px !important;
+    margin-bottom: 12px !important;
 }

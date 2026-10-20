@@ -1,6 +1,6 @@
 {
     "name": "Restaurant Engine Connector",
-    "version": "1.0",
+    "version": "1.0.2",
     "category": "Point of Sale",
     "summary": "Module restaurant personnalisé connecté au backend FastAPI (Moteur & Patron)",
     "description": """

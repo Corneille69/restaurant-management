@@ -70,7 +70,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
             manager_name=user.full_name,
             manager_login=user.username,
             action_type="LOGIN",
-            description=f"🟢 Connexion & Début de service du gérant {user.full_name} ({user.username}) à {now.strftime('%H:%M:%S')}.",
+            description=f" Connexion & Début de service du gérant {user.full_name} ({user.username}) à {now.strftime('%H:%M:%S')}.",
             created_at=now
         )
         db.add(activity)
@@ -87,20 +87,9 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         try:
             from app.services.odoo_service import odoo_service
             if user.odoo_user_id:
-                odoo_service.execute_kw('res.users', 'write', [[user.odoo_user_id], {
-                    'is_online': True,
-                    'last_login_time': now.strftime('%Y-%m-%d %H:%M:%S')
-                }])
-            odoo_service.execute_kw('restaurant.activity.log', 'create', [{
-                'manager_id': user.odoo_user_id or False,
-                'manager_name': user.full_name,
-                'manager_login': user.username,
-                'action_type': 'login',
-                'description': f"🟢 Connexion & Début de service du gérant {user.full_name} ({user.username}).",
-                'activity_time': now.strftime('%Y-%m-%d %H:%M:%S')
-            }])
-        except Exception:
-            pass
+                odoo_service.execute_kw('res.users', 'action_manager_logged_in', [[user.odoo_user_id]])
+        except Exception as e:
+            print(f"Erreur sync login Odoo: {e}")
 
     assigned_space = "admin" if user.role == UserRole.ADMIN.value else "manager"
     access_token = create_access_token(data={
@@ -151,7 +140,7 @@ def logout(current_user: User = Depends(get_current_user), db: Session = Depends
             manager_name=current_user.full_name,
             manager_login=current_user.username,
             action_type="LOGOUT",
-            description=f"⚪ Déconnexion & Fin de service du gérant {current_user.full_name} ({current_user.username}). Bilan session : {total_orders} vente(s) totalisant {total_sales:,.0f} FCFA.",
+            description=f" Déconnexion & Fin de service du gérant {current_user.full_name} ({current_user.username}). Bilan session : {total_orders} vente(s) totalisant {total_sales:,.0f} FCFA.",
             amount=total_sales,
             created_at=now
         )
@@ -161,21 +150,9 @@ def logout(current_user: User = Depends(get_current_user), db: Session = Depends
         try:
             from app.services.odoo_service import odoo_service
             if current_user.odoo_user_id:
-                odoo_service.execute_kw('res.users', 'write', [[current_user.odoo_user_id], {
-                    'is_online': False,
-                    'last_logout_time': now.strftime('%Y-%m-%d %H:%M:%S')
-                }])
-            odoo_service.execute_kw('restaurant.activity.log', 'create', [{
-                'manager_id': current_user.odoo_user_id or False,
-                'manager_name': current_user.full_name,
-                'manager_login': current_user.username,
-                'action_type': 'logout',
-                'description': f"⚪ Déconnexion & Fin de service du gérant {current_user.full_name} ({current_user.username}). Bilan : {total_orders} ventes, {total_sales:,.0f} FCFA.",
-                'amount': total_sales,
-                'activity_time': now.strftime('%Y-%m-%d %H:%M:%S')
-            }])
-        except Exception:
-            pass
+                odoo_service.execute_kw('res.users', 'action_manager_logged_out', [[current_user.odoo_user_id]])
+        except Exception as e:
+            print(f"Erreur sync logout Odoo: {e}")
 
     db.commit()
     return {
@@ -195,4 +172,3 @@ def login_form(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
 def get_me(current_user: User = Depends(get_current_user)):
     """Retourne les informations du profil connecté."""
     return current_user
-

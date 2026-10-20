@@ -4,9 +4,13 @@ import logging
 from app.core.database import get_db
 from app.services.odoo_service import odoo_service
 from app.schemas.restaurant import OdooStatusResponse
-from app.models.restaurant import RestaurantTable, MenuItem, Order, Category, PosSession, DailyInvoice
+from app.models.restaurant import (
+    RestaurantTable, MenuItem, Order, OrderItem, Category, PosSession, 
+    DailyInvoice, ManagerWorkSession, ManagerActivityLog
+)
 from app.models.user import User
 from app.core.security import hash_password
+from sqlalchemy import or_, func
 import datetime
 
 logger = logging.getLogger("odoo_api")
@@ -54,7 +58,7 @@ def sync_all_data_to_odoo(db: Session = Depends(get_db)):
 def sync_data_from_odoo(db: Session = Depends(get_db)):
     """Importe et synchronise en temps réel toutes les actions faites dans Odoo (Plats, Gérants, Commandes, Tables)."""
     counts = odoo_service.sync_all_from_odoo(db)
-    print(f"🔥 [ODOO SYNC ACTIVE] Données synchronisées depuis Odoo : {counts}")
+    print(f" [ODOO SYNC ACTIVE] Données synchronisées depuis Odoo : {counts}")
     return {
         "status": "success",
         "synced": counts,
@@ -69,7 +73,7 @@ async def webhook_manager(request: Request, db: Session = Depends(get_db)):
     login = data.get("login")
     odoo_id = data.get("odoo_id")
     password = data.get("password", "Pass1234!")
-    print(f"⚡ [ACTION ODOO REÇUE] Nouveau Gérant créé dans Odoo : {name} (login: {login})")
+    print(f" [ACTION ODOO REÇUE] Nouveau Gérant créé dans Odoo : {name} (login: {login})")
 
     user = db.query(User).filter((User.username == login) | (User.odoo_user_id == odoo_id)).first()
     if not user:
@@ -98,7 +102,7 @@ async def webhook_dish(request: Request, db: Session = Depends(get_db)):
     price = float(data.get("price", 0.0))
     tmpl_id = data.get("tmpl_id")
     category_name = data.get("category", "Plats Principaux")
-    print(f"⚡ [ACTION ODOO REÇUE] Nouveau Plat créé dans Odoo : {name} ({price} FCFA, Catégorie: {category_name})")
+    print(f" [ACTION ODOO REÇUE] Nouveau Plat créé dans Odoo : {name} ({price} FCFA, Catégorie: {category_name})")
 
     # Associer la catégorie
     cat_id = None
@@ -110,12 +114,14 @@ async def webhook_dish(request: Request, db: Session = Depends(get_db)):
             db.flush()
         cat_id = category.id
 
+    qty = int(data.get("available_quantity")) if data.get("available_quantity") is not None else 0
     item = db.query(MenuItem).filter((MenuItem.name == name) | (MenuItem.odoo_template_id == tmpl_id)).first()
     if not item:
         item = MenuItem(
             name=name,
             price=price,
-            is_available=True,
+            is_available=qty >0,
+            available_quantity=qty,
             odoo_template_id=tmpl_id,
             category_id=cat_id
         )
@@ -123,6 +129,9 @@ async def webhook_dish(request: Request, db: Session = Depends(get_db)):
     else:
         item.price = price
         item.odoo_template_id = tmpl_id
+        if data.get("available_quantity") is not None:
+            item.available_quantity = qty
+            item.is_available = qty >0
         if cat_id:
             item.category_id = cat_id
     db.commit()
@@ -134,7 +143,7 @@ async def webhook_dish_delete(request: Request, db: Session = Depends(get_db)):
     data = await request.json()
     tmpl_id = data.get("tmpl_id")
     name = data.get("name")
-    print(f"⚡ [ACTION ODOO REÇUE] Suppression du Plat : {name} (tmpl_id: {tmpl_id})")
+    print(f" [ACTION ODOO REÇUE] Suppression du Plat : {name} (tmpl_id: {tmpl_id})")
 
     item = db.query(MenuItem).filter((MenuItem.odoo_template_id == tmpl_id) | (MenuItem.name == name)).first()
     if item:
@@ -166,7 +175,7 @@ async def webhook_order(request: Request, db: Session = Depends(get_db)):
         except Exception:
             pass
 
-    print(f"⚡ [ACTION ODOO REÇUE] Vente validée dans Odoo : {order_name} ({total} FCFA sans monnaie) par {manager_name} ({manager_login}) - Mode: {payment_method}")
+    print(f" [ACTION ODOO REÇUE] Vente validée dans Odoo : {order_name} ({total} FCFA sans monnaie) par {manager_name} ({manager_login}) - Mode: {payment_method}")
 
     clean_name = (order_name or "").replace("CMD-", "")
     order = db.query(Order).filter(
@@ -209,17 +218,117 @@ async def webhook_order(request: Request, db: Session = Depends(get_db)):
         if date_order_str:
             order.created_at = order_date
     db.commit()
+    db.refresh(order)
 
-    # Accumulation en direct de la facturation de la journée
+    # 1. Enregistrement des lignes d'articles de la commande (OrderItem)
+    lines = data.get("lines", [])
+    if lines:
+        try:
+            existing_items_count = db.query(OrderItem).filter(OrderItem.order_id == order.id).count()
+            if existing_items_count == 0:
+                for l in lines:
+                    p_id = l.get("product_id")
+                    item_name = l.get("name") or "Article"
+                    qty = int(l.get("qty", 1))
+                    price_unit = float(l.get("price_unit", 0.0))
+                    subtotal = float(l.get("price_subtotal_incl", price_unit * qty))
+
+                    # Retrouver ou créer le MenuItem correspondant
+                    m_item = None
+                    if p_id:
+                        m_item = db.query(MenuItem).filter(MenuItem.odoo_product_id == p_id).first()
+                    if not m_item and item_name:
+                        m_item = db.query(MenuItem).filter(MenuItem.name == item_name).first()
+                    if not m_item:
+                        m_item = MenuItem(
+                            name=item_name,
+                            price=price_unit,
+                            odoo_product_id=p_id,
+                            is_available=True,
+                            available_quantity=0
+                        )
+                        db.add(m_item)
+                        db.flush()
+
+                    db.add(OrderItem(
+                        order_id=order.id,
+                        menu_item_id=m_item.id,
+                        quantity=qty,
+                        unit_price=price_unit,
+                        subtotal=subtotal
+                    ))
+                db.commit()
+        except Exception as e:
+            print(f"Erreur création lignes commande webhook_order: {e}")
+
+    # 2. Mise à jour de la session de travail et traçabilité du gérant
+    if manager_login or manager_name:
+        try:
+            mgr_user = db.query(User).filter(
+                or_(
+                    func.lower(User.username) == (manager_login or "").lower(),
+                    User.full_name == manager_name
+                )
+            ).first()
+
+            login_key = manager_login or (mgr_user.username if mgr_user else "gerant")
+            work_sess = db.query(ManagerWorkSession).filter(
+                func.lower(ManagerWorkSession.manager_login) == login_key.lower(),
+                ManagerWorkSession.is_online == True
+            ).order_by(ManagerWorkSession.id.desc()).first()
+
+            if not work_sess:
+                work_sess = ManagerWorkSession(
+                    user_id=mgr_user.id if mgr_user else None,
+                    manager_name=manager_name or (mgr_user.full_name if mgr_user else login_key),
+                    manager_login=login_key,
+                    is_online=True,
+                    login_at=order_date
+                )
+                db.add(work_sess)
+                db.flush()
+
+            work_sess.total_sales_amount = round((work_sess.total_sales_amount or 0.0) + total, 2)
+            work_sess.total_orders_count = (work_sess.total_orders_count or 0) + 1
+            work_sess.total_tendered_amount = round((work_sess.total_tendered_amount or 0.0) + (float(tendered_amount) if tendered_amount is not None else total), 2)
+            work_sess.total_change_amount = round((work_sess.total_change_amount or 0.0) + (float(change_amount) if change_amount is not None else 0.0), 2)
+            work_sess.last_activity_at = order_date
+
+            # Journal d'activité (faits et gestes du gérant)
+            line_desc = ", ".join([f"{l.get('name', 'Article')} x{l.get('qty', 1)}" for l in lines]) if lines else "Articles variés"
+            activity = ManagerActivityLog(
+                user_id=mgr_user.id if mgr_user else None,
+                manager_name=manager_name or (mgr_user.full_name if mgr_user else login_key),
+                manager_login=login_key,
+                action_type="ORDER_SALE",
+                order_number=order.order_number,
+                amount=total,
+                payment_method=payment_method,
+                description=f" Vente encaissée #{order.order_number} ({line_desc}) : {total:,.0f} FCFA nets ({payment_method}). Versé: {(float(tendered_amount) if tendered_amount is not None else total):,.0f} FCFA, Monnaie: {(float(change_amount) if change_amount is not None else 0):,.0f} FCFA.",
+                created_at=order_date
+            )
+            db.add(activity)
+            db.commit()
+        except Exception as e:
+            print(f"Erreur mise à jour session/activité gérant webhook_order: {e}")
+
+    # 3. Transmission et intégration automatique à la facturation globale (Admin)
+    try:
+        from app.services.billing_service import billing_service
+        billing_service.integrate_order_into_global_invoicing(order, db)
+    except Exception as e:
+        print(f"Erreur intégration facturation globale webhook_order: {e}")
+
+    # 4. Accumulation en direct de la facturation de la journée (compatibilité)
     try:
         today_date = order_date.date()
         daily_inv = db.query(DailyInvoice).filter(DailyInvoice.invoice_date == today_date).first()
         start_dt = datetime.datetime.combine(today_date, datetime.time.min)
         end_dt = datetime.datetime.combine(today_date, datetime.time.max)
-        day_orders = db.query(Order).filter(Order.created_at >= start_dt, Order.created_at <= end_dt).all()
+        day_orders = db.query(Order).filter(Order.created_at >=start_dt, Order.created_at <= end_dt).all()
         day_ttc = sum(o.total_amount for o in day_orders if o.status in ("paid", "done"))
-        day_ht = round(day_ttc / 1.18, 2) if day_ttc > 0 else 0.0
-        day_tva = round(day_ttc - day_ht, 2) if day_ttc > 0 else 0.0
+        day_ht = round(day_ttc / 1.18, 2) if day_ttc >0 else 0.0
+        day_tva = round(day_ttc - day_ht, 2) if day_ttc >0 else 0.0
 
         if not daily_inv:
             daily_inv = DailyInvoice(
@@ -292,7 +401,7 @@ async def webhook_daily_report_certified(request: Request, db: Session = Depends
         daily_inv.dgi_certified_at = datetime.datetime.utcnow()
         daily_inv.certified_by = certified_by
     db.commit()
-    print(f"🏛️ [DGI CERTIFICATION SYNC] Facture Générale Odoo {invoice_number} certifiée DGI : {dgi_reference} ({total_ttc} FCFA)")
+    print(f" [DGI CERTIFICATION SYNC] Facture Générale Odoo {invoice_number} certifiée DGI : {dgi_reference} ({total_ttc} FCFA)")
     return {"status": "ok"}
 
 @router.post("/webhook/session")
@@ -309,7 +418,7 @@ async def webhook_session(request: Request, db: Session = Depends(get_db)):
     total_sales = float(data.get("total_sales", 0.0) or 0.0)
     cash_diff = float(data.get("cash_difference", 0.0) or 0.0)
     
-    print(f"⚡ [SESSION ODOO REÇUE] Session {session_name} - Gérant: {manager_name} ({manager_login}) - État: {state} - Total: {total_sales} FCFA - Écart: {cash_diff} FCFA")
+    print(f" [SESSION ODOO REÇUE] Session {session_name} - Gérant: {manager_name} ({manager_login}) - État: {state} - Total: {total_sales} FCFA - Écart: {cash_diff} FCFA")
 
     start_at = None
     if start_at_str:
@@ -385,7 +494,7 @@ async def webhook_manager_toggle(request: Request, db: Session = Depends(get_db)
     login = data.get("login")
     odoo_id = data.get("odoo_id")
     is_active = data.get("is_active", True)
-    print(f"⚡ [ACTION ODOO REÇUE] Statut Gérant modifié : {login} -> Actif={is_active}")
+    print(f" [ACTION ODOO REÇUE] Statut Gérant modifié : {login} ->Actif={is_active}")
 
     user = db.query(User).filter((User.username == login) | (User.odoo_user_id == odoo_id)).first()
     if user:
@@ -399,21 +508,21 @@ async def webhook_manager_delete(request: Request, db: Session = Depends(get_db)
     data = await request.json()
     login = data.get("login")
     odoo_id = data.get("odoo_id")
-    print(f"⚡ [ACTION ODOO REÇUE] Suppression du Gérant : {login}")
+    print(f" [ACTION ODOO REÇUE] Suppression du Gérant : {login}")
 
     user = db.query(User).filter((User.username == login) | (User.odoo_user_id == odoo_id)).first()
     if user:
         try:
             db.delete(user)
             db.commit()
-            print(f"✅ Gérant {login} supprimé de la base PostgreSQL.")
+            print(f" Gérant {login} supprimé de la base PostgreSQL.")
         except Exception as e:
             db.rollback()
-            print(f"⚠️ Suppression physique bloquée par contraintes d'intégrité ({e}), archivage et désactivation du compte gérant.")
+            print(f" Suppression physique bloquée par contraintes d'intégrité ({e}), archivage et désactivation du compte gérant.")
             user.is_active = False
             user.is_online = False
             db.commit()
-            print(f"✅ Gérant {login} désactivé avec succès dans PostgreSQL.")
+            print(f" Gérant {login} désactivé avec succès dans PostgreSQL.")
     return {"status": "ok"}
 
 @router.post("/webhook/sync_settings_from_odoo")
@@ -430,13 +539,12 @@ async def webhook_sync_settings_from_odoo(request: Request, db: Session = Depend
         if hasattr(cfg, k) and v is not None:
             setattr(cfg, k, v)
     
-    # Synchronisation IFU <-> NIF
+    # Synchronisation IFU <->NIF
     if "ifu" in data and data["ifu"]:
         cfg.nif = data["ifu"]
     if "fiscal_division" in data and data["fiscal_division"]:
         cfg.tax_center = data["fiscal_division"]
 
     db.commit()
-    print("⚡ [ACTION ODOO REÇUE] Configuration Restaurant & Fiscalité DGI synchronisée depuis Odoo !")
+    print(" [ACTION ODOO REÇUE] Configuration Restaurant & Fiscalité DGI synchronisée depuis Odoo !")
     return {"status": "ok"}
-

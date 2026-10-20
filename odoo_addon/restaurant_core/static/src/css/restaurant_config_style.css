@@ -997,4 +997,1086 @@
     font-weight: 800 !important;
 }
 
+/* =========================================================================
+   STYLE EXÉCUTIF - LISTE DES GÉRANTS DU RESTAURANT (THÈME DGI & CONFIGURATION)
+   Palette : Bleu Royal / Marine, Blanc Pur, Écriture Noire Grasse, Accents d'Or
+   ========================================================================= */
+.o_resto_manager_tree.o_list_table,
+.o_list_renderer .o_resto_manager_tree {
+    background-color: #ffffff !important;
+    border-radius: 14px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    box-shadow: 0 6px 20px -3px rgba(15, 23, 42, 0.06) !important;
+    overflow: hidden !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.o_resto_manager_tree thead th,
+.o_list_table:has(.o_resto_manager_tree) thead th,
+.o_list_renderer:has(.o_resto_manager_tree) table thead th {
+    background: #ffffff !important;
+    color: #0a0f1d !important;
+    font-weight: 800 !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    padding: 14px 16px !important;
+    border-top: none !important;
+    border-bottom: 2.5px solid #1e3a8a !important;
+    border-left: none !important;
+    border-right: none !important;
+    vertical-align: middle !important;
+}
+
+.o_resto_manager_tree tbody tr,
+.o_list_renderer:has(.o_resto_manager_tree) tbody tr {
+    transition: background-color 0.15s ease, transform 0.15s ease !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    background-color: #ffffff !important;
+    border-left: 5px solid #1e3a8a !important;
+}
+
+.o_resto_manager_tree tbody tr:hover,
+.o_list_renderer:has(.o_resto_manager_tree) tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+.o_resto_manager_tree tbody tr.text-muted,
+.o_list_renderer:has(.o_resto_manager_tree) tbody tr.text-muted {
+    border-left: 5px solid #94a3b8 !important;
+    background-color: #f8fafc !important;
+    opacity: 0.85 !important;
+}
+
+.o_resto_manager_tree tbody td,
+.o_list_renderer:has(.o_resto_manager_tree) tbody td {
+    padding: 14px 16px !important;
+    font-size: 0.92rem !important;
+    vertical-align: middle !important;
+    color: #0a0f1d !important;
+    font-weight: 700 !important;
+    border-top: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+/* Nom du Gérant : Gras franc */
+.o_resto_manager_tree td[name="name"],
+.o_resto_manager_tree td[data-name="name"],
+.o_list_renderer:has(.o_resto_manager_tree) td[name="name"],
+.o_list_renderer:has(.o_resto_manager_tree) td[data-name="name"] {
+    color: #0a0f1d !important;
+    font-weight: 800 !important;
+    font-size: 0.98rem !important;
+}
+
+/* Identifiant (Login) : Bleu Royal monospace */
+.o_resto_manager_tree td[name="login"],
+.o_resto_manager_tree td[data-name="login"],
+.o_list_renderer:has(.o_resto_manager_tree) td[name="login"],
+.o_list_renderer:has(.o_resto_manager_tree) td[data-name="login"] {
+    color: #1e3a8a !important;
+    font-weight: 800 !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+/* Montant Vendu en FCFA : Vert Émeraude Vif */
+.o_resto_manager_tree td[name="session_sales_total"],
+.o_resto_manager_tree td[data-name="session_sales_total"],
+.o_list_renderer:has(.o_resto_manager_tree) td[name="session_sales_total"],
+.o_list_renderer:has(.o_resto_manager_tree) td[data-name="session_sales_total"] {
+    color: #047857 !important;
+    font-weight: 900 !important;
+    font-size: 1.05rem !important;
+}
+
+/* Boutons d'Action sur chaque ligne */
+.btn-resto-mgr-deactivate {
+    background: #fffbeb !important;
+    color: #92400e !important;
+    border: 1.5px solid #f59e0b !important;
+    border-radius: 6px !important;
+    padding: 5px 12px !important;
+    font-weight: 800 !important;
+    font-size: 0.80rem !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+.btn-resto-mgr-deactivate:hover {
+    background: #fef3c7 !important;
+    color: #78350f !important;
+    border-color: #d97706 !important;
+}
+
+.btn-resto-mgr-reactivate {
+    background: #ecfdf5 !important;
+    color: #065f46 !important;
+    border: 1.5px solid #10b981 !important;
+    border-radius: 6px !important;
+    padding: 5px 12px !important;
+    font-weight: 800 !important;
+    font-size: 0.80rem !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+.btn-resto-mgr-reactivate:hover {
+    background: #d1fae5 !important;
+    color: #047857 !important;
+}
+
+.btn-resto-mgr-delete {
+    background: #fef2f2 !important;
+    color: #b91c1c !important;
+    border: 1.5px solid #fca5a5 !important;
+    border-radius: 6px !important;
+    padding: 5px 12px !important;
+    font-weight: 800 !important;
+    font-size: 0.80rem !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+.btn-resto-mgr-delete:hover {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    border-color: #ef4444 !important;
+}
+
+/* =========================================================================
+   STYLE EXÉCUTIF GRANDS MARCHÉS & FISCALITÉ DGI (VUE LISTE & BANDEAU)
+   ========================================================================= */
+
+.resto-gm-banner-wrapper {
+    animation: fadeInSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* TABLEAU DES LISTES D'AFFAIRES ET MARCHÉS */
+.o_list_renderer .o_list_table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+    border: 1.5px solid #cbd5e1 !important;
+    background: #ffffff !important;
+}
+
+.o_list_renderer .o_list_table thead {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    border-bottom: 2.5px solid #f59e0b !important;
+}
+
+.o_list_renderer .o_list_table thead th {
+    background: transparent !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+    padding: 12px 14px !important;
+    border: none !important;
+    vertical-align: middle !important;
+}
+
+.o_list_renderer .o_list_table thead th:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.o_list_renderer .o_list_table tbody tr {
+    transition: all 0.15s ease-in-out !important;
+    cursor: pointer !important;
+}
+
+.o_list_renderer .o_list_table tbody tr:hover {
+    background-color: #eff6ff !important;
+    box-shadow: inset 4px 0 0 #2563eb !important;
+}
+
+.o_list_renderer .o_list_table tbody td {
+    padding: 11px 14px !important;
+    vertical-align: middle !important;
+    font-size: 0.89rem !important;
+    color: #0f172a !important;
+    border-top: 1px solid #f1f5f9 !important;
+}
+
+/* BOUTONS SUPÉRIEURS DANS LE FORMULAIRE DE GRAND MARCHÉ */
+.o_resto_config_form .o_statusbar_buttons {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+.o_resto_config_form .o_statusbar_buttons button {
+    border-radius: 8px !important;
+    font-weight: 800 !important;
+    font-size: 0.90rem !important;
+    padding: 8px 18px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.o_resto_config_form .o_statusbar_buttons button[name="action_certify_dgi"] {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+}
+
+.o_resto_config_form .o_statusbar_buttons button[name="action_confirm"] {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid #f59e0b !important;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25) !important;
+}
+
+.o_resto_config_form .o_statusbar_buttons button[name="action_print_dgi_invoice"] {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border: 1.5px solid #475569 !important;
+}
+
+.o_resto_config_form .o_statusbar_buttons button[name="action_print_pdf"],
+.o_resto_config_form .o_statusbar_buttons button[name="action_print_client_receipt"],
+.o_resto_config_form .o_statusbar_buttons button[name="action_view_accounting_invoice"] {
+    background: #ffffff !important;
+    color: #1e3a8a !important;
+    border: 1.5px solid #93c5fd !important;
+}
+
+/* =========================================================================
+   STYLE EXÉCUTIF - SESSIONS & HORAIRES DES GÉRANTS (SUPERVISION ADMIN)
+   Palette : Blanc Pur (#ffffff), Jaune Or (#f59e0b), Bleu Marine (#1e3a8a / #0a0f1d),
+             Bleu Royal (#2563eb), Vert Émeraude Présence Active (#10b981)
+   ========================================================================= */
+
+/* --- 1. BARRE DE STATUT (STATUSBAR) --- */
+.o_resto_config_form .o_statusbar_status {
+    gap: 8px !important;
+}
+
+.o_resto_config_form .o_statusbar_status .o_arrow_button {
+    border-radius: 9999px !important;
+    font-weight: 800 !important;
+    font-size: 0.82rem !important;
+    padding: 7px 18px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    border: 1.5px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    color: #64748b !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* État actif : Session en cours (VERT ÉMERAUDE ACTIF + BORDURE OR) */
+.o_resto_config_form .o_statusbar_status button[data-value="opened"].o_arrow_button_current {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid #f59e0b !important; /* Accent Liseré Or */
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+    font-weight: 900 !important;
+}
+
+/* État actif : Session Fermée & Comptabilisée (BLEU MARINE PROFOND + OR) */
+.o_resto_config_form .o_statusbar_status button[data-value="closed"].o_arrow_button_current {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid #f59e0b !important; /* Accent Liseré Or */
+    box-shadow: 0 4px 14px rgba(30, 58, 138, 0.3) !important;
+    font-weight: 900 !important;
+}
+
+/* --- 2. ANIMATION & EFFET DE PRÉSENCE DU BOUTON VERT --- */
+@keyframes restoPresencePulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.65), 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+    70% {
+        box-shadow: 0 0 0 12px rgba(16, 185, 129, 0), 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+}
+
+.btn-resto-presence-online,
+.btn-success[style*="10b981"] {
+    animation: restoPresencePulse 2.4s infinite !important;
+}
+
+/* --- 3. TABLEAU DES VENTES ENCAISSÉES DANS LA SESSION --- */
+.o_resto_session_orders_tree.o_list_table {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: 1.5px solid #cbd5e1 !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05) !important;
+    background: #ffffff !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    margin-top: 0.5rem !important;
+}
+
+.o_resto_session_orders_tree thead {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    border-bottom: 2.5px solid #f59e0b !important; /* Liseré OR */
+}
+
+.o_resto_session_orders_tree thead th {
+    background: transparent !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 0.84rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+    padding: 12px 14px !important;
+    border: none !important;
+    vertical-align: middle !important;
+}
+
+.o_resto_session_orders_tree thead th:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.o_resto_session_orders_tree tbody tr {
+    transition: background-color 0.15s ease !important;
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.o_resto_session_orders_tree tbody tr:hover {
+    background-color: #eff6ff !important;
+}
+
+.o_resto_session_orders_tree tbody td {
+    padding: 11px 14px !important;
+    font-size: 0.90rem !important;
+    color: #0a0f1d !important;
+    font-weight: 700 !important;
+    vertical-align: middle !important;
+    border-top: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.o_resto_session_orders_tree tbody td[name="name"],
+.o_resto_session_orders_tree tbody td[data-name="name"] {
+    color: #1e3a8a !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    font-weight: 800 !important;
+}
+
+.o_resto_session_orders_tree tbody td[name="amount_total"],
+.o_resto_session_orders_tree tbody td[data-name="amount_total"] {
+    color: #047857 !important;
+    font-weight: 900 !important;
+    font-size: 0.98rem !important;
+}
+
+.o_resto_session_orders_tree tfoot td {
+    background: #f8fafc !important;
+    font-weight: 900 !important;
+    font-size: 1.05rem !important;
+    color: #047857 !important;
+    padding: 14px 16px !important;
+    border-top: 2.5px solid #1e3a8a !important;
+}
+
+/* Onglet notebook actif */
+.o_resto_config_form .nav-tabs .nav-link.active {
+    color: #1e3a8a !important;
+    font-weight: 800 !important;
+    border-bottom: 3px solid #f59e0b !important; /* Liseré OR */
+}
+
+/* =========================================================================
+   STYLE EXÉCUTIF - FENÊTRE & MENU UTILISATEUR (USER DROPDOWN MENU)
+   Palette : Blanc Pur (#ffffff), Jaune Or (#f59e0b), Bleu Marine (#1e3a8a / #0a0f1d),
+             Bleu Royal (#2563eb), Rouge Alerte Déconnexion (#dc2626)
+   ========================================================================= */
+
+/* --- 1. CONTENEUR PRINCIPAL DE LA FENÊTRE DROPDOWN (USER MENU) --- */
+.o-dropdown--menu.dropdown-menu,
+.dropdown-menu:has([data-menu]),
+.o_user_menu .dropdown-menu,
+.o_menu_systray .dropdown-menu {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-top: 4px solid #1e3a8a !important; /* Liseré Supérieur Bleu Marine */
+    border-radius: 14px !important;
+    box-shadow: 0 16px 40px -4px rgba(15, 23, 42, 0.22), 0 6px 18px -2px rgba(15, 23, 42, 0.1) !important;
+    padding: 8px !important;
+    min-width: 255px !important;
+    overflow: hidden !important;
+    animation: restoDropdownSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes restoDropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* En-tête discret "Espace Utilisateur" en haut de la fenêtre */
+.o-dropdown--menu:has([data-menu="logout"])::before,
+.dropdown-menu:has([data-menu="logout"])::before {
+    content: "⚡ ESPACE UTILISATEUR" !important;
+    display: flex !important;
+    align-items: center !important;
+    font-size: 0.70rem !important;
+    font-weight: 900 !important;
+    color: #1e3a8a !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    padding: 8px 12px !important;
+    margin-bottom: 6px !important;
+    border-bottom: 1.5px solid #e2e8f0 !important;
+    background: linear-gradient(90deg, #f0f7ff 0%, #ffffff 100%) !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+/* --- 2. LIGNES DU MENU (DROPDOWN ITEMS) --- */
+.o-dropdown--menu.dropdown-menu .dropdown-item,
+.dropdown-menu:has([data-menu]) .dropdown-item,
+.o_user_menu .dropdown-menu .dropdown-item,
+.o_menu_systray .dropdown-menu .dropdown-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 9px 14px !important;
+    margin: 3px 0 !important;
+    border-radius: 8px !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    color: #0a0f1d !important;
+    border: 1px solid transparent !important;
+    border-left: 3.5px solid transparent !important;
+    background: transparent !important;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+}
+
+.o-dropdown--menu.dropdown-menu .dropdown-item > div,
+.dropdown-menu:has([data-menu]) .dropdown-item > div {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+}
+
+/* Survol standard des options : Bleu Marine, Blanc & Liseré d'Or */
+.o-dropdown--menu.dropdown-menu .dropdown-item:hover,
+.o-dropdown--menu.dropdown-menu .dropdown-item:focus,
+.dropdown-menu:has([data-menu]) .dropdown-item:hover,
+.dropdown-menu:has([data-menu]) .dropdown-item:focus,
+.o_user_menu .dropdown-menu .dropdown-item:hover,
+.o_user_menu .dropdown-menu .dropdown-item:focus {
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%) !important;
+    color: #1e3a8a !important;
+    border-color: #bfdbfe !important;
+    border-left: 3.5px solid #f59e0b !important; /* Liseré OR au survol */
+    transform: translateX(4px) !important;
+    box-shadow: 0 2px 8px rgba(30, 58, 138, 0.08) !important;
+}
+
+/* --- 3. SÉPARATEUR DE SECTION --- */
+.o-dropdown--menu.dropdown-menu .dropdown-divider,
+.dropdown-menu:has([data-menu]) .dropdown-divider,
+.o_user_menu .dropdown-menu .dropdown-divider {
+    margin: 6px 4px !important;
+    border-top: 1.5px solid #e2e8f0 !important;
+    opacity: 0.9 !important;
+}
+
+/* --- 4. ICÔNES ÉLÉGANTES SUR MESURE POUR CHAQUE OPTION --- */
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu]::before,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu]::before {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    margin-right: 12px !important;
+    font-size: 0.95rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* Documentation */
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="documentation"]::before,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="documentation"]::before {
+    content: "📖" !important;
+}
+
+/* Assistance / Support */
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="support"]::before,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="support"]::before {
+    content: "🎧" !important;
+}
+
+/* Raccourcis / Shortcuts */
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="shortcuts"]::before,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="shortcuts"]::before {
+    content: "⌨️" !important;
+}
+
+/* Préférences / Settings */
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="settings"]::before,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="settings"]::before {
+    content: "⚙️" !important;
+}
+
+/* Mon compte Odoo.com (account) */
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="account"]::before,
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="odoo_account"]::before,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="account"]::before,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="odoo_account"]::before {
+    content: "👤" !important;
+}
+
+/* Déconnexion */
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="logout"]::before,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="logout"]::before {
+    content: "🚪" !important;
+}
+
+/* --- 5. RACCOURCI CLAVIER EN TOUCHE STYLISÉE (CTRL+K) --- */
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="shortcuts"] .fw-bold,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="shortcuts"] .fw-bold,
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="shortcuts"] small,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="shortcuts"] small {
+    background: #ffffff !important;
+    color: #1e3a8a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 2px 7px !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    font-size: 0.70rem !important;
+    font-weight: 800 !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+    letter-spacing: 0.05em !important;
+    margin-left: auto !important;
+}
+
+/* --- 6. BOUTON DE DÉCONNEXION (LOG OUT) : ROUGE ÉLÉGANT HAUT DE GAMME --- */
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="logout"],
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="logout"] {
+    color: #dc2626 !important;
+    font-weight: 800 !important;
+    background: #fff8f8 !important;
+    border: 1px solid #fee2e2 !important;
+    border-left: 3.5px solid #ef4444 !important;
+    margin-top: 8px !important;
+    border-radius: 8px !important;
+}
+
+.o-dropdown--menu.dropdown-menu .dropdown-item[data-menu="logout"]:hover,
+.dropdown-menu:has([data-menu]) .dropdown-item[data-menu="logout"]:hover {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+    color: #991b1b !important;
+    border-color: #fca5a5 !important;
+    border-left: 3.5px solid #dc2626 !important;
+    transform: translateX(4px) !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15) !important;
+}
+
+/* =========================================================================
+   STYLE EXÉCUTIF DE LA MODALE "PRÉFÉRENCES UTILISATEUR"
+   Thème : Blanc Pur #ffffff, Or #f59e0b, Bleu Marine #1e3a8a, Bleu Royal #2563eb
+   ========================================================================= */
+
+/* --- 1. BOÎTE MODALE & CADRE FLOTTANT --- */
+.modal:has([name="preference_save"]) .modal-dialog,
+.o_dialog:has([name="preference_save"]) .modal-dialog {
+    max-width: 840px !important;
+}
+
+.modal:has([name="preference_save"]) .modal-content,
+.o_dialog:has([name="preference_save"]) .modal-content {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-top: 5px solid #1e3a8a !important; /* Liseré Supérieur Bleu Marine */
+    border-radius: 20px !important;
+    box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35) !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+/* Liseré d'Or lumineux au sommet de la modale */
+.modal:has([name="preference_save"]) .modal-content::before,
+.o_dialog:has([name="preference_save"]) .modal-content::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 4px !important;
+    background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 40%, #f59e0b 80%, #d97706 100%) !important;
+    z-index: 10 !important;
+}
+
+/* --- 2. EN-TÊTE DE LA MODALE --- */
+.modal:has([name="preference_save"]) .modal-header,
+.o_dialog:has([name="preference_save"]) .modal-header {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+    border-bottom: 1.5px solid #e2e8f0 !important;
+    padding: 18px 26px !important;
+}
+
+.modal:has([name="preference_save"]) .modal-header .modal-title,
+.o_dialog:has([name="preference_save"]) .modal-header .modal-title {
+    color: #1e3a8a !important;
+    font-size: 1.25rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.02em !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.modal:has([name="preference_save"]) .modal-header .modal-title::before,
+.o_dialog:has([name="preference_save"]) .modal-header .modal-title::before {
+    content: "⚙️" !important;
+    font-size: 1.2rem !important;
+}
+
+.modal:has([name="preference_save"]) .modal-header .btn-close,
+.o_dialog:has([name="preference_save"]) .modal-header .btn-close {
+    background-color: #f1f5f9 !important;
+    border-radius: 50% !important;
+    padding: 8px !important;
+    opacity: 0.8 !important;
+    transition: all 0.2s ease !important;
+}
+
+.modal:has([name="preference_save"]) .modal-header .btn-close:hover,
+.o_dialog:has([name="preference_save"]) .modal-header .btn-close:hover {
+    background-color: #fee2e2 !important;
+    opacity: 1 !important;
+    transform: rotate(90deg) !important;
+}
+
+/* --- 3. CORPS DE LA MODALE & CARTE IDENTITÉ UTILISATEUR --- */
+.modal:has([name="preference_save"]) .modal-body,
+.o_dialog:has([name="preference_save"]) .modal-body {
+    background: #f8fafc !important;
+    padding: 24px !important;
+}
+
+.modal:has([name="preference_save"]) h1,
+.o_dialog:has([name="preference_save"]) h1 {
+    font-size: 1.55rem !important;
+    font-weight: 900 !important;
+    color: #0a0f1d !important;
+    letter-spacing: -0.02em !important;
+    margin-bottom: 6px !important;
+}
+
+.modal:has([name="preference_save"]) h1::after,
+.o_dialog:has([name="preference_save"]) h1::after {
+    content: "COMPTE ACTIF • LE GOUT DU MATIN" !important;
+    display: block !important;
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    color: #2563eb !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    margin-top: 4px !important;
+}
+
+/* Avatar de profil utilisateur */
+.modal:has([name="preference_save"]) .oe_avatar,
+.o_dialog:has([name="preference_save"]) .oe_avatar {
+    border-radius: 16px !important;
+    border: 3px solid #f59e0b !important; /* Bordure OR éclatante */
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.25) !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+    transition: transform 0.2s ease !important;
+}
+
+.modal:has([name="preference_save"]) .oe_avatar:hover,
+.o_dialog:has([name="preference_save"]) .oe_avatar:hover {
+    transform: scale(1.03) !important;
+    border-color: #1e3a8a !important;
+}
+
+/* --- 4. ONGLETS MODERNES (NOTEBOOK & TABS) --- */
+.modal:has([name="preference_save"]) .nav-tabs,
+.o_dialog:has([name="preference_save"]) .nav-tabs {
+    border-bottom: 2px solid #cbd5e1 !important;
+    gap: 8px !important;
+    margin-top: 14px !important;
+    margin-bottom: 20px !important;
+}
+
+.modal:has([name="preference_save"]) .nav-tabs .nav-link,
+.o_dialog:has([name="preference_save"]) .nav-tabs .nav-link {
+    background: #e2e8f0 !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem !important;
+    border-radius: 10px 10px 0 0 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-bottom: none !important;
+    padding: 10px 20px !important;
+    transition: all 0.2s ease !important;
+}
+
+.modal:has([name="preference_save"]) .nav-tabs .nav-link:hover,
+.o_dialog:has([name="preference_save"]) .nav-tabs .nav-link:hover {
+    background: #eff6ff !important;
+    color: #1e3a8a !important;
+}
+
+.modal:has([name="preference_save"]) .nav-tabs .nav-link.active,
+.o_dialog:has([name="preference_save"]) .nav-tabs .nav-link.active {
+    background: #ffffff !important;
+    color: #1e3a8a !important;
+    font-weight: 900 !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-bottom: 3.5px solid #f59e0b !important; /* Liseré OR actif */
+    box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.05) !important;
+}
+
+/* --- 5. CARTES BLANCHES & CHAMPS DE SAISIE --- */
+.modal:has([name="preference_save"]) .o_inner_group,
+.o_dialog:has([name="preference_save"]) .o_inner_group {
+    background: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    padding: 18px 20px !important;
+    margin-bottom: 16px !important;
+    box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.05) !important;
+}
+
+.modal:has([name="preference_save"]) .o_form_label,
+.o_dialog:has([name="preference_save"]) .o_form_label {
+    color: #1e293b !important;
+    font-weight: 800 !important;
+    font-size: 0.84rem !important;
+    letter-spacing: 0.01em !important;
+}
+
+/* Champs de saisie & Selects */
+.modal:has([name="preference_save"]) input.o_input,
+.modal:has([name="preference_save"]) select.o_input,
+.modal:has([name="preference_save"]) .o_field_widget select,
+.o_dialog:has([name="preference_save"]) input.o_input,
+.o_dialog:has([name="preference_save"]) select.o_input,
+.o_dialog:has([name="preference_save"]) .o_field_widget select {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    font-size: 0.90rem !important;
+    font-weight: 600 !important;
+    color: #0a0f1d !important;
+    transition: all 0.2s ease !important;
+}
+
+.modal:has([name="preference_save"]) input.o_input:focus,
+.modal:has([name="preference_save"]) select.o_input:focus,
+.modal:has([name="preference_save"]) .o_field_widget select:focus,
+.o_dialog:has([name="preference_save"]) input.o_input:focus,
+.o_dialog:has([name="preference_save"]) select.o_input:focus,
+.o_dialog:has([name="preference_save"]) .o_field_widget select:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.15) !important;
+    outline: none !important;
+}
+
+/* Options Radio (Notifications) */
+.modal:has([name="preference_save"]) .o_radio_item,
+.o_dialog:has([name="preference_save"]) .o_radio_item {
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    margin-right: 14px !important;
+}
+
+.modal:has([name="preference_save"]) .o_radio_input:checked,
+.o_dialog:has([name="preference_save"]) .o_radio_input:checked {
+    background-color: #1e3a8a !important;
+    border-color: #1e3a8a !important;
+}
+
+/* --- 6. PIED DE PAGE & BOUTONS D'ACTION (ENREGISTRER / ANNULER) --- */
+.modal:has([name="preference_save"]) .modal-footer,
+.o_dialog:has([name="preference_save"]) .modal-footer {
+    background: #ffffff !important;
+    border-top: 1.5px solid #e2e8f0 !important;
+    padding: 16px 24px !important;
+    gap: 12px !important;
+}
+
+/* Bouton Enregistrer (Bleu Royal -> Bleu Marine & Liseré d'Or) */
+.modal:has([name="preference_save"]) button[name="preference_save"],
+.o_dialog:has([name="preference_save"]) button[name="preference_save"] {
+    background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%) !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 0.92rem !important;
+    padding: 9px 24px !important;
+    border-radius: 9px !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.modal:has([name="preference_save"]) button[name="preference_save"]:hover,
+.o_dialog:has([name="preference_save"]) button[name="preference_save"]:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #0f172a 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45) !important;
+}
+
+/* Bouton Annuler */
+.modal:has([name="preference_save"]) button[name="preference_cancel"],
+.o_dialog:has([name="preference_save"]) button[name="preference_cancel"] {
+    background: #f8fafc !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+    font-size: 0.92rem !important;
+    padding: 9px 20px !important;
+    border-radius: 9px !important;
+    transition: all 0.2s ease !important;
+}
+
+.modal:has([name="preference_save"]) button[name="preference_cancel"]:hover,
+.o_dialog:has([name="preference_save"]) button[name="preference_cancel"]:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+}
+
+/* =========================================================================
+   STYLE EXÉCUTIF DU KANBAN "MENUS & PLATS"
+   Cartes Carrées Compactes, En-têtes Épurés et Bouton d'Ajout (+) Mis en Valeur
+   ========================================================================= */
+
+/* --- 1. COLONNES DE CATÉGORIE DU KANBAN (ALIGNEMENT COMPACT & ÉPURÉ) --- */
+.o_kanban_dashboard .o_kanban_group,
+.o_kanban_renderer.o_kanban_grouped .o_kanban_group {
+    background: #f8fafc !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    padding: 10px 8px !important;
+    margin-right: 14px !important;
+    box-shadow: 0 4px 14px -4px rgba(15, 23, 42, 0.05) !important;
+    min-width: 215px !important;
+    max-width: 230px !important;
+    width: 220px !important;
+}
+
+/* --- 2. EN-TÊTE DE COLONNE DE CATÉGORIE --- */
+.o_kanban_dashboard .o_kanban_header,
+.o_kanban_renderer.o_kanban_grouped .o_kanban_header {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-left: 4px solid #1e3a8a !important; /* Liseré Bleu Marine */
+    border-radius: 10px !important;
+    padding: 7px 10px !important;
+    margin-bottom: 10px !important;
+    box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+}
+
+.o_kanban_dashboard .o_kanban_header .o_kanban_header_title,
+.o_kanban_renderer.o_kanban_grouped .o_kanban_header .o_kanban_header_title {
+    display: flex !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+.o_kanban_dashboard .o_kanban_header .o_column_title,
+.o_kanban_renderer.o_kanban_grouped .o_kanban_header .o_column_title {
+    color: #0a0f1d !important;
+    font-size: 0.90rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.01em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+}
+
+/* --- 3. BOUTON (+) AJOUT DU PLAT ULTRA-VISIBLE ET BIEN ORDONNÉ --- */
+.o_kanban_dashboard .o_kanban_header .o_kanban_quick_add,
+.o_kanban_renderer.o_kanban_grouped .o_kanban_header .o_kanban_quick_add {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid #fbbf24 !important;
+    border-radius: 7px !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 7px rgba(245, 158, 11, 0.4) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    margin-left: auto !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+}
+
+.o_kanban_dashboard .o_kanban_header .o_kanban_quick_add:hover,
+.o_kanban_renderer.o_kanban_grouped .o_kanban_header .o_kanban_quick_add:hover {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    border-color: #93c5fd !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.35) !important;
+}
+
+.o_kanban_dashboard .o_kanban_header .o_kanban_quick_add i,
+.o_kanban_renderer.o_kanban_grouped .o_kanban_header .o_kanban_quick_add i {
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    opacity: 1 !important;
+}
+
+/* Bouton Paramètres / Engrenage discret */
+.o_kanban_dashboard .o_kanban_header .o_kanban_config button,
+.o_kanban_renderer.o_kanban_grouped .o_kanban_header .o_kanban_config button {
+    background: #f1f5f9 !important;
+    border-radius: 6px !important;
+    width: 26px !important;
+    height: 26px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin-right: 2px !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+/* --- 4. CARTES DE PLATS COMPACTES & EFFET DE SURVOL --- */
+.o_kanban_dashboard .oe_kanban_global_click,
+.resto-dish-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.o_kanban_dashboard .oe_kanban_global_click:hover,
+.resto-dish-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 18px rgba(30, 58, 138, 0.16) !important;
+    border-color: #1e3a8a !important;
+}
+
+/* Formulaire d'ajout rapide au clic sur (+) */
+.o_kanban_quick_create {
+    background: #ffffff !important;
+    border: 2px solid #2563eb !important;
+    border-radius: 14px !important;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.15) !important;
+    padding: 10px !important;
+    margin-bottom: 12px !important;
+}
+
+.o_kanban_quick_create .btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 800 !important;
+}
+
+/* =========================================================================
+   GROUPEMENT DES VENTES PAR GÉRANT ET PAR JOURNÉE DE TRAVAIL (COMMANDE & VENTES)
+   ========================================================================= */
+/* Niveau 0 : En-tête Gérant de Caisse */
+.o_list_table .o_group_header[data-group-level="0"],
+.o_list_table .o_group_header:not([data-group-level="1"]):not([data-group-level="2"]) {
+    background: linear-gradient(90deg, #eff6ff 0%, #ffffff 80%) !important;
+    border-left: 6px solid #1e3a8a !important;
+    color: #0b192c !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.05) !important;
+    cursor: pointer !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.o_list_table .o_group_header[data-group-level="0"]:hover {
+    background: linear-gradient(90deg, #dbeafe 0%, #eff6ff 100%) !important;
+}
+
+/* Niveau 1 : En-tête Journée de Travail */
+.o_list_table .o_group_header[data-group-level="1"] {
+    background: linear-gradient(90deg, #fffbeb 0%, #ffffff 80%) !important;
+    border-left: 5px solid #f59e0b !important;
+    color: #92400e !important;
+    font-weight: 700 !important;
+    font-size: 0.90rem !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    cursor: pointer !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.o_list_table .o_group_header[data-group-level="1"]:hover {
+    background: linear-gradient(90deg, #fef3c7 0%, #fffbeb 100%) !important;
+}
+
+/* Badge de comptage dans les groupes */
+.o_list_table .o_group_header .badge {
+    background: #ffffff !important;
+    color: #1e3a8a !important;
+    border: 1.5px solid #bfdbfe !important;
+    font-weight: 800 !important;
+    font-size: 0.78rem !important;
+    padding: 4px 10px !important;
+    border-radius: 9999px !important;
+    margin-left: 8px !important;
+}
+
+/* Tableau des Produits Commandés dans la Fiche Commande & Vente */
+.o_resto_order_lines_table thead th,
+.o_resto_order_lines_table.o_list_table thead th {
+    background-color: #1e3a8a !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    border-bottom: 3px solid #f59e0b !important;
+    padding: 10px 12px !important;
+    vertical-align: middle !important;
+}
+
+.o_resto_order_lines_table tbody tr:hover {
+    background-color: #eff6ff !important;
+}
+
+.o_resto_order_lines_table tbody td {
+    padding: 10px 12px !important;
+    vertical-align: middle !important;
+    font-size: 0.90rem !important;
+}
+
+
+
+
+
 

@@ -19,7 +19,18 @@ patch(NavBar.prototype, {
     },
 
     async onNavBarDropdownItemSelection(menu) {
-        if (menu && (menu.xmlid === "restaurant_core.menu_restaurant_gerant_orders" || (menu.name && menu.name.includes("Ventes")))) {
+        if (menu && menu.xmlid === "restaurant_core.menu_restaurant_orders") {
+            try {
+                await this.actionService.doAction("restaurant_core.action_restaurant_sales_monitoring", {
+                    clearBreadcrumbs: true,
+                });
+                return;
+            } catch (e) {
+                window.location.href = "/web?db=restaurant_odoo#action=restaurant_core.action_restaurant_sales_monitoring";
+                return;
+            }
+        }
+        if (menu && (menu.xmlid === "restaurant_core.menu_restaurant_gerant_orders" || (menu.name && (menu.name.includes("Mes Ventes") || menu.name.includes("Reçus Caisse"))))) {
             try {
                 await this.actionService.doAction("restaurant_core.action_restaurant_gerant_own_orders", {
                     clearBreadcrumbs: true,
@@ -70,7 +81,7 @@ patch(NavBar.prototype, {
                     </div>
                     <div class="o_restaurant_brand_text_block">
                         <div class="o_restaurant_brand_name">${name}</div>
-                        <div class="o_restaurant_brand_badge">✦ ESPACE GÉRANT ✦</div>
+                        <div class="o_restaurant_brand_badge">ESPACE GÉRANT </div>
                     </div>
                 `;
                 brandContainer.onclick = () => {
@@ -99,8 +110,8 @@ patch(NavBar.prototype, {
                 if (!quickBtn) {
                     quickBtn = document.createElement("a");
                     quickBtn.className = "o_gerant_quick_pos_btn";
-                    quickBtn.href = "/pos/ui?config_id=2";
-                    quickBtn.innerHTML = "⚡ Ouvrir la Caisse ➔";
+                    quickBtn.href = "/pos/ui?config_id="+ (data.pos_config_id || 2);
+                    quickBtn.innerHTML = " Ouvrir la Caisse ";
                     if (systray) {
                         navbar.insertBefore(quickBtn, systray);
                     } else {
@@ -138,3 +149,73 @@ patch(NavBar.prototype, {
         }
     }
 });
+
+// =========================================================================
+// GESTION PRIORITÉ FRANÇAIS (#1) & ANGLAIS (#2) DANS LES PRÉFÉRENCES
+// =========================================================================
+(function setupLanguagePriorityWatcher() {
+    function reorderLanguageOptions() {
+        const selects = document.querySelectorAll('select[name="lang"], select#lang, .modal select');
+        selects.forEach(select => {
+            if (!select) return;
+            const options = Array.from(select.options);
+            if (options.length <= 1) return;
+
+            const hasLangOptions = options.some(opt => 
+                (opt.value && (opt.value.includes('fr') || opt.value.includes('en'))) ||
+                (opt.text && (opt.text.toLowerCase().includes('fran') || opt.text.toLowerCase().includes('engl')))
+            );
+            if (!hasLangOptions) return;
+
+            // Classement : Français (fr_FR) en PREMIER (#1), puis autres français, puis Anglais (#2)
+            const sorted = options.slice().sort((a, b) => {
+                const valA = (a.value || '').toLowerCase();
+                const textA = (a.text || '').toLowerCase();
+                const valB = (b.value || '').toLowerCase();
+                const textB = (b.text || '').toLowerCase();
+
+                function getScore(val, text) {
+                    if (val === 'fr_fr' || (text.includes('fran') && !text.includes('canada'))) return 1;
+                    if (val.startsWith('fr') || text.includes('fran')) return 2;
+                    if (val === 'en_us' || text.includes('engl') || text.includes('anglais')) return 3;
+                    if (val.startsWith('en')) return 4;
+                    return 10;
+                }
+
+                return getScore(valA, textA) - getScore(valB, textB);
+            });
+
+            let orderChanged = false;
+            for (let i = 0; i < options.length; i++) {
+                if (options[i] !== sorted[i]) {
+                    orderChanged = true;
+                    break;
+                }
+            }
+
+            if (orderChanged) {
+                const currentVal = select.value;
+                select.innerHTML = '';
+                sorted.forEach(opt => select.appendChild(opt));
+                if (currentVal) {
+                    select.value = currentVal;
+                }
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', reorderLanguageOptions);
+    } else {
+        reorderLanguageOptions();
+    }
+
+    const observer = new MutationObserver(() => {
+        reorderLanguageOptions();
+    });
+
+    observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+    });
+})();

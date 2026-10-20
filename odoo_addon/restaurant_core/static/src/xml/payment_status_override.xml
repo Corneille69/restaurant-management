@@ -10,7 +10,7 @@
                     <!-- 1. CHAMP À CÔTÉ : TOTAL QUI DOIT ÊTRE PAYÉ (ADDITION) -->
                     <div class="total-to-pay-box p-2 rounded-3 text-center d-flex flex-column justify-content-center" style="background: #f1f5f9; border: 2.5px solid #064e3b; width: 40%; min-width: 170px;">
                         <div class="text-uppercase fw-bolder mb-1" style="color: #064e3b; font-size: 0.90rem; letter-spacing: 0.5px;">
-                            📋 Total à Payer :
+                             Total à Payer :
                         </div>
                         <div class="fw-bolder" style="font-size: 2.1rem; font-weight: 900; color: #064e3b; line-height: 1.1;">
                             <t t-esc="totalDueText" />
@@ -23,7 +23,7 @@
                     <!-- 2. LE GRAND CHAMP : MONTANT SAISI À LA MAIN PAR LE GÉRANT -->
                     <div class="cash-entered-box p-2 rounded-3 text-center flex-grow-1" style="background: #ffffff; border: 3px solid #d4af37; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);">
                         <div class="text-uppercase fw-bolder mb-1" style="color: #b45309; font-size: 0.90rem; letter-spacing: 0.5px;">
-                            💵 Montant Reçu en Espèces :
+                             Montant Reçu en Espèces :
                         </div>
                         <div class="entered-amount-display fw-bolder" style="font-size: 2.9rem; font-weight: 900; color: #b45309; line-height: 1.1; letter-spacing: 1px;">
                             <t t-esc="enteredAmountText" />
@@ -39,10 +39,10 @@
                 <!-- Cas A : Monnaie à rendre au client -->
                 <div t-if="props.order.get_change() &gt; 0" class="d-flex justify-content-between align-items-center py-2 px-3 rounded-3" style="background: #f0fdf4; border: 2.5px solid #059669; color: #064e3b; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.15);">
                     <div class="d-flex align-items-center">
-                        <span class="fs-2 me-2">🪙</span>
+                        <span class="fs-2 me-2"></span>
                         <div>
-                            <strong class="d-block fs-5 fw-bolder" style="color: #064e3b;">MONNAIE À REMETTRE AU CLIENT :</strong>
-                            <span class="small fw-bold" style="color: #047857;">Montant exact à restituer au client</span>
+                            <strong class="d-block fs-5 fw-bolder" style="color: #064e3b;">MONNAIEÀ REMETTRE AU CLIENT :</strong>
+                            <span class="small fw-bold" style="color: #047857;">Montantexact à restituer au client</span>
                         </div>
                     </div>
                     <span class="fs-1 fw-bolder" style="font-weight: 900; color: #047857; font-size: 2.2rem;">
@@ -51,12 +51,12 @@
                 </div>
 
                 <!-- Cas B : Argent insuffisant (Reste à encaisser) -->
-                <div t-elif="props.order.get_due() &gt; 0 and enteredAmount &gt; 0" class="d-flex justify-content-between align-items-center py-2 px-3 rounded-3" style="background: #fef2f2; border: 2.5px solid #ef4444; color: #b91c1c;">
+                <div t-elif="props.order.get_due() &gt; 0 &amp;&amp; enteredAmount &gt; 0" class="d-flex justify-content-between align-items-center py-2 px-3 rounded-3" style="background: #fef2f2; border: 2.5px solid #ef4444; color: #b91c1c;">
                     <div class="d-flex align-items-center">
-                        <span class="fs-3 me-2">⚠️</span>
+                        <span class="fs-3 me-2"></span>
                         <div>
-                            <strong class="d-block fs-6 fw-bolder">Argent insuffisant !</strong>
-                            <span class="small fw-bold">Reste encore à encaisser</span>
+                            <strong class="d-block fs-6 fw-bolder">Argentinsuffisant !</strong>
+                            <span class="small fw-bold">Resteencore à encaisser</span>
                         </div>
                     </div>
                     <span class="fs-2 fw-bolder text-danger" style="font-weight: 900;">
@@ -65,17 +65,17 @@
                 </div>
 
                 <!-- Cas C : Compte exact -->
-                <div t-elif="props.order.get_due() === 0 and props.order.get_change() === 0 and props.order.get_total_paid() &gt; 0" class="d-flex justify-content-between align-items-center py-2 px-3 rounded-3" style="background: #eff6ff; border: 2.5px solid #3b82f6; color: #1d4ed8;">
+                <div t-elif="props.order.get_due() === 0 &amp;&amp; props.order.get_change() === 0 &amp;&amp; props.order.get_total_paid() &gt; 0" class="d-flex justify-content-between align-items-center py-2 px-3 rounded-3" style="background: #eff6ff; border: 2.5px solid #3b82f6; color: #1d4ed8;">
                     <div class="d-flex align-items-center">
-                        <span class="fs-3 me-2">✅</span>
-                        <span class="fs-5 fw-bolder">Compte Exact (Aucune monnaie à rendre)</span>
+                        <span class="fs-3 me-2"></span>
+                        <span class="fs-5 fw-bolder">CompteExact (Aucune monnaie à rendre)</span>
                     </div>
-                    <span class="fs-3 fw-bolder text-primary" style="font-weight: 900;">0 FCFA</span>
+                    <span class="fs-3 fw-bolder text-primary" style="font-weight: 900;">0FCFA</span>
                 </div>
 
                 <!-- Cas D : En attente de saisie -->
                 <div t-else="" class="text-center py-1 text-muted small fw-bold" style="color: #64748b;">
-                    👉 Tapez le montant remis par le client sur le pavé numérique pour calculer la monnaie
+                     Tapez le montant remis par le client sur le pavé numérique pour calculer la monnaie
                 </div>
 
             </div>
@@ -91,9 +91,61 @@
                         onclick="window.top.location.href='/web?db=restaurant_odoo#action=restaurant_core.action_restaurant_gerant_own_orders'; return false;"
                         class="btn pos-sales-nav-btn pos-home-nav-btn d-flex align-items-center gap-2"
                         title="Quitter la caisse et retourner à l'Accueil (Mes Ventes)">
-                    <span class="sales-btn-icon" style="font-size: 15px; line-height: 1;">🏠</span>
+                    <span class="sales-btn-icon" style="font-size: 15px; line-height: 1;"></span>
                     <span class="sales-btn-text" style="font-size: 13.5px; font-weight: 900; letter-spacing: 0.3px;">Accueil</span>
                 </button>
+            </div>
+        </xpath>
+    </t>
+
+    <!-- 4. EXTENSION CARTE PRODUIT : AFFICHAGE DU STOCK EN TEMPS RÉEL (JUSTE LE NOMBRE POUR LE GÉRANT) -->
+    <t t-name="restaurant_core.ProductCard" t-inherit="point_of_sale.ProductCard" t-inherit-mode="extension">
+        <xpath expr="//article" position="attributes">
+            <attribute name="t-attf-class">{{props.class ? props.class + ' ' : ''}}product position-relative d-flex align-items-stretch p-0 m-0 text-start cursor-pointer overflow-hidden transition-base {{isOutOfStock ? 'product-out-of-stock' : ''}}</attribute>
+        </xpath>
+        <xpath expr="//span[hasclass('price-tag')]" position="replace">
+            <div class="product-bottom-row d-flex align-items-center justify-content-between w-100 gap-1 mt-auto">
+                <span class="price-tag fw-bolder" t-esc="formattedPrice || props.price" />
+                <span t-if="!isOutOfStock" class="stock-badge stock-available fw-bolder" t-att-title="'Stock disponible : ' + stockQty">
+                    <t t-esc="stockQty"/>
+                </span>
+                <span t-else="" class="stock-badge stock-rupture fw-bolder" title="Manque de stock (0 présent)">
+                    0
+                </span>
+            </div>
+        </xpath>
+    </t>
+
+    <!-- 5. EXTENSION POPUP D'ALERTE RUPTURE & MANQUE DE STOCK (DESIGN EXÉCUTIF) -->
+    <t t-name="restaurant_core.ErrorPopup" t-inherit="point_of_sale.ErrorPopup" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('popup')]" position="replace">
+            <div class="popup popup-error resto-popup-stock-alert">
+                <!-- En-tête avec Bannière & Badge Icône d'Alerte Or/Ambre -->
+                <div class="modal-header resto-stock-modal-header d-flex align-items-center justify-content-center flex-column text-center position-relative">
+                    <div class="resto-stock-icon-wrapper mb-2">
+                        <i class="fa fa-exclamation-triangle resto-stock-icon"/>
+                    </div>
+                    <h4 class="modal-title title resto-stock-modal-title">
+                        <t t-esc="props.title" />
+                    </h4>
+                    <span class="resto-stock-status-pill">
+                        Alerte Disponibilité Caisse
+                    </span>
+                </div>
+
+                <!-- Corps du Message Formaté & Soigné -->
+                <main class="modal-body resto-stock-modal-body">
+                    <div class="resto-stock-card-message">
+                        <t t-esc="props.body" />
+                    </div>
+                </main>
+
+                <!-- Pied de page avec Grand Bouton Exécutif Centré -->
+                <div class="footer modal-footer resto-stock-modal-footer d-flex justify-content-center align-items-center">
+                    <div class="button cancel btn resto-stock-btn-confirm" t-on-click="confirm">
+                        <i class="fa fa-check me-2"/> <t t-esc="props.confirmText || 'Compris'" />
+                    </div>
+                </div>
             </div>
         </xpath>
     </t>

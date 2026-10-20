@@ -142,6 +142,11 @@ class PosOrder(models.Model):
                 if not mgr_user.last_login_time:
                     mgr_user.sudo().last_login_time = fields.Datetime.now()
 
+                # Décrémentation du stock disponible en temps réel dans Odoo
+                for line in rec.lines:
+                    if line.product_id and line.qty:
+                        line.product_id.sudo().available_quantity = max(0.0, line.product_id.available_quantity - line.qty)
+
                 # Accumulation automatique en temps réel dans la Facturation de la Journée
                 try:
                     self.env['restaurant.daily.report'].sudo()._accumulate_order(rec)
@@ -196,6 +201,11 @@ class PosOrder(models.Model):
                 mgr_user.sudo().session_sales_total += net_amt
                 mgr_user.sudo().is_online = True
 
+            # Décrémentation du stock disponible
+            for line in rec.lines:
+                if line.product_id and line.qty:
+                    line.product_id.sudo().available_quantity = max(0.0, line.product_id.available_quantity - line.qty)
+
             # Accumulation automatique en temps réel dans la Facturation de la Journée
             try:
                 self.env['restaurant.daily.report'].sudo()._accumulate_order(rec)
@@ -246,6 +256,62 @@ class PosOrder(models.Model):
 
 class PosSession(models.Model):
     _inherit = 'pos.session'
+
+    is_manager_online = fields.Boolean(
+        string="Présence en Direct",
+        compute='_compute_manager_online',
+        help="Indique si le gérant est actuellement connecté et en service"
+    )
+    duration_str = fields.Char(
+        string="Durée de Service",
+        compute='_compute_duration_str',
+        help="Durée écoulée ou totale de service du gérant"
+    )
+
+    @api.depends('state', 'user_id', 'user_id.is_online')
+    def _compute_manager_online(self):
+        for rec in self:
+            rec.is_manager_online = (rec.state != 'closed' and bool(rec.user_id and rec.user_id.is_online))
+
+    @api.depends('start_at', 'stop_at')
+    def _compute_duration_str(self):
+        for rec in self:
+            if rec.start_at:
+                end_time = rec.stop_at or fields.Datetime.now()
+                delta = end_time - rec.start_at
+                total_sec = max(0, int(delta.total_seconds()))
+                hours, remainder = divmod(total_sec, 3600)
+                minutes, _ = divmod(remainder, 60)
+                rec.duration_str = f"{hours}h {minutes:02d}m"
+            else:
+                rec.duration_str = "0h 00m"
+
+    def action_force_close_session(self):
+        for s in self:
+            s.write({
+                'state': 'closed',
+                'stop_at': fields.Datetime.now(),
+            })
+            if s.user_id:
+                s.user_id.sudo().write({
+                    'is_online': False,
+                    'last_logout_time': fields.Datetime.now(),
+                })
+
+    def _loader_params_product_product(self):
+        result = super()._loader_params_product_product()
+        fields_list = result['search_params']['fields']
+        if 'available_quantity' not in fields_list:
+            fields_list.append('available_quantity')
+        if 'is_restaurant_dish' not in fields_list:
+            fields_list.append('is_restaurant_dish')
+        return result
+
+    @api.model
+    def get_realtime_dish_stocks(self, *args, **kwargs):
+        """Retourne le mapping en direct {product_id: available_quantity} pour tous les plats de la caisse."""
+        products = self.env['product.product'].sudo().search([('available_in_pos', '=', True)])
+        return {str(p.id): (p.available_quantity if p.available_quantity is not False else 20.0) for p in products}
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -328,8 +394,84 @@ class PosSession(models.Model):
         return super().open_frontend_cb()
 
 
+class AccountTax(models.Model):
+    _inherit = 'account.tax'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('type_tax_use') == 'sale':
+                vals['price_include'] = True
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if 'price_include' in vals and not vals['price_include']:
+            for rec in self:
+                if rec.type_tax_use == 'sale':
+                    vals = dict(vals)
+                    vals['price_include'] = True
+                    break
+        return super().write(vals)
+
+
 class PosConfig(models.Model):
     _inherit = 'pos.config'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            vals['iface_tax_included'] = 'total'
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if 'iface_tax_included' in vals and vals['iface_tax_included'] != 'total':
+            vals = dict(vals)
+            vals['iface_tax_included'] = 'total'
+        return super().write(vals)
+
+    def action_open_pos_direct(self):
+        """Ouvre directement l'interface de caisse interactive pour le gérant."""
+        config = self if len(self) == 1 else (self.search([('active', '=', True)], limit=1) or self.search([], limit=1))
+        if not config:
+            raise UserError(_("Aucun point de vente / caisse n'est configuré."))
+
+        # S'assurer que le prix en caisse est strictement identique au prix saisi par l'admin (TTC)
+        sale_taxes = self.env['account.tax'].sudo().search([('type_tax_use', '=', 'sale'), ('price_include', '=', False)])
+        if sale_taxes:
+            sale_taxes.write({'price_include': True})
+        if config.iface_tax_included != 'total':
+            config.sudo().write({'iface_tax_included': 'total'})
+
+        user = self.env.user
+        # Chercher une session ouverte pour cette caisse
+        active_session = self.env['pos.session'].search([
+            ('config_id', '=', config.id),
+            ('state', 'in', ['opened', 'opening_control']),
+            ('rescue', '=', False),
+        ], order='id desc', limit=1)
+
+        if not active_session:
+            # Créer et ouvrir une session pour le gérant connecté
+            active_session = self.env['pos.session'].create({
+                'user_id': user.id,
+                'config_id': config.id,
+            })
+            active_session.sudo().write({
+                'state': 'opened',
+                'start_at': fields.Datetime.now()
+            })
+            user.sudo().write({
+                'is_online': True,
+                'last_login_time': fields.Datetime.now()
+            })
+        else:
+            if user.is_restaurant_manager:
+                user.sudo().write({
+                    'is_online': True,
+                    'last_login_time': fields.Datetime.now()
+                })
+
+        return config.with_context(from_backend=True).open_ui()
 
     def open_ui(self):
         """Bloque le lancement du point de vente interactif par l'administrateur."""
@@ -356,6 +498,11 @@ class ProductTemplate(models.Model):
         string="ID Plat Backend",
         index=True,
         help="Identifiant du plat / produit dans la base de données du backend"
+    )
+    available_quantity = fields.Float(
+        string="Nombre Présent (Stock)",
+        default=20.0,
+        help="Quantité disponible en stock dans le restaurant"
     )
     restaurant_category_id = fields.Many2one(
         'pos.category',
@@ -403,7 +550,13 @@ class ProductTemplate(models.Model):
                 vals['is_restaurant_dish'] = True
                 vals['sale_ok'] = True
         records = super().create(vals_list)
+        # Garantir que les taxes associées aux plats ont price_include = True
+        # afin que le prix saisi par l'admin soit rigoureusement le montant payé en caisse
         for rec in records:
+            if rec.taxes_id:
+                non_inc_taxes = rec.taxes_id.filtered(lambda t: not t.price_include)
+                if non_inc_taxes:
+                    non_inc_taxes.sudo().write({'price_include': True})
             if rec.available_in_pos:
                 cat_name = rec.restaurant_category_id.name if rec.restaurant_category_id else (rec.pos_categ_ids[:1].name if rec.pos_categ_ids else 'Plats Principaux')
                 _notify_backend('dish', {
@@ -423,6 +576,10 @@ class ProductTemplate(models.Model):
             vals['pos_categ_ids'] = [(6, 0, [vals['restaurant_category_id']])]
         res = super().write(vals)
         for rec in self:
+            if rec.taxes_id:
+                non_inc_taxes = rec.taxes_id.filtered(lambda t: not t.price_include)
+                if non_inc_taxes:
+                    non_inc_taxes.sudo().write({'price_include': True})
             if rec.available_in_pos and ('name' in vals or 'list_price' in vals or 'available_in_pos' in vals or 'active' in vals or 'restaurant_category_id' in vals or 'pos_categ_ids' in vals):
                 cat_name = rec.restaurant_category_id.name if rec.restaurant_category_id else (rec.pos_categ_ids[:1].name if rec.pos_categ_ids else 'Plats Principaux')
                 _notify_backend('dish', {
@@ -600,6 +757,15 @@ class ResUsers(models.Model):
         default=0.0,
         help="Total des ventes réalisées lors de sa prise de poste"
     )
+
+    def action_view_manager_sales(self):
+        """Ouvre toutes les commandes et ventes de ce gérant groupées par journée de travail."""
+        self.ensure_one()
+        action = self.env.ref('restaurant_core.action_restaurant_sales_monitoring').read()[0]
+        action['domain'] = [('user_id', '=', self.id), ('state', 'in', ['paid', 'done', 'invoiced'])]
+        action['context'] = {'create': False, 'search_default_group_by_day': 1}
+        action['name'] = f"Ventes de {self.name} (Par Journée de Travail)"
+        return action
 
     def _is_restaurant_admin(self):
         """Vérifie si l'utilisateur courant est l'administrateur exclusif."""

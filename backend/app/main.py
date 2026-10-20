@@ -28,13 +28,15 @@ try:
         conn.execute(text("ALTER TABLE restaurant_config ADD COLUMN IF NOT EXISTS ifu VARCHAR(50) DEFAULT '000123456789A';"))
         conn.execute(text("ALTER TABLE restaurant_config ADD COLUMN IF NOT EXISTS fiscal_division VARCHAR(150) DEFAULT 'DGI - Division Fiscale des Moyennes Entreprises';"))
         conn.execute(text("ALTER TABLE restaurant_config ADD COLUMN IF NOT EXISTS dgi_qr_enabled BOOLEAN DEFAULT TRUE;"))
-        conn.execute(text("ALTER TABLE global_invoices ADD COLUMN IF NOT EXISTS manager_name VARCHAR(100);"))
-        conn.execute(text("ALTER TABLE global_invoices ADD COLUMN IF NOT EXISTS manager_login VARCHAR(50);"))
+        conn.execute(text("ALTER TABLE global_invoices ADD COLUMN IF NOT EXISTS manager_name TEXT;"))
+        conn.execute(text("ALTER TABLE global_invoices ADD COLUMN IF NOT EXISTS manager_login TEXT;"))
         conn.execute(text("ALTER TABLE global_invoices ADD COLUMN IF NOT EXISTS manager_id INTEGER;"))
         conn.execute(text("ALTER TABLE global_invoices ADD COLUMN IF NOT EXISTS opened_at TIMESTAMP WITHOUT TIME ZONE;"))
         conn.execute(text("DROP INDEX IF EXISTS ix_global_invoice_items_order_id;"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_global_invoice_items_order_id ON global_invoice_items (order_id);"))
         conn.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS uq_global_invoice_item_order ON global_invoice_items (global_invoice_id, order_id);"))
+        conn.execute(text("ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS available_quantity INTEGER DEFAULT 0;"))
+        conn.execute(text("UPDATE menu_items SET available_quantity = 0 WHERE available_quantity IS NULL;"))
         conn.commit()
 
 except Exception as e:
@@ -131,14 +133,14 @@ async def odoo_background_sync_worker():
     """Tâche de fond qui surveille et synchronise automatiquement toutes les actions d'Odoo vers PostgreSQL."""
     import asyncio
     from app.services.odoo_service import odoo_service
-    await asyncio.sleep(5)  # Pause initiale
+    await asyncio.sleep(5) # Pause initiale
     while True:
         try:
             with SessionLocal() as db_session:
                 counts = odoo_service.sync_all_from_odoo(db_session)
                 total_changes = sum(counts.values())
-                if total_changes > 0:
-                    print(f"🔄 [ACTION ODOO DÉTECTÉE & SYNCHRONISÉE] {counts['dishes']} plats, {counts['managers']} gérants, {counts['orders']} commandes enregistrés dans PostgreSQL backend !")
+                if total_changes >0:
+                    print(f" [ACTION ODOO DÉTECTÉE & SYNCHRONISÉE] {counts['dishes']} plats, {counts['managers']} gérants, {counts['orders']} commandes enregistrés dans PostgreSQL backend !")
         except Exception:
             pass
         await asyncio.sleep(8)

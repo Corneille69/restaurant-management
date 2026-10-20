@@ -158,6 +158,14 @@
                                                 <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Date de facturation :</td>
                                                 <td style="font-weight: 600; padding: 2px 0;"><span t-field="o.date"/></td>
                                             </tr>
+                                            <tr t-if="o.session_opened_at">
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Heure de service :</td>
+                                                <td style="font-weight: 600; padding: 2px 0;"><span t-field="o.session_opened_at"/></td>
+                                            </tr>
+                                            <tr t-if="o.active_manager_name">
+                                                <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Gérant(s) en caisse :</td>
+                                                <td style="font-weight: 700; padding: 2px 0; color: #1e3a8a;" t-esc="o.active_manager_name"/>
+                                            </tr>
                                             <tr>
                                                 <td style="font-weight: 800; padding: 2px 8px 2px 0; color: #000000;">Échéance :</td>
                                                 <td style="font-weight: 600; padding: 2px 0;">Clôture journalière</td>
