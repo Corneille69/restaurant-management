@@ -2288,6 +2288,7 @@ class RestaurantIrUiMenu(models.Model):
                 'restaurant_core.menu_restaurant_gerant_invoices',
                 'restaurant_core.menu_restaurant_gerant_orders',
                 'restaurant_core.menu_restaurant_dishes_gerant',
+                'restaurant_core.menu_restaurant_grand_marche',
             ]
             admin_xml_ids = [
                 'restaurant_core.menu_restaurant_dashboard',
@@ -2296,6 +2297,7 @@ class RestaurantIrUiMenu(models.Model):
                 'restaurant_core.menu_restaurant_sessions',
                 'restaurant_core.menu_restaurant_orders',
                 'restaurant_core.menu_restaurant_invoices',
+                'restaurant_core.menu_restaurant_grand_marche_admin',
                 'restaurant_core.menu_restaurant_config_direct',
             ]
 

@@ -1832,12 +1832,12 @@
     <!-- AUCUN BOUTON CRÉER/NOUVEAU • AUCUNE MODIFICATION • TOUT CALCULÉ AUTO -->
     <!-- ===================================================================== -->
 
-    <!-- VUE LISTE SPÉCIFIQUE ADMINISTRATEUR (SANS BOUTON NOUVEAU NI MODIFICATION) -->
+    <!-- VUE LISTE SPÉCIFIQUE ADMINISTRATEUR -->
     <record id="view_restaurant_grand_marche_admin_tree" model="ir.ui.view">
         <field name="name">restaurant.grand.marche.admin.tree</field>
         <field name="model">restaurant.grand.marche</field>
         <field name="arch" type="xml">
-            <tree string="Grands Marchés &amp; Certification DGI" banner_route="/restaurant_core/grand_marche_banner" sample="1" create="false" edit="false" delete="false"
+            <tree string="Grands Marchés &amp; Certification DGI" banner_route="/restaurant_core/grand_marche_banner" sample="1"
                   decoration-success="dgi_status == 'certified'" decoration-warning="dgi_status == 'to_certify'" decoration-info="dgi_status == 'draft'">
                 <field name="name" string="N° Facture Marché" decoration-bf="1"/>
                 <field name="date_invoice" string="Date"/>
@@ -1860,12 +1860,12 @@
         </field>
     </record>
 
-    <!-- VUE FORMULAIRE SPÉCIFIQUE ADMINISTRATEUR (SANS AUCUN BOUTON NOUVEAU NI MODIFICATION) -->
+    <!-- VUE FORMULAIRE SPÉCIFIQUE ADMINISTRATEUR -->
     <record id="view_restaurant_grand_marche_admin_form" model="ir.ui.view">
         <field name="name">restaurant.grand.marche.admin.form</field>
         <field name="model">restaurant.grand.marche</field>
         <field name="arch" type="xml">
-            <form string="Supervision Grand Marché &amp; Certification DGI" create="false" edit="false" class="o_resto_config_form">
+            <form string="Supervision Grand Marché &amp; Certification DGI" class="o_resto_config_form">
                 <header class="resto-config-header" style="background: #ffffff !important; border-bottom: 2px solid #e2e8f0 !important; padding: 0.75rem 1.5rem !important;">
                     <button name="action_certify_dgi"
                             string="Certifier la Facture DGI"
@@ -2286,6 +2286,7 @@
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_grand_marche_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_grand_marche_form')})]"/>
         <field name="search_view_id" ref="view_restaurant_grand_marche_search"/>
+        <field name="domain">[]</field>
         <field name="context">{'default_manager_id':uid}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -2297,16 +2298,17 @@
         </field>
     </record>
 
-    <!-- ACTION DÉDIÉE POUR L'ADMINISTRATION (SUPERVISION FISCALE DGI STRICTE SANS CRÉATION NI MODIFICATION) -->
+    <!-- ACTION DÉDIÉE POUR L'ADMINISTRATION -->
     <record id="action_restaurant_grand_marche_admin" model="ir.actions.act_window">
-        <field name="name">Grands Marchés &amp; Certification DGI</field>
+        <field name="name">Grands Marchés &amp; Factures DGI</field>
         <field name="res_model">restaurant.grand.marche</field>
         <field name="view_mode">tree,form</field>
         <field name="view_ids" eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_restaurant_grand_marche_admin_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_restaurant_grand_marche_admin_form')})]"/>
         <field name="search_view_id" ref="view_restaurant_grand_marche_search"/>
-        <field name="context">{'create':False, 'edit': False, 'delete': False}</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_empty_folder">
                 Toutes les Factures Grands Marchés transmises par les gérants
