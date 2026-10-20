@@ -9,36 +9,107 @@ patch(NavBar.prototype, {
     setup() {
         super.setup();
 
+        const ensureActiveApp = () => {
+            if (!this.menuService.getCurrentApp()) {
+                const apps = this.menuService.getApps();
+                if (apps && apps.length) {
+                    const restoApp = apps.find(a => 
+                        a.xmlid === "restaurant_core.menu_restaurant_root" || 
+                        (a.name && a.name.toLowerCase().includes("restaurant"))
+                    ) || apps[0];
+                    if (restoApp && this.menuService.setCurrentMenu) {
+                        this.menuService.setCurrentMenu(restoApp);
+                    }
+                }
+            }
+        };
+
+        try {
+            ensureActiveApp();
+        } catch (e) {}
+
         onMounted(() => {
+            try {
+                ensureActiveApp();
+            } catch (e) {}
             this.syncRestaurantBrand();
         });
 
         onPatched(() => {
+            try {
+                ensureActiveApp();
+            } catch (e) {}
             this.syncRestaurantBrand();
         });
+    },
+
+    get currentApp() {
+        const app = this.menuService.getCurrentApp();
+        if (app) return app;
+        const apps = this.menuService.getApps();
+        if (apps && apps.length) {
+            const restoApp = apps.find(a => 
+                a.xmlid === "restaurant_core.menu_restaurant_root" || 
+                (a.name && a.name.toLowerCase().includes("restaurant"))
+            ) || apps[0];
+            return restoApp;
+        }
+        return null;
+    },
+
+    get currentAppSections() {
+        const app = this.currentApp;
+        if (!app) return [];
+        const tree = this.menuService.getMenuAsTree(app.id);
+        return (tree && tree.childrenTree) || [];
+    },
+
+    async adapt() {
+        const isGerant = document.documentElement.classList.contains("o_resto_gerant_mode") ||
+                         (document.body && document.body.classList.contains("o_resto_gerant_mode"));
+        if (!isGerant) {
+            // Mode Admin : la sidebar est verticale (260px)
+            // On désactive tout regroupement More et on garde toutes les rubriques visibles
+            this.currentAppSectionsExtra = [];
+            const sectionsMenu = this.appSubMenus && this.appSubMenus.el;
+            if (sectionsMenu) {
+                const sections = [
+                    ...sectionsMenu.querySelectorAll(":scope > *:not(.o_menu_sections_more)"),
+                ];
+                for (const section of sections) {
+                    section.classList.remove("d-none");
+                }
+            }
+            return;
+        }
+        return super.adapt();
     },
 
     async onNavBarDropdownItemSelection(menu) {
         if (menu && menu.xmlid === "restaurant_core.menu_restaurant_orders") {
             try {
+                if (this.menuService.setCurrentMenu) {
+                    this.menuService.setCurrentMenu(menu);
+                }
                 await this.actionService.doAction("restaurant_core.action_restaurant_sales_monitoring", {
                     clearBreadcrumbs: true,
                 });
                 return;
             } catch (e) {
-                window.location.href = "/web?db=restaurant_odoo#action=restaurant_core.action_restaurant_sales_monitoring";
-                return;
+                // Fallback direct
             }
         }
         if (menu && (menu.xmlid === "restaurant_core.menu_restaurant_gerant_orders" || (menu.name && (menu.name.includes("Mes Ventes") || menu.name.includes("Reçus Caisse"))))) {
             try {
+                if (this.menuService.setCurrentMenu) {
+                    this.menuService.setCurrentMenu(menu);
+                }
                 await this.actionService.doAction("restaurant_core.action_restaurant_gerant_own_orders", {
                     clearBreadcrumbs: true,
                 });
                 return;
             } catch (e) {
-                window.location.href = "/web?db=restaurant_odoo#action=restaurant_core.action_restaurant_gerant_own_orders";
-                return;
+                // Fallback direct
             }
         }
         super.onNavBarDropdownItemSelection(menu);
@@ -131,7 +202,17 @@ patch(NavBar.prototype, {
                     <div class="o_restaurant_brand_subtitle" style="display: ${subtitle ? 'block' : 'none'}">${subtitle}</div>
                 `;
                 brandContainer.onclick = () => {
-                    window.location.hash = "#action=restaurant_core.action_restaurant_sales_dashboard";
+                    const apps = this.menuService.getApps();
+                    const restoApp = apps && apps.find(a => 
+                        a.xmlid === "restaurant_core.menu_restaurant_root" || 
+                        (a.name && a.name.toLowerCase().includes("restaurant"))
+                    );
+                    if (restoApp && this.menuService.setCurrentMenu) {
+                        this.menuService.setCurrentMenu(restoApp);
+                    }
+                    this.actionService.doAction("restaurant_core.action_restaurant_sales_dashboard", {
+                        clearBreadcrumbs: true,
+                    });
                 };
 
                 const quickBtn = navbar.querySelector(".o_gerant_quick_pos_btn");

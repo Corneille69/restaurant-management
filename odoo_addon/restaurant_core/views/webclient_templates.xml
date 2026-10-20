@@ -237,11 +237,24 @@
                                 '&lt;div class="o_restaurant_brand_subtitle"&gt;' + rSub + '&lt;/div&gt;'
                             ].join('');
                             brand.onclick = function() {
+                                if (window.odoo &amp;&amp; window.odoo.__WOWL_DEBUG__ &amp;&amp; window.odoo.__WOWL_DEBUG__.root) {
+                                    var env = window.odoo.__WOWL_DEBUG__.root.env;
+                                    if (env &amp;&amp; env.services &amp;&amp; env.services.action) {
+                                        if (env.services.menu) {
+                                            var apps = env.services.menu.getApps();
+                                            var restoApp = apps &amp;&amp; apps.find(function(a) {
+                                                return a.xmlid === 'restaurant_core.menu_restaurant_root' || (a.name &amp;&amp; a.name.indexOf('Restaurant') !== -1);
+                                            });
+                                            if (restoApp &amp;&amp; env.services.menu.setCurrentMenu) {
+                                                env.services.menu.setCurrentMenu(restoApp);
+                                            }
+                                        }
+                                        env.services.action.doAction("restaurant_core.action_restaurant_sales_dashboard", { clearBreadcrumbs: true });
+                                        return;
+                                    }
+                                }
                                 window.location.hash = '#action=restaurant_core.action_restaurant_sales_dashboard';
                             };
-
-                            var existingQuick = navbar.querySelector('.o_gerant_quick_pos_btn');
-                            if (existingQuick) existingQuick.remove();
                         }
 
                         if (data) {
@@ -252,28 +265,120 @@
                         }
                     }
 
+                    var ADMIN_MENU_CONFIG = [
+                        { name: "Gérants du Restaurant", action: 414, menuId: 259, xmlid: "restaurant_core.menu_restaurant_managers" },
+                        { name: "Menus &amp; Plats", action: 415, menuId: 265, xmlid: "restaurant_core.menu_restaurant_dishes_all" },
+                        { name: "Sessions &amp; Horaires des Gérants", action: 421, menuId: 270, xmlid: "restaurant_core.menu_restaurant_sessions" },
+                        { name: "Commandes &amp; Ventes Encaissées", action: "restaurant_core.action_restaurant_sales_monitoring", menuId: 261, xmlid: "restaurant_core.menu_restaurant_orders" },
+                        { name: "Facturation &amp; DGI", action: 424, menuId: 274, xmlid: "restaurant_core.menu_restaurant_invoices" },
+                        { name: "Configuration Restaurant &amp; DGI", action: 427, menuId: 282, xmlid: "restaurant_core.menu_restaurant_config_direct" },
+                        { name: "Grands Marchés &amp; DGI", action: 437, menuId: 294, xmlid: "restaurant_core.menu_restaurant_grand_marche_admin" },
+                        { name: "Tableau de Bord", action: 422, menuId: 288, xmlid: "restaurant_core.menu_restaurant_dashboard" }
+                    ];
+
+                    function ensureAdminSidebarSections() {
+                        var isG = localStorage.getItem('resto_is_gerant') === 'true' || 
+                                  document.documentElement.classList.contains('o_resto_gerant_mode') || 
+                                  (document.body &amp;&amp; document.body.classList.contains('o_resto_gerant_mode'));
+                        if (isG) return;
+
+                        var navbar = document.querySelector('.o_main_navbar');
+                        if (!navbar) return;
+
+                        // 1. Si OWL est disponible et qu'aucune app n'est sélectionnée, activer Gestion Restaurant
+                        if (window.odoo &amp;&amp; window.odoo.__WOWL_DEBUG__ &amp;&amp; window.odoo.__WOWL_DEBUG__.root) {
+                            var env = window.odoo.__WOWL_DEBUG__.root.env;
+                            if (env &amp;&amp; env.services &amp;&amp; env.services.menu) {
+                                var menuService = env.services.menu;
+                                if (!menuService.getCurrentApp()) {
+                                    var apps = menuService.getApps();
+                                    if (apps &amp;&amp; apps.length) {
+                                        var restoApp = apps.find(function(a) {
+                                            return a.xmlid === 'restaurant_core.menu_restaurant_root' || (a.name &amp;&amp; a.name.indexOf('Restaurant') !== -1);
+                                        }) || apps[0];
+                                        if (restoApp &amp;&amp; menuService.setCurrentMenu) {
+                                            menuService.setCurrentMenu(restoApp);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // 2. Vérifier si les éléments de menu sont affichés dans .o_menu_sections
+                        var sectionsContainer = navbar.querySelector('.o_menu_sections');
+                        var visibleItems = navbar.querySelectorAll('.o_menu_sections .o_nav_entry:not(.d-none), .o_menu_sections .dropdown-item:not(.d-none), .o_restaurant_nav_entry');
+                        
+                        if (visibleItems.length === 0) {
+                            if (!sectionsContainer) {
+                                sectionsContainer = document.createElement('div');
+                                sectionsContainer.className = 'o_menu_sections';
+                                var systray = navbar.querySelector('.o_menu_systray');
+                                if (systray) {
+                                    navbar.insertBefore(sectionsContainer, systray);
+                                } else {
+                                    navbar.appendChild(sectionsContainer);
+                                }
+                            }
+
+                            sectionsContainer.innerHTML = '';
+                            ADMIN_MENU_CONFIG.forEach(function(item) {
+                                var link = document.createElement('a');
+                                link.className = 'o_nav_entry o_restaurant_nav_entry';
+                                link.href = '#action=' + item.action + '&amp;menu_id=' + item.menuId;
+                                link.innerHTML = item.name;
+                                link.dataset.menuXmlid = item.xmlid;
+                                link.dataset.section = item.menuId;
+                                link.onclick = function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (window.odoo &amp;&amp; window.odoo.__WOWL_DEBUG__ &amp;&amp; window.odoo.__WOWL_DEBUG__.root) {
+                                        var env = window.odoo.__WOWL_DEBUG__.root.env;
+                                        if (env &amp;&amp; env.services &amp;&amp; env.services.action) {
+                                            env.services.action.doAction(item.action, { clearBreadcrumbs: true });
+                                            return;
+                                        }
+                                    }
+                                    window.location.hash = '#action=' + item.action + '&amp;menu_id=' + item.menuId;
+                                };
+                                sectionsContainer.appendChild(link);
+                            });
+                        }
+                    }
+
                     function syncBrandFromAPI() {
                         fetch('/restaurant/api/brand', { cache: 'no-store' })
                             .then(function(r) { return r.json(); })
                             .then(function(data) {
                                 if (data) renderOrUpdateBrand(data);
+                                ensureAdminSidebarSections();
                             })
-                            .catch(function() {});
+                            .catch(function() {
+                                ensureAdminSidebarSections();
+                            });
                     }
 
                     if (document.readyState === 'loading') {
                         document.addEventListener('DOMContentLoaded', function() {
                             renderOrUpdateBrand(null);
+                            ensureAdminSidebarSections();
                             syncBrandFromAPI();
                         });
                     } else {
                         renderOrUpdateBrand(null);
+                        ensureAdminSidebarSections();
                         syncBrandFromAPI();
                     }
 
                     setInterval(syncBrandFromAPI, 2000);
-                    window.addEventListener('focus', syncBrandFromAPI);
-                    window.addEventListener('hashchange', syncBrandFromAPI);
+                    setInterval(ensureAdminSidebarSections, 1000);
+                    window.addEventListener('focus', function() {
+                        syncBrandFromAPI();
+                        ensureAdminSidebarSections();
+                    });
+                    window.addEventListener('hashchange', function() {
+                        syncBrandFromAPI();
+                        ensureAdminSidebarSections();
+                    });
 
                     // Gestion sécurisée des clics sur les menus spécifiques
                     document.addEventListener('click', function(ev) {
